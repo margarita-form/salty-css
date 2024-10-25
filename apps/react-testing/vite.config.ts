@@ -1,15 +1,20 @@
 /// <reference types='vitest' />
 import { PluginOption, defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
+import * as path from 'path';
 import react from '@vitejs/plugin-react-swc';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { exec } from 'child_process';
+import { generateCss, generateFile } from '../../libs/core/src';
 
 const stylegen: () => PluginOption = () => ({
   name: 'stylegen',
+  buildStart: () => {
+    generateCss(__dirname);
+  },
   watchChange: {
     handler: (context) => {
       if (context.includes('.salty.')) {
-        console.log('Generating CSS...');
+        generateFile(__dirname, context);
       }
     },
   },
@@ -29,7 +34,15 @@ export default defineConfig({
     host: 'localhost',
   },
 
-  plugins: [react(), nxViteTsPaths(), stylegen()],
+  plugins: [
+    react(),
+    nxViteTsPaths(),
+    dts({
+      entryRoot: 'src',
+      tsconfigPath: path.join(__dirname, 'tsconfig.app.json'),
+    }),
+    stylegen(),
+  ],
 
   // Uncomment this if you are using workers.
   // worker: {

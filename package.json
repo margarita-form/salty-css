@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "build:core": "nx run core:build",
+    "dev:react-testing": "nx run react-testing:serve",
     "stylegen:react-testing": "npm run build:core"
   },
   "private": true,

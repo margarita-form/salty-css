@@ -20,104 +20,139 @@ export const logger = winston.createLogger({
   transports: [new winston.transports.Console({})],
 });
 
-const project = process.argv[2];
-const onchange = process.argv[3];
+export const generateCss = async (dirname: string) => {
+  try {
+    const cssFiles: string[] = [];
+    const destDir = join(dirname, './saltygen');
+    const cssFile = join(dirname, 'styles/index.css');
 
-const dirBase = join(__dirname, '../../');
-const sourceDir = join(dirBase, project);
-const destDir = join(sourceDir, './saltygen');
+    const generateConfig = async () => {
+      const coreConfigPath = join(dirname, 'salty-config.ts');
+      const coreConfigDest = join(destDir, 'salty-config.js');
 
-const cssFile = join(sourceDir, 'styles/index.css');
+      await esbuild.build({
+        entryPoints: [coreConfigPath],
+        minify: true,
+        treeShaking: true,
+        bundle: true,
+        outfile: coreConfigDest,
+        format: 'esm',
+        external: ['react'],
+      });
 
-const generateConfig = async () => {
-  const coreConfigPath = join(sourceDir, 'salty-config.ts');
-  const coreConfigDest = join(destDir, 'salty-config.js');
+      const { config } = await import(coreConfigDest);
+      return config;
+    };
 
-  await esbuild.build({
-    entryPoints: [coreConfigPath],
-    minify: true,
-    treeShaking: true,
-    bundle: true,
-    outfile: coreConfigDest,
-    format: 'cjs',
-    external: ['react'],
-  });
+    const clearDistDir = () => {
+      if (existsSync(destDir)) execSync('rm -rf ' + destDir);
+      mkdirSync(destDir);
+      mkdirSync(join(destDir, 'css'));
+    };
 
-  const { config } = await import(coreConfigDest);
-  return config;
-};
+    // Clear the dist directory
+    clearDistDir();
 
-const clearDistDir = () => {
-  if (onchange) return;
-  if (existsSync(destDir)) execSync('rm -rf ' + destDir);
-  mkdirSync(destDir);
-  mkdirSync(join(destDir, 'css'));
-};
+    // Generate the config files
+    const config = await generateConfig();
+    console.log({ config });
 
-const main = async () => {
-  const cssFiles: string[] = [];
-  // Clear the dist directory
-  clearDistDir();
+    // Function to copy files/directories recursively
+    async function copyRecursively(src: string, dest: string) {
+      const stats = statSync(src);
 
-  // Generate the config files
-  const config = await generateConfig();
-  console.log({ config });
+      if (stats.isDirectory()) {
+        const files = readdirSync(src);
+        await Promise.all(
+          files.map((file) =>
+            copyRecursively(join(src, file), join(dest, file))
+          )
+        );
+      } else if (stats.isFile()) {
+        const isSaltyFile = src.includes('.salty.');
 
-  // Function to copy files/directories recursively
-  async function copyRecursively(src: string, dest: string) {
-    const stats = statSync(src);
+        if (isSaltyFile) {
+          const hashedName = toHash(src);
+          const dest = join(destDir, 'js', hashedName + '.js');
 
-    if (stats.isDirectory()) {
-      const files = readdirSync(src);
-      await Promise.all(
-        files.map((file) => copyRecursively(join(src, file), join(dest, file)))
-      );
-    } else if (stats.isFile()) {
-      const isSaltyFile = src.includes('.salty.');
+          await esbuild.build({
+            entryPoints: [src],
+            minify: true,
+            treeShaking: true,
+            bundle: true,
+            outfile: dest,
+            format: 'esm',
+            target: ['es2022'],
+            keepNames: true,
+            external: ['react'],
+          });
 
-      if (isSaltyFile) {
-        const hashedName = toHash(src);
-        const dest = join(destDir, 'js', hashedName + '.js');
+          const contents = await import(dest);
 
-        await esbuild.build({
-          entryPoints: [src],
-          minify: true,
-          treeShaking: true,
-          bundle: true,
-          outfile: dest,
-          format: 'cjs',
-          target: ['es2022'],
-          keepNames: true,
-          external: ['react'],
-        });
+          Object.entries(contents).forEach(([key, value]: [string, any]) => {
+            // const generator = value.generator._withCallerName(key);
+            const generator = value.generator;
 
-        const contents = await import(dest);
+            const fileName = `${generator.hash}.css`;
+            cssFiles.push(fileName);
+            console.log('pushing css file', fileName);
 
-        Object.entries(contents).forEach(([key, value]: [string, any]) => {
-          // const generator = value.generator._withCallerName(key);
-          const generator = value.generator;
-
-          const fileName = `${generator.hash}.css`;
-          cssFiles.push(fileName);
-          console.log('pushing css file', fileName);
-
-          const filePath = `css/${fileName}`;
-          const cssPath = join(destDir, filePath);
-          writeFileSync(cssPath, generator.css);
-        });
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+            const filePath = `css/${fileName}`;
+            const cssPath = join(destDir, filePath);
+            writeFileSync(cssPath, generator.css);
+          });
+        }
       }
     }
+    // Start the copying process
+    await copyRecursively(dirname, destDir);
+
+    const cssFileImports = cssFiles
+      .map((file) => `@import url('../saltygen/css/${file}');`)
+      .join('\n');
+
+    writeFileSync(cssFile, cssFileImports);
+  } catch (e) {
+    console.error(e);
   }
-  // Start the copying process
-  await copyRecursively(sourceDir, destDir);
-
-  const cssFileImports = cssFiles
-    .map((file) => `@import url('../saltygen/css/${file}');`)
-    .join('\n');
-
-  writeFileSync(cssFile, cssFileImports);
 };
 
-main();
+export const generateFile = async (dirname: string, file: string) => {
+  try {
+    const destDir = join(dirname, './saltygen');
+    const coreConfigDest = join(destDir, 'salty-config.js');
+    const { config } = await import(coreConfigDest);
+
+    const isSaltyFile = file.includes('.salty.');
+
+    if (isSaltyFile) {
+      const hashedName = toHash(file);
+      const dest = join(destDir, 'js', hashedName + 'edit' + '.js');
+
+      const res = await esbuild.build({
+        entryPoints: [file],
+        minify: true,
+        treeShaking: true,
+        bundle: true,
+        outfile: dest,
+        format: 'esm',
+        target: ['es2022'],
+        keepNames: true,
+        external: ['react'],
+      });
+
+      const contents = await import(dest);
+
+      Object.entries(contents).forEach(([key, value]: [string, any]) => {
+        // const generator = value.generator._withCallerName(key);
+        const generator = value.generator;
+        const fileName = `${generator.hash}.css`;
+        const filePath = `css/${fileName}`;
+        const cssPath = join(destDir, filePath);
+        writeFileSync(cssPath, generator.css);
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};

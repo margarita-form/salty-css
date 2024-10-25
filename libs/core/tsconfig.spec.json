@@ -1,18 +1,17 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc/libs/core",
+    "outDir": "../../dist/out-tsc",
     "types": [
       "vitest/globals",
-      "vitest/importMeta",
-      "vite/client",
       "node",
-      "vitest"
+      "@nx/react/typings/cssmodule.d.ts",
+      "@nx/react/typings/image.d.ts"
     ]
   },
   "include": [
     "vite.config.ts",
-    "vitest.config.ts",
+    "vite.minified-config.ts",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.test.tsx",
@@ -22,10 +21,5 @@
     "src/**/*.test.jsx",
     "src/**/*.spec.jsx",
     "src/**/*.d.ts"
-  ],
-  "references": [
-    {
-      "path": "./tsconfig.lib.json"
-    }
   ]
 }

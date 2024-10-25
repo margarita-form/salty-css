@@ -28,9 +28,21 @@ export default defineConfig({
     },
     lib: {
       // Could also be a dictionary or array of multiple entry points.
-      entry: 'src/index.ts',
       name: 'salty-css-core',
-      fileName: 'index',
+      entry: {
+        index: 'src/index.ts',
+        'src/react/styled': 'src/react/styled.ts',
+      },
+      fileName: (format, entryName) => {
+        const ext = format === 'es' ? 'js' : format;
+        const parts = entryName.split('/');
+        if (parts.length > 1) {
+          const name = parts.at(-1);
+          const path = parts.slice(0, -1).join('/');
+          return `${path}/${name}.${ext}`;
+        }
+        return `${entryName}.${ext}`;
+      },
       // Change this to the formats you want to support.
       // Don't forget to update your package.json as well.
       formats: ['es', 'cjs'],
