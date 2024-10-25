@@ -37,7 +37,7 @@ export default defineConfig({
     },
     rollupOptions: {
       // External packages that should not be bundled into your library.
-      external: ['path', 'fs', 'esbuild', 'winston', 'child_process'],
+      external: ['path', 'fs', 'esbuild', 'winston', 'child_process', 'react'],
     },
   },
   test: {

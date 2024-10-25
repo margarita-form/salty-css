@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
-    "composite": true,
+    "composite": false,
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
@@ -29,6 +31,10 @@
     "sourceMap": false,
     "strict": true,
     "target": "es2022",
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "paths": {
+      "@salty-css/core": ["libs/core/src/index.ts"],
+      "@salty-css/core/*": ["libs/core/src/*"]
+    }
   }
 }

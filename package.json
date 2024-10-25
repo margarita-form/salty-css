@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "build:core": "nx run core:build"
+    "build:core": "nx run core:build",
+    "stylegen:react-testing": "npm run build:core"
   },
   "private": true,
   "type": "module",
@@ -12,16 +13,23 @@
     "@nx/eslint": "20.0.5",
     "@nx/eslint-plugin": "20.0.5",
     "@nx/js": "^20.0.5",
+    "@nx/react": "^20.0.5",
     "@nx/vite": "20.0.5",
     "@nx/web": "20.0.5",
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
     "@types/node": "18.16.9",
+    "@types/react": "^18.3.12",
+    "@vitejs/plugin-react-swc": "^3.7.1",
     "@vitest/coverage-v8": "^1.0.4",
     "@vitest/ui": "^1.3.1",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.1",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
     "jsdom": "~22.1.0",
     "nx": "20.0.5",
     "prettier": "^2.6.2",
@@ -29,14 +37,16 @@
     "typescript": "~5.5.2",
     "typescript-eslint": "^8.0.0",
     "verdaccio": "^5.0.4",
-    "vite": "^5.0.0",
-    "vite-plugin-dts": "~3.8.1",
+    "vite": "^5.4.10",
+    "vite-plugin-dts": "^4.3.0",
     "vitest": "^1.3.1"
   },
   "workspaces": [
     "packages/*"
   ],
   "dependencies": {
+    "clsx": "^2.1.1",
+    "react": "^18.3.1",
     "winston": "^3.15.0"
   },
   "nx": {
