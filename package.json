@@ -36,7 +36,9 @@
   "workspaces": [
     "packages/*"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "winston": "^3.15.0"
+  },
   "nx": {
     "includedScripts": [],
     "targets": {
