@@ -12,9 +12,9 @@ const stylegen: () => PluginOption = () => ({
     generateCss(__dirname);
   },
   watchChange: {
-    handler: (context) => {
-      if (context.includes('.salty.')) {
-        generateFile(__dirname, context);
+    handler: (filePath) => {
+      if (filePath.includes('.salty.')) {
+        generateFile(__dirname, filePath);
       }
     },
   },

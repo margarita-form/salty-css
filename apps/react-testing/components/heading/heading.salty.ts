@@ -1,7 +1,7 @@
 import { styled } from '@salty-css/react/styled';
 
 export const Heading = styled('div', {
-  color: 'red',
+  color: 'orange',
   fontFamily: 'Arial, sans-serif',
-  fontSize: '42px',
+  fontSize: '69px',
 });

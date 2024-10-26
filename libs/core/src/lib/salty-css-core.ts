@@ -9,6 +9,7 @@ import {
   mkdirSync,
   readdirSync,
   writeFileSync,
+  readFileSync,
 } from 'fs';
 
 export const logger = winston.createLogger({
@@ -87,7 +88,8 @@ export const generateCss = async (dirname: string) => {
             external: ['react'],
           });
 
-          const contents = await import(dest);
+          const now = Date.now();
+          const contents = await import(`${dest}?t=${now}`);
 
           Object.entries(contents).forEach(([key, value]: [string, any]) => {
             // const generator = value.generator._withCallerName(key);
@@ -95,7 +97,6 @@ export const generateCss = async (dirname: string) => {
 
             const fileName = `${generator.hash}.css`;
             cssFiles.push(fileName);
-            console.log('pushing css file', fileName);
 
             const filePath = `css/${fileName}`;
             const cssPath = join(destDir, filePath);
@@ -119,7 +120,9 @@ export const generateCss = async (dirname: string) => {
 
 export const generateFile = async (dirname: string, file: string) => {
   try {
+    const cssFiles: string[] = [];
     const destDir = join(dirname, './saltygen');
+    const cssFile = join(dirname, 'styles/index.css');
     const coreConfigDest = join(destDir, 'salty-config.js');
     const { config } = await import(coreConfigDest);
 
@@ -127,11 +130,11 @@ export const generateFile = async (dirname: string, file: string) => {
 
     if (isSaltyFile) {
       const hashedName = toHash(file);
-      const dest = join(destDir, 'js', hashedName + 'edit' + '.js');
+      const dest = join(destDir, 'js', hashedName + '.js');
 
       const res = await esbuild.build({
         entryPoints: [file],
-        minify: true,
+        minify: false,
         treeShaking: true,
         bundle: true,
         outfile: dest,
@@ -141,7 +144,8 @@ export const generateFile = async (dirname: string, file: string) => {
         external: ['react'],
       });
 
-      const contents = await import(dest);
+      const now = Date.now();
+      const contents = await import(`${dest}?t=${now}`);
 
       Object.entries(contents).forEach(([key, value]: [string, any]) => {
         // const generator = value.generator._withCallerName(key);
@@ -149,8 +153,20 @@ export const generateFile = async (dirname: string, file: string) => {
         const fileName = `${generator.hash}.css`;
         const filePath = `css/${fileName}`;
         const cssPath = join(destDir, filePath);
+        cssFiles.push(fileName);
         writeFileSync(cssPath, generator.css);
       });
+
+      const current = readFileSync(cssFile, 'utf8').split('\n');
+
+      const cssFileImports = cssFiles.map(
+        (file) => `@import url('../saltygen/css/${file}');`
+      );
+
+      const set = new Set([...current, ...cssFileImports]);
+      const merged = [...set].join('\n');
+
+      writeFileSync(cssFile, merged);
     }
   } catch (e) {
     console.error(e);
