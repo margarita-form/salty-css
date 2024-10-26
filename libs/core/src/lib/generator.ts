@@ -41,7 +41,15 @@ export class StyleComponentGenerator {
     return stylesStringArr.join(' ');
   }
 
+  get cssDisplayNameVar() {
+    return `--${this.hash}-display-name: ${this._callerName};`;
+  }
+
   get css() {
+    if (this._callerName) {
+      return `.${this.cssClassName} { 
+      ${this.cssDisplayNameVar}${this.cssValues} }`;
+    }
     return `.${this.cssClassName} { ${this.cssValues} }`;
   }
 

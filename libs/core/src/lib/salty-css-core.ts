@@ -92,8 +92,7 @@ export const generateCss = async (dirname: string) => {
           const contents = await import(`${dest}?t=${now}`);
 
           Object.entries(contents).forEach(([key, value]: [string, any]) => {
-            // const generator = value.generator._withCallerName(key);
-            const generator = value.generator;
+            const generator = value.generator._withCallerName(key);
 
             const fileName = `${generator.hash}.css`;
             cssFiles.push(fileName);
@@ -148,8 +147,7 @@ export const generateFile = async (dirname: string, file: string) => {
       const contents = await import(`${dest}?t=${now}`);
 
       Object.entries(contents).forEach(([key, value]: [string, any]) => {
-        // const generator = value.generator._withCallerName(key);
-        const generator = value.generator;
+        const generator = value.generator._withCallerName(key);
         const fileName = `${generator.hash}.css`;
         const filePath = `css/${fileName}`;
         const cssPath = join(destDir, filePath);
