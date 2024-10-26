@@ -30,14 +30,15 @@ export const elementBuilder = <T extends Props>(
   }: T) => {
     const joined = clsx(generator.className, className);
 
-    const type = typeof extend === 'function' ? extend : element || extend;
+    const extendsComponent = typeof extend === 'function';
+    const type = extendsComponent ? extend : element || extend;
 
     return createElement(
       type,
       {
         style: inlineStyles ? generator.styles : undefined,
+        element: extendsComponent ? element : undefined,
         className: joined,
-        element,
         ...props,
       },
       children
