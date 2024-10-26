@@ -25,7 +25,7 @@ export const generateCss = async (dirname: string) => {
   try {
     const cssFiles: string[] = [];
     const destDir = join(dirname, './saltygen');
-    const cssFile = join(dirname, 'styles/index.css');
+    const cssFile = join(destDir, 'index.css');
 
     const generateConfig = async () => {
       const coreConfigPath = join(dirname, 'salty-config.ts');
@@ -122,7 +122,7 @@ export const generateFile = async (dirname: string, file: string) => {
   try {
     const cssFiles: string[] = [];
     const destDir = join(dirname, './saltygen');
-    const cssFile = join(dirname, 'styles/index.css');
+    const cssFile = join(destDir, 'index.css');
     const coreConfigDest = join(destDir, 'salty-config.js');
     const { config } = await import(coreConfigDest);
 
