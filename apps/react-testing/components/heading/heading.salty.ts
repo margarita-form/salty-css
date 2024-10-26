@@ -23,7 +23,7 @@ export const LargeHeading = styled(
 export const LargeHeadingH1 = styled(
   LargeHeading,
   {
-    color: '#000',
+    color: 'var(--primary-color)',
   },
   { element: 'h1' }
 );

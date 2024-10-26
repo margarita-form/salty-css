@@ -12,6 +12,7 @@ import {
   readFileSync,
 } from 'fs';
 import { StyleComponentGenerator } from './generator';
+import { dashCase } from '../util/dash-case';
 
 export const logger = winston.createLogger({
   level: 'info',
@@ -57,7 +58,19 @@ export const generateCss = async (dirname: string) => {
 
     // Generate the config files
     const config = await generateConfig();
-    console.log({ config });
+
+    // Generate variables css file
+
+    const variables = Object.entries(config.variables).map(([key, value]) => {
+      return `--${dashCase(key)}: ${value};`;
+    });
+
+    const variablesCss = `:root {
+      ${variables.join('\n')}
+    }`;
+
+    const variablesPath = join(destDir, 'css/variables.css');
+    writeFileSync(variablesPath, variablesCss);
 
     // Function to copy files/directories recursively
     async function copyRecursively(src: string, dest: string) {
@@ -114,7 +127,9 @@ export const generateCss = async (dirname: string) => {
       .map((file) => `@import url('../saltygen/css/${file}');`)
       .join('\n');
 
-    writeFileSync(cssFile, cssFileImports);
+    const cssContent = `@import url('../saltygen/css/variables.css');\n${cssFileImports}`;
+
+    writeFileSync(cssFile, cssContent);
   } catch (e) {
     console.error(e);
   }
