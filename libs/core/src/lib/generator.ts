@@ -10,20 +10,17 @@ export interface GeneratorOptions {
 }
 
 export class StyleComponentGenerator {
-  private _callerName: string | undefined;
+  public _callerName: string | undefined;
 
-  constructor(public styles: Styles, private options: GeneratorOptions) {
-    //
-  }
+  constructor(public styles: Styles, private options: GeneratorOptions) {}
 
   get hash() {
     return toHash(this.styles);
   }
 
-  get className() {
-    const classNames: string[] = [];
-    if (this._callerName) classNames.push(`${this._callerName}__${this.hash}`);
-    else classNames.push(this.hash);
+  get classNames() {
+    const classNames: string[] = [this.hash];
+    // if (this._callerName) classNames.push(this._callerName);
 
     const { className } = this.options;
     if (className) classNames.push(className);

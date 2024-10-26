@@ -4,17 +4,20 @@ import dts from 'vite-plugin-dts';
 import * as path from 'path';
 import react from '@vitejs/plugin-react-swc';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { generateCss, generateFile } from '../../libs/core/src';
+import { generateCss, generateFile, minimizeFile } from '../../libs/core/src';
 
 const stylegen: () => PluginOption = () => ({
   name: 'stylegen',
-  buildStart: () => {
-    generateCss(__dirname);
+  buildStart: () => generateCss(__dirname),
+  load: async (filePath) => {
+    if (filePath.includes('.salty.')) {
+      return await minimizeFile(__dirname, filePath);
+    }
   },
   watchChange: {
-    handler: (filePath) => {
+    handler: async (filePath) => {
       if (filePath.includes('.salty.')) {
-        generateFile(__dirname, filePath);
+        await generateFile(__dirname, filePath);
       }
     },
   },

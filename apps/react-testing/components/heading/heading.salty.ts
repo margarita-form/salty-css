@@ -15,7 +15,7 @@ export const LargeHeading = styled(
   HeadingBase,
   {
     fontSize: '5vw',
-    color: '#555',
+    color: '#888',
   },
   { className: 'large-heading', element: 'h2' }
 );
@@ -23,7 +23,7 @@ export const LargeHeading = styled(
 export const LargeHeadingH1 = styled(
   LargeHeading,
   {
-    color: 'green',
+    color: '#000',
   },
   { element: 'h1' }
 );

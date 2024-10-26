@@ -11,6 +11,7 @@ import {
   writeFileSync,
   readFileSync,
 } from 'fs';
+import { StyleComponentGenerator } from './generator';
 
 export const logger = winston.createLogger({
   level: 'info',
@@ -169,4 +170,60 @@ export const generateFile = async (dirname: string, file: string) => {
   } catch (e) {
     console.error(e);
   }
+};
+
+export const minimizeFile = async (dirname: string, file: string) => {
+  try {
+    const destDir = join(dirname, './saltygen');
+    const isSaltyFile = file.includes('.salty.');
+
+    if (isSaltyFile) {
+      const original = readFileSync(file, 'utf8');
+      const hashedName = toHash(file);
+      const dest = join(destDir, 'js', hashedName + '.js');
+
+      await esbuild.build({
+        entryPoints: [file],
+        minify: false,
+        treeShaking: true,
+        bundle: true,
+        outfile: dest,
+        format: 'esm',
+        target: ['es2022'],
+        keepNames: true,
+        external: ['react'],
+      });
+
+      const now = Date.now();
+      const contents = await import(`${dest}?t=${now}`);
+
+      const mapped = Object.entries(contents).map(
+        ([key, value]: [string, any]) => {
+          const generator = value.generator._withCallerName(
+            key
+          ) as StyleComponentGenerator;
+
+          const regexpResult = new RegExp(
+            `${key}[=\\s]+[^()]+styled\\(([^,]+),`,
+            'g'
+          ).exec(original);
+
+          if (!regexpResult) return '';
+          const tagName = regexpResult.at(1)?.trim();
+
+          return `export const ${key} = styled(${tagName}, "${
+            generator.classNames
+          }", "${generator._callerName}", "${generator.props.element || ''}");`;
+        }
+      );
+
+      const imports = `import { styledClient as styled } from '@salty-css/react/styled-client';`;
+
+      const full = `${imports}\n${mapped.join('')}`;
+      return full;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return '';
 };
