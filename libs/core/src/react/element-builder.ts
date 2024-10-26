@@ -3,10 +3,11 @@ import { clsx } from 'clsx';
 import { StyleComponentGenerator } from '../lib/generator';
 
 type CreateElementProps = {
-  as?: Tag<any>;
+  extend?: Tag<any>;
   children?: ReactNode;
   className?: string;
   inlineStyles?: boolean;
+  element?: string;
 };
 
 export type Props = Record<string, unknown> & CreateElementProps;
@@ -20,7 +21,8 @@ export const elementBuilder = <T extends Props>(
   generator: StyleComponentGenerator
 ) => {
   const fn = ({
-    as = tagName,
+    extend = tagName,
+    element = generator.props.element,
     children,
     className,
     inlineStyles,
@@ -28,13 +30,14 @@ export const elementBuilder = <T extends Props>(
   }: T) => {
     const joined = clsx(generator.className, className);
 
-    console.log(as);
+    const type = typeof extend === 'function' ? extend : element || extend;
 
     return createElement(
-      as,
+      type,
       {
         style: inlineStyles ? generator.styles : undefined,
         className: joined,
+        element,
         ...props,
       },
       children

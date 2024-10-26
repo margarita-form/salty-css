@@ -6,6 +6,7 @@ export type Styles = Record<string, unknown>;
 export interface GeneratorOptions {
   className?: string;
   displayName?: string;
+  element?: string;
 }
 
 export class StyleComponentGenerator {
@@ -42,6 +43,13 @@ export class StyleComponentGenerator {
 
   get css() {
     return `.${this.cssClassName} { ${this.cssValues} }`;
+  }
+
+  get props() {
+    const { element } = this.options;
+    return {
+      element,
+    };
   }
 
   public _withCallerName(name: string) {
