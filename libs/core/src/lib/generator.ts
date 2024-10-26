@@ -11,11 +11,7 @@ export interface GeneratorOptions {
 export class StyleComponentGenerator {
   private _callerName: string | undefined;
 
-  constructor(
-    public tagName: string,
-    public styles: Styles,
-    private options: GeneratorOptions
-  ) {
+  constructor(public styles: Styles, private options: GeneratorOptions) {
     //
   }
 

@@ -1,7 +1,12 @@
 import { styled } from '@salty-css/react/styled';
 
-export const Heading = styled('div', {
-  color: 'orange',
+export const HeadingBase = styled('span', {
+  display: 'block',
   fontFamily: 'Arial, sans-serif',
-  fontSize: '69px',
+  margin: '5vw',
+  fontSize: '22px',
+});
+
+export const LargeHeading = styled(HeadingBase, {
+  fontSize: '12vw',
 });

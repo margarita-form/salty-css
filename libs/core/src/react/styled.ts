@@ -3,13 +3,13 @@ import {
   StyleComponentGenerator,
   Styles,
 } from '../lib/generator';
-import { elementBuilder } from './element-builder';
+import { elementBuilder, Props, Tag } from './element-builder';
 
-export const styled = (
-  tagName: string,
+export const styled = <P extends Props>(
+  tagName: Tag<P>,
   styles: Styles,
   options: GeneratorOptions = {}
 ) => {
-  const generator = new StyleComponentGenerator(tagName, styles, options);
-  return elementBuilder(generator);
+  const generator = new StyleComponentGenerator(styles, options);
+  return elementBuilder(tagName, generator);
 };
