@@ -13,7 +13,7 @@ export const config = {
     },
     custom: {
       variables: {
-        thatCanGoDeep: 'enabled',
+        thatCanGoDeep: 'blue',
       },
     },
   },

@@ -1,5 +1,6 @@
-export function dashCase(str: string): string {
+export function dashCase(str: PropertyKey): string {
   if (!str) return '';
+  if (typeof str !== 'string') return String(str);
   return str
     .replace(/\s/g, '-')
     .replace(/[A-Z](?:(?=[^A-Z])|[A-Z]*(?=[A-Z][^A-Z]|$))/g, (s, i) => {

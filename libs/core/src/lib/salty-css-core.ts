@@ -51,30 +51,38 @@ export const generateVariables = async (dirname: string) => {
 
   // Generate variables css file
 
+  type Variables = { css?: string; ts?: string };
   const parseVariables = <T extends object>(
     obj: T,
     path: PropertyKey[] = []
-  ): string[] => {
+  ): Variables[] => {
     if (!obj) throw 'Invalid variable layer';
-    return Object.entries(obj).flatMap(([key, value]) => {
-      if (!value) return '';
-      if (typeof value === 'object')
-        return parseVariables(value, [...path, key]);
+    return Object.entries(obj).flatMap(
+      ([key, value]): Variables | Variables[] => {
+        if (!value) return {};
+        if (typeof value === 'object')
+          return parseVariables(value, [...path, key]);
 
-      const name = [...path, key].join('-');
-      return `--${dashCase(name).replace('--', '-')}: ${value};`;
-    });
+        const cssName = [...path.map(dashCase), dashCase(key)].join('-');
+        const tsName = [...path, key].join('.');
+        return { css: `--${cssName}: ${value};`, ts: `"{${tsName}}"` };
+      }
+    );
   };
 
   const variables = parseVariables(config.variables);
 
-  const variablesCss = `:root { ${variables.join(' ')} }`;
-
   const destDir = getDestDir(dirname);
-  const variablesPath = join(destDir, 'css/variables.css');
-  console.log(variablesCss);
 
+  const variablesPath = join(destDir, 'css/variables.css');
+  const cssVariables = variables.map(({ css }) => css);
+  const variablesCss = `:root { ${cssVariables.join(' ')} }`;
   writeFileSync(variablesPath, variablesCss);
+
+  const tsTokensPath = join(destDir, 'types/css-tokens.d.ts');
+  const tsTokens = variables.map(({ ts }) => ts);
+  const tsTokensTypes = `type VariableToken = ${tsTokens.join(' | ')};`;
+  writeFileSync(tsTokensPath, tsTokensTypes);
 };
 
 export const generateCss = async (dirname: string) => {
@@ -87,6 +95,7 @@ export const generateCss = async (dirname: string) => {
       if (existsSync(destDir)) execSync('rm -rf ' + destDir);
       mkdirSync(destDir);
       mkdirSync(join(destDir, 'css'));
+      mkdirSync(join(destDir, 'types'));
     };
 
     // Clear the dist directory

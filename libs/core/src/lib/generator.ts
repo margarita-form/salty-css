@@ -1,7 +1,9 @@
 import { dashCase } from '../util/dash-case';
 import { toHash } from '../util/to-hash';
 
-export type Styles = Record<string, unknown>;
+type StylePropertyValue = Record<never, never> & unknown;
+
+export type Styles = Record<string, StylePropertyValue | VariableToken>;
 
 export interface GeneratorOptions {
   className?: string;
@@ -32,9 +34,15 @@ export class StyleComponentGenerator {
   }
 
   get cssValues() {
-    const stylesStringArr = Object.entries(this.styles).map(
-      ([key, value]) => `${dashCase(key)}: ${value};`
-    );
+    const stylesStringArr = Object.entries(this.styles).map(([key, value]) => {
+      // `${dashCase(key)}: ${value};`
+      const propertyName = key.startsWith('-') ? key : dashCase(key);
+      if (typeof value !== 'string') return undefined;
+      const propertyValue = /\{.+\}/.test(value)
+        ? `var(--${dashCase(value.replace(/\{|\}/g, '').replaceAll('.', '-'))})`
+        : value;
+      return `${propertyName}: ${propertyValue};`;
+    });
     return stylesStringArr.join(' ');
   }
 
