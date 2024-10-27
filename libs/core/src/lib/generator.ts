@@ -8,7 +8,7 @@ type Variants = {
 type StylePropertyValue = Record<never, never> & unknown;
 
 interface CssStyles {
-  [key: string]: StylePropertyValue | VariableToken | CssStyles;
+  [key: string]: StylePropertyValue | PropertyValueToken | CssStyles;
 }
 
 export type Styles = CssStyles & Variants;
@@ -93,13 +93,13 @@ export class StyleComponentGenerator {
         if (typeof value === 'number') return addValue(value);
         if (typeof value !== 'string') return acc;
 
-        const isToken = /\{.+\}/.test(value);
-        if (isToken) {
-          const variable = dashCase(
-            value.replace(/\{|\}/g, '').replaceAll('.', '-')
-          );
-
-          return addValue(`var(--${variable})`);
+        const hasToken = /\{[^{}]+\}/g.test(value);
+        if (hasToken) {
+          const tokens = value.replace(/\{([^{}]+)\}/g, (...args) => {
+            const variable = dashCase(args[1].replaceAll('.', '-'));
+            return `var(--${variable})`;
+          });
+          return addValue(tokens);
         }
 
         return addValue(value);

@@ -1,1 +1,2 @@
-type VariableToken = '';
+type VariableTokens = '';
+type PropertyValueToken = '';

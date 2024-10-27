@@ -65,7 +65,7 @@ export const generateVariables = async (dirname: string) => {
 
         const cssName = [...path.map(dashCase), dashCase(key)].join('-');
         const tsName = [...path, key].join('.');
-        return { css: `--${cssName}: ${value};`, ts: `"{${tsName}}"` };
+        return { css: `--${cssName}: ${value};`, ts: `"${tsName}"` };
       }
     );
   };
@@ -80,8 +80,8 @@ export const generateVariables = async (dirname: string) => {
   writeFileSync(variablesPath, variablesCss);
 
   const tsTokensPath = join(destDir, 'types/css-tokens.d.ts');
-  const tsTokens = variables.map(({ ts }) => ts);
-  const tsTokensTypes = `type VariableToken = ${tsTokens.join(' | ')};`;
+  const tsTokens = variables.map(({ ts }) => ts).join('|');
+  const tsTokensTypes = `type VariableTokens = ${tsTokens}; type PropertyValueToken = \`{\${VariableTokens}}\``;
   writeFileSync(tsTokensPath, tsTokensTypes);
 };
 

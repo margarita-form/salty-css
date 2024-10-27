@@ -16,5 +16,9 @@ export const config = {
         thatCanGoDeep: 'blue',
       },
     },
+    spacings: {
+      emLarge: '1.2em',
+      emRegular: '0.6em',
+    },
   },
 };

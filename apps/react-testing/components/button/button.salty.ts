@@ -1,8 +1,9 @@
 import { styled } from '@salty-css/react/styled';
+import { token } from '@salty-css/react/css-helpers';
 
 export const Button = styled('button', {
   display: 'block',
-  padding: '0.6em 1.2em',
+  padding: `${token('spacings.emRegular')} ${token('spacings.emLarge')}`,
   border: '1px solid currentColor',
   background: 'transparent',
   color: 'currentColor',
