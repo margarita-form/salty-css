@@ -2,13 +2,16 @@ import { dashCase } from '../util/dash-case';
 import { toHash } from '../util/to-hash';
 
 type Variants = {
-  variants?: { [key: PropertyKey]: { [key: PropertyKey]: any } };
+  variants?: { [key: PropertyKey]: { [key: PropertyKey]: Styles } };
 };
 
 type StylePropertyValue = Record<never, never> & unknown;
 
-export type Styles = Record<string, StylePropertyValue | VariableToken> &
-  Variants;
+interface CssStyles {
+  [key: string]: StylePropertyValue | VariableToken | CssStyles;
+}
+
+export type Styles = CssStyles & Variants;
 
 export interface GeneratorOptions {
   className?: string;
