@@ -2,6 +2,19 @@ const generateRandom = () => Math.random().toString(36).substring(7);
 
 export const config = {
   variables: {
-    primaryColor: 'hotpink',
+    colors: {
+      brand: 'red',
+      highlight: 'yellow',
+    },
+    fontSize: {
+      heading: {
+        regular: '2.5vw',
+      },
+    },
+    custom: {
+      variables: {
+        thatCanGoDeep: 'enabled',
+      },
+    },
   },
 };

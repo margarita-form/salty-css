@@ -23,29 +23,65 @@ export const logger = winston.createLogger({
   transports: [new winston.transports.Console({})],
 });
 
+const getDestDir = (dirname: string) => join(dirname, './saltygen');
+
+const generateConfig = async (dirname: string) => {
+  const destDir = getDestDir(dirname);
+  const coreConfigPath = join(dirname, 'salty-config.ts');
+  const coreConfigDest = join(destDir, 'salty-config.js');
+
+  await esbuild.build({
+    entryPoints: [coreConfigPath],
+    minify: true,
+    treeShaking: true,
+    bundle: true,
+    outfile: coreConfigDest,
+    format: 'esm',
+    external: ['react'],
+  });
+
+  const now = Date.now();
+  const { config } = await import(`${coreConfigDest}?t=${now}`);
+  return config;
+};
+
+export const generateVariables = async (dirname: string) => {
+  // Generate the config files
+  const config = await generateConfig(dirname);
+
+  // Generate variables css file
+
+  const parseVariables = <T extends object>(
+    obj: T,
+    path: PropertyKey[] = []
+  ): string[] => {
+    if (!obj) throw 'Invalid variable layer';
+    return Object.entries(obj).flatMap(([key, value]) => {
+      if (!value) return '';
+      if (typeof value === 'object')
+        return parseVariables(value, [...path, key]);
+
+      const name = [...path, key].join('-');
+      return `--${dashCase(name).replace('--', '-')}: ${value};`;
+    });
+  };
+
+  const variables = parseVariables(config.variables);
+
+  const variablesCss = `:root { ${variables.join(' ')} }`;
+
+  const destDir = getDestDir(dirname);
+  const variablesPath = join(destDir, 'css/variables.css');
+  console.log(variablesCss);
+
+  writeFileSync(variablesPath, variablesCss);
+};
+
 export const generateCss = async (dirname: string) => {
   try {
     const cssFiles: string[] = [];
-    const destDir = join(dirname, './saltygen');
+    const destDir = getDestDir(dirname);
     const cssFile = join(destDir, 'index.css');
-
-    const generateConfig = async () => {
-      const coreConfigPath = join(dirname, 'salty-config.ts');
-      const coreConfigDest = join(destDir, 'salty-config.js');
-
-      await esbuild.build({
-        entryPoints: [coreConfigPath],
-        minify: true,
-        treeShaking: true,
-        bundle: true,
-        outfile: coreConfigDest,
-        format: 'esm',
-        external: ['react'],
-      });
-
-      const { config } = await import(coreConfigDest);
-      return config;
-    };
 
     const clearDistDir = () => {
       if (existsSync(destDir)) execSync('rm -rf ' + destDir);
@@ -56,21 +92,8 @@ export const generateCss = async (dirname: string) => {
     // Clear the dist directory
     clearDistDir();
 
-    // Generate the config files
-    const config = await generateConfig();
-
-    // Generate variables css file
-
-    const variables = Object.entries(config.variables).map(([key, value]) => {
-      return `--${dashCase(key)}: ${value};`;
-    });
-
-    const variablesCss = `:root {
-      ${variables.join('\n')}
-    }`;
-
-    const variablesPath = join(destDir, 'css/variables.css');
-    writeFileSync(variablesPath, variablesCss);
+    // Generate variables
+    await generateVariables(dirname);
 
     // Function to copy files/directories recursively
     async function copyRecursively(src: string, dest: string) {

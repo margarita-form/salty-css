@@ -6,7 +6,7 @@ export const HeadingBase = styled(
     display: 'block',
     fontFamily: 'Arial, sans-serif',
     margin: '2vw 5vw',
-    fontSize: '2.5vw',
+    fontSize: 'var(--font-size-heading-regular)',
   },
   { className: 'heading' }
 );
@@ -23,7 +23,7 @@ export const LargeHeading = styled(
 export const LargeHeadingH1 = styled(
   LargeHeading,
   {
-    color: 'var(--primary-color)',
+    color: 'var(--colors-brand)',
   },
   { element: 'h1' }
 );
