@@ -87,7 +87,7 @@ export const generateVariables = async (dirname: string) => {
 
 export const generateCss = async (dirname: string) => {
   try {
-    const cssFiles: string[] = [];
+    const cssFiles: string[][] = [];
     const destDir = getDestDir(dirname);
     const cssFile = join(destDir, 'index.css');
 
@@ -142,8 +142,10 @@ export const generateCss = async (dirname: string) => {
               key
             ) as StyleComponentGenerator;
 
-            const fileName = `${generator.hash}.css`;
-            cssFiles.push(fileName);
+            const fileName = `${generator.hash}-${generator.priority}.css`;
+            if (!cssFiles[generator.priority])
+              cssFiles[generator.priority] = [];
+            cssFiles[generator.priority].push(fileName);
 
             const filePath = `css/${fileName}`;
             const cssPath = join(destDir, filePath);
@@ -156,6 +158,7 @@ export const generateCss = async (dirname: string) => {
     await copyRecursively(dirname, destDir);
 
     const cssFileImports = cssFiles
+      .flat()
       .map((file) => `@import url('../saltygen/css/${file}');`)
       .join('\n');
 
@@ -201,7 +204,7 @@ export const generateFile = async (dirname: string, file: string) => {
           key
         ) as StyleComponentGenerator;
 
-        const fileName = `${generator.hash}.css`;
+        const fileName = `${generator.hash}-${generator.priority}.css`;
         const filePath = `css/${fileName}`;
         const cssPath = join(destDir, filePath);
         cssFiles.push(fileName);
@@ -214,7 +217,8 @@ export const generateFile = async (dirname: string, file: string) => {
         (file) => `@import url('../saltygen/css/${file}');`
       );
 
-      const set = new Set([...current, ...cssFileImports]);
+      // const set = new Set([...current, ...cssFileImports]);
+      const set = new Set([...cssFileImports, ...current]);
       const merged = [...set].join('\n');
 
       writeFileSync(cssFile, merged);

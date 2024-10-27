@@ -12,7 +12,10 @@ type CreateElementProps = {
 
 export type Props = Record<string, unknown> & CreateElementProps;
 
-type FnComponent<P extends Props> = (props: P) => ReactNode;
+type FnComponent<P extends Props> = {
+  (props: P): ReactNode;
+  generator?: StyleComponentGenerator;
+};
 
 export type Tag<P extends Props> = string | FnComponent<P>;
 

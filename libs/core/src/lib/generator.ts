@@ -1,3 +1,4 @@
+import { Tag } from '../react/element-builder';
 import { dashCase } from '../util/dash-case';
 import { toHash } from '../util/to-hash';
 
@@ -26,10 +27,22 @@ export interface GeneratorOptions {
 export class StyleComponentGenerator {
   public _callerName: string | undefined;
 
-  constructor(public styles: Styles, private options: GeneratorOptions) {}
+  constructor(
+    public tagName: Tag<any>,
+    public styles: Styles,
+    private options: GeneratorOptions
+  ) {}
 
   get hash() {
     return toHash(this.styles);
+  }
+
+  get priority(): number {
+    if (typeof this.tagName === 'function') {
+      const prev = this.tagName.generator?.priority || 0;
+      return prev + 1;
+    }
+    return 0;
   }
 
   get classNames() {
@@ -125,7 +138,7 @@ export class StyleComponentGenerator {
         return addValue(value);
       }, '');
 
-      const css = `${currentClass} { ${current} }`;
+      const css = `@layer l${this.priority} { ${currentClass} { ${current} } }`;
       return [css, ...classes].join('\n');
     };
 

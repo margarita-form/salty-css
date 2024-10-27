@@ -60,3 +60,30 @@ export const Button = styled('button', {
     },
   ],
 });
+
+export const LargeButton = styled(Button, {
+  fontSize: '24px',
+  variants: {
+    warning: {
+      true: {
+        background: 'red',
+        borderColor: 'red',
+        color: '#000',
+        '&:hover': {
+          opacity: 0.5,
+        },
+      },
+    },
+  },
+  compoundVariants: [
+    {
+      warning: true,
+      variant: 'solid',
+      css: {
+        borderColor: '#000',
+        borderWidth: '2px',
+        fontWeight: '700',
+      },
+    },
+  ],
+});

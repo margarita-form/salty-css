@@ -14,6 +14,6 @@ export const styled = <
   styles: S,
   options: GeneratorOptions = {}
 ) => {
-  const generator = new StyleComponentGenerator(styles, options);
+  const generator = new StyleComponentGenerator(tagName, styles, options);
   return elementBuilder<P, T, S>(tagName, styles, generator);
 };
