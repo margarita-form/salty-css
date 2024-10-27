@@ -1,6 +1,6 @@
 import { createElement, ReactNode } from 'react';
 import { clsx } from 'clsx';
-import { StyleComponentGenerator } from '../lib/generator';
+import { StyleComponentGenerator, Styles } from '../lib/generator';
 
 type CreateElementProps = {
   extend?: Tag<any>;
@@ -16,8 +16,13 @@ type FnComponent<P extends Props> = (props: P) => ReactNode;
 
 export type Tag<P extends Props> = string | FnComponent<P>;
 
-export const elementBuilder = <T extends Props>(
-  tagName: Tag<T>,
+export const elementBuilder = <
+  const P extends Props,
+  const T extends Tag<P>,
+  const S extends Styles
+>(
+  tagName: T,
+  styles: S,
   generator: StyleComponentGenerator
 ) => {
   const fn = ({
@@ -27,7 +32,7 @@ export const elementBuilder = <T extends Props>(
     className,
     inlineStyles,
     ...props
-  }: T) => {
+  }: P) => {
     const joined = clsx(generator.cssClassName, className);
 
     const extendsComponent = typeof extend === 'function';
@@ -51,5 +56,15 @@ export const elementBuilder = <T extends Props>(
     toString: () => `.${generator.cssClassName}`,
   });
 
-  return fn;
+  type _V = (typeof styles)['variants'];
+  type VariantValue<T> = T extends 'true' ? 'true' | true : T;
+  type Variants = _V extends undefined
+    ? {}
+    : { [K in keyof _V]?: VariantValue<keyof _V[K]> | '' };
+
+  type ComponentType = <T extends object>(
+    props: T & CreateElementProps & Variants
+  ) => ReactNode;
+
+  return fn as ComponentType;
 };

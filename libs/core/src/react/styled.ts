@@ -5,11 +5,15 @@ import {
 } from '../lib/generator';
 import { elementBuilder, Props, Tag } from './element-builder';
 
-export const styled = <P extends Props>(
-  tagName: Tag<P>,
-  styles: Styles,
+export const styled = <
+  const P extends Props,
+  const T extends Tag<P>,
+  const S extends Styles
+>(
+  tagName: T,
+  styles: S,
   options: GeneratorOptions = {}
 ) => {
   const generator = new StyleComponentGenerator(styles, options);
-  return elementBuilder(tagName, generator);
+  return elementBuilder<P, T, S>(tagName, styles, generator);
 };
