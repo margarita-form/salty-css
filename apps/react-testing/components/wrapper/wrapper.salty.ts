@@ -12,4 +12,7 @@ export const Wrapper = styled('div', {
       },
     },
   },
+  defaultVariants: {
+    margin: 'regular',
+  },
 });

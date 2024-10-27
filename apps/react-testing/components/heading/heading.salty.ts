@@ -5,7 +5,7 @@ export const HeadingBase = styled(
   {
     display: 'block',
     fontFamily: 'Arial, sans-serif',
-    margin: '2vw 5vw',
+    margin: '2vw 0',
     fontSize: 'var(--font-size-heading-regular)',
   },
   { className: 'heading' }

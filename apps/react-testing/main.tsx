@@ -19,7 +19,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <StrictMode>
-    <Wrapper test={{ margin: 'regular' }}>
+    <Wrapper>
       <LargeHeadingH1>Large heading H1</LargeHeadingH1>
       <LargeHeading>Large heading H2</LargeHeading>
       <HeadingBase>Heading base H3</HeadingBase>
