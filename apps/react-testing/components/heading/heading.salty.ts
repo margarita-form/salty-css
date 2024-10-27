@@ -24,6 +24,10 @@ export const LargeHeadingH1 = styled(
   LargeHeading,
   {
     color: '{custom.variables.thatCanGoDeep}',
+    transition: '200ms',
+    '&:hover': {
+      opacity: 0.5,
+    },
   },
   { element: 'h1' }
 );

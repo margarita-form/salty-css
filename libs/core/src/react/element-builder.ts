@@ -28,7 +28,7 @@ export const elementBuilder = <T extends Props>(
     inlineStyles,
     ...props
   }: T) => {
-    const joined = clsx(generator.className, className);
+    const joined = clsx(generator.cssClassName, className);
 
     const extendsComponent = typeof extend === 'function';
     const type = extendsComponent ? extend : element || extend;
@@ -45,6 +45,11 @@ export const elementBuilder = <T extends Props>(
     );
   };
 
-  Object.assign(fn, { generator });
+  Object.assign(fn, {
+    generator,
+    className: `.${generator.cssClassName}`,
+    toString: () => `.${generator.cssClassName}`,
+  });
+
   return fn;
 };
