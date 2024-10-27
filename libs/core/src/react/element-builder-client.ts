@@ -37,9 +37,14 @@ export const elementBuilderClient = <T extends Props>(
 
     if (_variantKeys) {
       _variantKeys.forEach((key) => {
-        if (props[key] !== undefined) {
-          additionalClasses.push(`${key}-${props[key]}`);
-          if (!extendsComponent) delete props[key];
+        const [name, defaultValue] = key.split('=');
+        console.log(name, defaultValue);
+
+        if (props[name] !== undefined) {
+          additionalClasses.push(`${name}-${props[name]}`);
+          if (!extendsComponent) delete props[name];
+        } else if (defaultValue !== undefined) {
+          additionalClasses.push(`${name}-${defaultValue}`);
         }
       });
     }

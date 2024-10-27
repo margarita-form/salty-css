@@ -35,5 +35,28 @@ export const Button = styled('button', {
         },
       },
     },
+    borderRadius: {
+      none: {
+        borderRadius: 0,
+      },
+      regular: {
+        borderRadius: '0.6em',
+      },
+      circular: {
+        borderRadius: '50em',
+      },
+    },
   },
+  defaultVariants: {
+    borderRadius: 'regular',
+  },
+  compoundVariants: [
+    {
+      variant: 'solid',
+      borderRadius: 'circular',
+      css: {
+        paddingInline: '{spacings.emExtraLarge}',
+      },
+    },
+  ],
 });

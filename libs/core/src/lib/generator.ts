@@ -1,8 +1,12 @@
 import { dashCase } from '../util/dash-case';
 import { toHash } from '../util/to-hash';
 
+type CompoundVariant = { [key: PropertyKey]: any; css: Styles };
+
 type Variants = {
   variants?: { [key: PropertyKey]: { [key: PropertyKey]: Styles } };
+  defaultVariants?: { [key: PropertyKey]: any };
+  compoundVariants?: CompoundVariant[];
 };
 
 type StylePropertyValue = Record<never, never> & unknown;
@@ -69,6 +73,22 @@ export class StyleComponentGenerator {
             return acc;
           }
 
+          if (_key === 'defaultVariants') {
+            return acc;
+          }
+
+          if (_key === 'compoundVariants') {
+            value.forEach((variant: CompoundVariant) => {
+              const { css, ...rest } = variant;
+              const scope = Object.entries(rest).reduce((acc, [prop, val]) => {
+                return `${acc}.${prop}-${val}`;
+              }, currentClass);
+              const result = parseStyles(css, scope);
+              classes.push(result);
+            });
+            return acc;
+          }
+
           if (_key.startsWith('@')) {
             const result = parseStyles(value, currentClass);
             const query = `${_key} {\n ${result.replace('\n', '\n ')}\n}`;
@@ -116,7 +136,11 @@ export class StyleComponentGenerator {
     const { element } = this.options;
 
     const variantKeys = this.styles.variants
-      ? Object.keys(this.styles.variants)
+      ? Object.keys(this.styles.variants).map((name) => {
+          const defaultVariant = this.styles.defaultVariants?.[name];
+          if (defaultVariant) return `${name}=${String(defaultVariant)}`;
+          return name;
+        })
       : undefined;
 
     return {

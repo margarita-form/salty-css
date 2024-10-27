@@ -21,7 +21,11 @@ root.render(
       <HeadingBase>Heading base H3</HeadingBase>
 
       <ButtonsWrapper>
-        <Button variant="solid" onClick={() => alert('It is a button.')}>
+        <Button
+          variant="solid"
+          borderRadius="circular"
+          onClick={() => alert('It is a button.')}
+        >
           Solid
         </Button>
         <Button variant="outlined" onClick={() => alert('It is a button.')}>

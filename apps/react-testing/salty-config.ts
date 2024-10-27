@@ -17,6 +17,7 @@ export const config = {
       },
     },
     spacings: {
+      emExtraLarge: '1.8em',
       emLarge: '1.2em',
       emRegular: '0.6em',
     },
