@@ -19,7 +19,8 @@ export const elementBuilderClient = <T extends Props>(
   tagName: Tag<T>,
   _className: string,
   _callerName?: string,
-  _element?: string
+  _element?: string,
+  _variantKeys?: string[]
 ) => {
   const fn = ({
     extend = tagName,
@@ -29,16 +30,26 @@ export const elementBuilderClient = <T extends Props>(
     inlineStyles,
     ...props
   }: T) => {
-    const joined = clsx(_className, className);
+    const additionalClasses: string[] = [];
 
     const extendsComponent = typeof extend === 'function';
     const type = extendsComponent ? extend : element || extend;
 
+    if (_variantKeys) {
+      _variantKeys.forEach((key) => {
+        if (props[key] !== undefined) {
+          additionalClasses.push(`${key}-${props[key]}`);
+          if (!extendsComponent) delete props[key];
+        }
+      });
+    }
+
+    const joinedClassNames = clsx(_className, className, additionalClasses);
     return createElement(
       type,
       {
         element: extendsComponent ? element : undefined,
-        className: joined,
+        className: joinedClassNames,
         ...props,
       },
       children

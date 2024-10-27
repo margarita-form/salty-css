@@ -1,9 +1,14 @@
 import { dashCase } from '../util/dash-case';
 import { toHash } from '../util/to-hash';
 
+type Variants = {
+  variants?: { [key: PropertyKey]: { [key: PropertyKey]: any } };
+};
+
 type StylePropertyValue = Record<never, never> & unknown;
 
-export type Styles = Record<string, StylePropertyValue | VariableToken>;
+export type Styles = Record<string, StylePropertyValue | VariableToken> &
+  Variants;
 
 export interface GeneratorOptions {
   className?: string;
@@ -45,7 +50,21 @@ export class StyleComponentGenerator {
       const classes: string[] = [];
       const current = Object.entries(obj).reduce((acc, [key, value]) => {
         if (typeof value === 'object') {
+          if (!value) return acc;
           const _key = key.trim();
+
+          if (_key === 'variants') {
+            Object.entries<any>(value).forEach(([prop, conditions]) => {
+              if (!conditions) return;
+              Object.entries<any>(conditions).forEach(([val, styles]) => {
+                if (!styles) return;
+                const scope = `${currentClass}.${prop}-${val}`;
+                const result = parseStyles(styles, scope);
+                classes.push(result);
+              });
+            });
+            return acc;
+          }
 
           if (_key.startsWith('@')) {
             const result = parseStyles(value, currentClass);
@@ -92,8 +111,14 @@ export class StyleComponentGenerator {
 
   get props() {
     const { element } = this.options;
+
+    const variantKeys = this.styles.variants
+      ? Object.keys(this.styles.variants)
+      : undefined;
+
     return {
       element,
+      variantKeys,
     };
   }
 

@@ -4,7 +4,14 @@ export const styledClient = <P extends Props>(
   tagName: Tag<P>,
   className: string,
   callerName?: string,
-  element?: string
+  element?: string,
+  variantKeys?: string[]
 ) => {
-  return elementBuilderClient(tagName, className, callerName, element);
+  return elementBuilderClient(
+    tagName,
+    className,
+    callerName,
+    element,
+    variantKeys
+  );
 };

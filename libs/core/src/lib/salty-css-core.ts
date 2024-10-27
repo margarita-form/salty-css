@@ -265,7 +265,9 @@ export const minimizeFile = async (dirname: string, file: string) => {
 
           return `export const ${key} = styled(${tagName}, "${
             generator.classNames
-          }", "${generator._callerName}", "${generator.props.element || ''}");`;
+          }", "${generator._callerName}", "${
+            generator.props.element || ''
+          }", ${JSON.stringify(generator.props.variantKeys)});`;
         }
       );
 
