@@ -184,7 +184,7 @@ export const generateFile = async (dirname: string, file: string) => {
       const hashedName = toHash(file);
       const dest = join(destDir, 'js', hashedName + '.js');
 
-      const res = await esbuild.build({
+      await esbuild.build({
         entryPoints: [file],
         minify: false,
         treeShaking: true,
@@ -217,7 +217,6 @@ export const generateFile = async (dirname: string, file: string) => {
         (file) => `@import url('../saltygen/css/${file}');`
       );
 
-      // const set = new Set([...current, ...cssFileImports]);
       const set = new Set([...cssFileImports, ...current]);
       const merged = [...set].join('\n');
 
@@ -275,7 +274,7 @@ export const minimizeFile = async (dirname: string, file: string) => {
         }
       );
 
-      const imports = `import { styledClient as styled } from '@salty-css/react/styled-client';`;
+      const imports = `import { styledClient as styled } from 'salty-core/react/styled-client';`;
 
       const full = `${imports}\n${mapped.join('')}`;
       return full;

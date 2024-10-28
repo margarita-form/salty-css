@@ -12,5 +12,31 @@
   ],
   "nx": {
     "name": "core"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.cjs"
+    },
+    "./react/styled": {
+      "import": "./react/styled.js",
+      "require": "./react/styled.cjs"
+    },
+    "./react/styled-client": {
+      "import": "./react/styled-client.js",
+      "require": "./react/styled-client.cjs"
+    },
+    "./react/css-helpers": {
+      "import": "./react/css-helpers.js",
+      "require": "./react/css-helpers.cjs"
+    },
+    "./vite": {
+      "import": "./vite/index.js",
+      "require": "./vite/index.cjs"
+    },
+    "./webpack/salty-loader": {
+      "import": "./webpack/salty-loader.js",
+      "require": "./webpack/salty-loader.cjs"
+    }
   }
 }

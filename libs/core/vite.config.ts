@@ -31,7 +31,11 @@ export default defineConfig({
       name: 'salty-css-core',
       entry: {
         index: 'src/index.ts',
-        'src/react/styled': 'src/react/styled.ts',
+        'react/styled': 'src/react/styled.ts',
+        'react/styled-client': 'src/react/styled-client.ts',
+        'react/css-helpers': 'src/react/css-helpers.ts',
+        'webpack/salty-loader': 'src/webpack/salty-loader.ts',
+        'vite/index': 'src/vite/index.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;
