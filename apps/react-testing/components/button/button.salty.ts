@@ -22,6 +22,9 @@ export const Button = styled('button', {
   },
   variants: {
     variant: {
+      outlined: {
+        //
+      },
       solid: {
         '&:not(:hover)': {
           background: 'black',

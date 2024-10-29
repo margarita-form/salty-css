@@ -32,7 +32,7 @@ root.render(
         >
           Solid
         </Button>
-        <Button variant="solid" onClick={() => alert('It is a button.')}>
+        <Button variant="outlined" onClick={() => alert('It is a button.')}>
           Outlined
         </Button>
       </ButtonsWrapper>
