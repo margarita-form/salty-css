@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild';
+import * as winston from 'winston';
 import { execSync } from 'child_process';
 import { toHash } from '../util/to-hash';
-import * as winston from 'winston';
 import { join } from 'path';
 import {
   statSync,
@@ -11,7 +11,7 @@ import {
   writeFileSync,
   readFileSync,
 } from 'fs';
-import { StyleComponentGenerator } from './generator';
+import { StyleComponentGenerator } from '../generator/style-generator';
 import { dashCase } from '../util/dash-case';
 import { writeFile } from 'fs/promises';
 

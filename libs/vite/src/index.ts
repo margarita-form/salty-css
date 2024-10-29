@@ -3,7 +3,7 @@ import {
   generateFile,
   generateVariables,
   minimizeFile,
-} from '../lib/salty-css-core';
+} from '@salty-css/core/compiler';
 
 export const saltyPlugin = (dir: string) => ({
   name: 'stylegen',

@@ -1,12 +1,14 @@
 import {
-  GeneratorOptions,
-  StyleComponentGenerator,
+  Tag,
+  StyledComponentProps,
   Styles,
-} from '../lib/generator';
-import { elementBuilder, Props, Tag } from './element-builder';
+  GeneratorOptions,
+} from '@salty-css/core/types';
+import { elementBuilder } from './element-builder';
+import { StyleComponentGenerator } from '@salty-css/core/generator';
 
 export const styled = <
-  const P extends Props,
+  const P extends StyledComponentProps,
   const T extends Tag<P>,
   const S extends Styles
 >(

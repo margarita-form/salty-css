@@ -1,5 +1,5 @@
 {
-  "name": "core",
+  "name": "@salty-css/core",
   "version": "0.0.1",
   "dependencies": {},
   "main": "./dist/index.js",

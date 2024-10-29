@@ -1,0 +1,26 @@
+{
+  "name": "@salty-css/react",
+  "version": "0.0.1",
+  "dependencies": {},
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "typings": "./dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "!**/*.tsbuildinfo"
+  ],
+  "nx": {
+    "name": "react"
+  },
+  "exports": {
+    "./styled": {
+      "import": "./styled.js",
+      "require": "./styled.cjs"
+    },
+    "./styled-client": {
+      "import": "./styled-client.js",
+      "require": "./styled-client.cjs"
+    }
+  }
+}

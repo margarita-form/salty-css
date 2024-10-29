@@ -1,26 +1,15 @@
 import { createElement, ReactNode } from 'react';
+import { StyleComponentGenerator } from '@salty-css/core/generator';
+import {
+  Tag,
+  StyledComponentProps,
+  Styles,
+  CreateElementProps,
+} from '@salty-css/core/types';
 import { clsx } from 'clsx';
-import { StyleComponentGenerator, Styles } from '../lib/generator';
-
-type CreateElementProps = {
-  extend?: Tag<any>;
-  children?: ReactNode;
-  className?: string;
-  inlineStyles?: boolean;
-  element?: string;
-};
-
-export type Props = Record<string, unknown> & CreateElementProps;
-
-type FnComponent<P extends Props> = {
-  (props: P): ReactNode;
-  generator?: StyleComponentGenerator;
-};
-
-export type Tag<P extends Props> = string | FnComponent<P>;
 
 export const elementBuilder = <
-  const P extends Props,
+  const P extends StyledComponentProps,
   const T extends Tag<P>,
   const S extends Styles
 >(

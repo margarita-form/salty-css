@@ -1,5 +1,5 @@
 import { styled } from '@salty-css/react/styled';
-import { token } from '@salty-css/react/css-helpers';
+import { token } from '@salty-css/core/css';
 
 export const ButtonsWrapper = styled('div', {
   margin: '5vw 0',

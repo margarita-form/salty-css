@@ -1,5 +1,5 @@
 import type { LoaderContext } from 'webpack';
-import { generateFile, minimizeFile } from '../lib/salty-css-core';
+import { generateFile, minimizeFile } from '@salty-css/core/compiler';
 
 interface SaltyLoaderOptions {
   dir: string;

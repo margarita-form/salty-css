@@ -1,28 +1,6 @@
-import { Tag } from '../react/element-builder';
+import { CompoundVariant, GeneratorOptions, Styles, Tag } from '../types';
 import { dashCase } from '../util/dash-case';
 import { toHash } from '../util/to-hash';
-
-type CompoundVariant = { [key: PropertyKey]: any; css: Styles };
-
-type Variants = {
-  variants?: { [key: PropertyKey]: { [key: PropertyKey]: Styles } };
-  defaultVariants?: { [key: PropertyKey]: any };
-  compoundVariants?: CompoundVariant[];
-};
-
-type StylePropertyValue = Record<never, never> & unknown;
-
-interface CssStyles {
-  [key: string]: StylePropertyValue | PropertyValueToken | CssStyles;
-}
-
-export type Styles = CssStyles & Variants;
-
-export interface GeneratorOptions {
-  className?: string;
-  displayName?: string;
-  element?: string;
-}
 
 export class StyleComponentGenerator {
   public _callerName: string | undefined;
