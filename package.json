@@ -4,10 +4,11 @@
   "license": "MIT",
   "scripts": {
     "dev:react-testing": "nx run react-testing:serve",
-    "build:core": "nx run build:build",
+    "build:core": "nx run core:build",
     "build:react": "nx run react:build",
     "build:vite": "nx run vite:build",
-    "build:webpack": "nx run webpack:build"
+    "build:webpack": "nx run webpack:build",
+    "build:all": "nx run-many --target=build --projects core react vite webpack"
   },
   "private": true,
   "type": "module",
