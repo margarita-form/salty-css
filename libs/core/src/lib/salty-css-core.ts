@@ -245,8 +245,8 @@ export const minimizeFile = async (dirname: string, file: string) => {
         /^(?!export\s)const\s.*/gm,
         (original) => `export ${original}`
       );
-      if (copy === original) return;
-      await writeFile(file, original);
+
+      if (copy !== original) await writeFile(file, original);
 
       await esbuild.build({
         entryPoints: [file],
@@ -299,8 +299,8 @@ export const minimizeFile = async (dirname: string, file: string) => {
 
       current = current.replace(`{ styled }`, `{ styledClient as styled }`);
       current = current.replace(
-        `salty-core/react/styled`,
-        `salty-core/react/styled-client`
+        `@salty-css/react/styled`,
+        `@salty-css/react/styled-client`
       );
 
       return current;

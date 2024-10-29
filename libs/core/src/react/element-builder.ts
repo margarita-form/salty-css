@@ -36,17 +36,37 @@ export const elementBuilder = <
     inlineStyles,
     ...props
   }: P) => {
-    const joined = clsx(generator.cssClassName, className);
+    const additionalClasses: string[] = [];
 
     const extendsComponent = typeof extend === 'function';
     const type = extendsComponent ? extend : element || extend;
+    if (!type) throw new Error('No element provided');
+
+    const { variantKeys } = generator.props;
+    if (variantKeys) {
+      variantKeys.forEach((key) => {
+        const [name, defaultValue] = key.split('=');
+        if (props[name] !== undefined) {
+          additionalClasses.push(`${name}-${props[name]}`);
+          if (!extendsComponent) delete props[name];
+        } else if (defaultValue !== undefined) {
+          additionalClasses.push(`${name}-${defaultValue}`);
+        }
+      });
+    }
+
+    const joinedClassNames = clsx(
+      generator.cssClassName,
+      className,
+      additionalClasses
+    );
 
     return createElement(
       type,
       {
-        style: inlineStyles ? generator.styles : undefined,
+        'data-client': true,
         element: extendsComponent ? element : undefined,
-        className: joined,
+        className: joinedClassNames,
         ...props,
       },
       children
