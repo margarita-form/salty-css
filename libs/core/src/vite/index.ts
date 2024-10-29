@@ -1,4 +1,3 @@
-import type { PluginOption } from 'vite';
 import {
   generateCss,
   generateFile,
@@ -6,22 +5,22 @@ import {
   minimizeFile,
 } from '../lib/salty-css-core';
 
-export const saltyPlugin: () => PluginOption = () => ({
+export const saltyPlugin = (dir: string) => ({
   name: 'stylegen',
-  buildStart: () => generateCss(__dirname),
-  load: async (filePath) => {
+  buildStart: () => generateCss(dir),
+  load: async (filePath: string) => {
     if (filePath.includes('.salty.')) {
-      return await minimizeFile(__dirname, filePath);
+      return await minimizeFile(dir, filePath);
     }
     return undefined;
   },
   watchChange: {
-    handler: async (filePath) => {
+    handler: async (filePath: string) => {
       if (filePath.includes('.salty.')) {
-        await generateFile(__dirname, filePath);
+        await generateFile(dir, filePath);
       }
       if (filePath.includes('salty-config')) {
-        await generateVariables(__dirname);
+        await generateVariables(dir);
       }
     },
   },

@@ -34,12 +34,11 @@ export const elementBuilderClient = <T extends Props>(
 
     const extendsComponent = typeof extend === 'function';
     const type = extendsComponent ? extend : element || extend;
+    if (!type) throw new Error('No element provided');
 
     if (_variantKeys) {
       _variantKeys.forEach((key) => {
         const [name, defaultValue] = key.split('=');
-        console.log(name, defaultValue);
-
         if (props[name] !== undefined) {
           additionalClasses.push(`${name}-${props[name]}`);
           if (!extendsComponent) delete props[name];

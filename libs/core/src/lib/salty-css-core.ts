@@ -13,6 +13,7 @@ import {
 } from 'fs';
 import { StyleComponentGenerator } from './generator';
 import { dashCase } from '../util/dash-case';
+import { writeFile } from 'fs/promises';
 
 export const logger = winston.createLogger({
   level: 'info',
@@ -138,6 +139,7 @@ export const generateCss = async (dirname: string) => {
           const contents = await import(`${dest}?t=${now}`);
 
           Object.entries(contents).forEach(([key, value]: [string, any]) => {
+            if (!value.generator) return;
             const generator = value.generator._withCallerName(
               key
             ) as StyleComponentGenerator;
@@ -200,6 +202,7 @@ export const generateFile = async (dirname: string, file: string) => {
       const contents = await import(`${dest}?t=${now}`);
 
       Object.entries(contents).forEach(([key, value]: [string, any]) => {
+        if (!value.generator) return;
         const generator = value.generator._withCallerName(
           key
         ) as StyleComponentGenerator;
@@ -233,9 +236,17 @@ export const minimizeFile = async (dirname: string, file: string) => {
     const isSaltyFile = file.includes('.salty.');
 
     if (isSaltyFile) {
-      const original = readFileSync(file, 'utf8');
       const hashedName = toHash(file);
       const dest = join(destDir, 'js', hashedName + '.js');
+
+      let original = readFileSync(file, 'utf8');
+      const copy = original;
+      original = original.replace(
+        /^(?!export\s)const\s.*/gm,
+        (original) => `export ${original}`
+      );
+      if (copy === original) return;
+      await writeFile(file, original);
 
       await esbuild.build({
         entryPoints: [file],
@@ -252,32 +263,47 @@ export const minimizeFile = async (dirname: string, file: string) => {
       const now = Date.now();
       const contents = await import(`${dest}?t=${now}`);
 
-      const mapped = Object.entries(contents).map(
-        ([key, value]: [string, any]) => {
-          const generator = value.generator._withCallerName(
-            key
-          ) as StyleComponentGenerator;
+      let current = original;
+      Object.entries(contents).forEach(([key, value]: [string, any]) => {
+        if (!value.generator) return;
 
-          const regexpResult = new RegExp(
-            `${key}[=\\s]+[^()]+styled\\(([^,]+),`,
-            'g'
-          ).exec(original);
+        const generator = value.generator._withCallerName(
+          key
+        ) as StyleComponentGenerator;
 
-          if (!regexpResult) return '';
-          const tagName = regexpResult.at(1)?.trim();
+        const regexpResult = new RegExp(
+          `${key}[=\\s]+[^()]+styled\\(([^,]+),`,
+          'g'
+        ).exec(original);
 
-          return `export const ${key} = styled(${tagName}, "${
-            generator.classNames
-          }", "${generator._callerName}", "${
-            generator.props.element || ''
-          }", ${JSON.stringify(generator.props.variantKeys)});`;
+        if (!regexpResult) {
+          return console.error('Could not find the original declaration');
         }
+
+        const tagName = regexpResult.at(1)?.trim();
+        const { element, variantKeys } = generator.props;
+
+        const clientVersion = `${key} = styled(${tagName}, "${
+          generator.classNames
+        }", "${generator._callerName}", ${JSON.stringify(
+          element
+        )}, ${JSON.stringify(variantKeys)});`;
+
+        const regexp = new RegExp(
+          `${key}[=\\s]+[^()]+styled\\(([^,]+),[^;]+;`,
+          'g'
+        );
+
+        current = current.replace(regexp, clientVersion);
+      });
+
+      current = current.replace(`{ styled }`, `{ styledClient as styled }`);
+      current = current.replace(
+        `salty-core/react/styled`,
+        `salty-core/react/styled-client`
       );
 
-      const imports = `import { styledClient as styled } from 'salty-core/react/styled-client';`;
-
-      const full = `${imports}\n${mapped.join('')}`;
-      return full;
+      return current;
     }
   } catch (e) {
     console.error(e);
