@@ -78,6 +78,7 @@ export const parseStyles = <T extends object>(
   }, '');
 
   if (!currentClass) return classes.join('\n');
+  if (!current) return classes.join('\n');
 
   let css = '';
   if (layer !== undefined)
