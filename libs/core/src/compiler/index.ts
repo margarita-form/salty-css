@@ -14,6 +14,7 @@ import {
 import { StyleComponentGenerator } from '../generator/style-generator';
 import { dashCase } from '../util/dash-case';
 import { writeFile } from 'fs/promises';
+import { parseStyles } from '../generator/parse-styles';
 
 export const logger = winston.createLogger({
   level: 'info',
@@ -84,6 +85,12 @@ export const generateVariables = async (dirname: string) => {
   const tsTokens = variables.map(({ ts }) => ts).join('|');
   const tsTokensTypes = `type VariableTokens = ${tsTokens}; type PropertyValueToken = \`{\${VariableTokens}}\``;
   writeFileSync(tsTokensPath, tsTokensTypes);
+
+  // Generator global styles
+  const globalStylesPath = join(destDir, 'css/global.css');
+  const globalStylesString = parseStyles(config.global, '');
+
+  writeFileSync(globalStylesPath, globalStylesString);
 };
 
 export const generateCss = async (dirname: string) => {
@@ -164,7 +171,11 @@ export const generateCss = async (dirname: string) => {
       .map((file) => `@import url('../saltygen/css/${file}');`)
       .join('\n');
 
-    const cssContent = `@import url('../saltygen/css/variables.css');\n${cssFileImports}`;
+    const globalImports = [
+      "@import url('../saltygen/css/variables.css');",
+      "@import url('../saltygen/css/global.css');",
+    ];
+    const cssContent = `${globalImports.join('\n')}\n${cssFileImports}`;
 
     writeFileSync(cssFile, cssContent);
   } catch (e) {

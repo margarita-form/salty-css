@@ -22,4 +22,9 @@ export const config = {
       emRegular: '0.6em',
     },
   },
+  global: {
+    html: {
+      backgroundColor: '#f8f8f8',
+    },
+  },
 };
