@@ -1,9 +1,11 @@
 import { GeneratorOptions, Styles, Tag } from '../types';
 import { toHash } from '../util/to-hash';
+import { getTemplateKeys } from './parse-templates';
 import { parseStyles } from './parse-styles';
 
 export class StyleComponentGenerator {
   public _callerName: string | undefined;
+  public _context: { name: string; config: any } | undefined;
 
   constructor(
     public tagName: Tag<any>,
@@ -38,8 +40,19 @@ export class StyleComponentGenerator {
     return `--${this.hash}-display-name: ${this._callerName};`;
   }
 
+  get templateKeys() {
+    return this._context?.config.templates
+      ? getTemplateKeys(this._context.config.templates)
+      : [];
+  }
+
   get css() {
-    return parseStyles(this.styles, `.${this.cssClassName}`, this.priority);
+    return parseStyles(
+      this.styles,
+      `.${this.cssClassName}`,
+      this.priority,
+      this._context?.config
+    );
   }
 
   get props() {
@@ -59,7 +72,9 @@ export class StyleComponentGenerator {
     };
   }
 
-  public _withCallerName(name: string) {
+  public _withBuildContext(context: { name: string; config: any }) {
+    this._context = context;
+    const { name, config } = context;
     this._callerName = name;
     return this;
   }

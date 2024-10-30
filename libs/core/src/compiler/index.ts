@@ -15,6 +15,7 @@ import { StyleComponentGenerator } from '../generator/style-generator';
 import { dashCase } from '../util/dash-case';
 import { writeFile } from 'fs/promises';
 import { parseStyles } from '../generator/parse-styles';
+import { parseTemplates } from '../generator/parse-templates';
 
 export const logger = winston.createLogger({
   level: 'info',
@@ -86,11 +87,48 @@ export const generateVariables = async (dirname: string) => {
   const tsTokensTypes = `type VariableTokens = ${tsTokens}; type PropertyValueToken = \`{\${VariableTokens}}\``;
   writeFileSync(tsTokensPath, tsTokensTypes);
 
-  // Generator global styles
+  // Generate global styles
   const globalStylesPath = join(destDir, 'css/global.css');
   const globalStylesString = parseStyles(config.global, '');
 
   writeFileSync(globalStylesPath, globalStylesString);
+
+  // Generate templates
+  const templateStylesPath = join(destDir, 'css/templates.css');
+  const templateStylesString = parseTemplates(config.templates);
+
+  writeFileSync(templateStylesPath, templateStylesString);
+};
+
+export const compileSaltyFile = async (
+  sourceFilePath: string,
+  outputDirectory: string
+) => {
+  const hashedName = toHash(sourceFilePath);
+  const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
+
+  await esbuild.build({
+    entryPoints: [sourceFilePath],
+    minify: true,
+    treeShaking: true,
+    bundle: true,
+    outfile: outputFilePath,
+    format: 'esm',
+    target: ['es2022'],
+    keepNames: true,
+    external: ['react'],
+  });
+
+  const now = Date.now();
+  const contents = await import(`${outputFilePath}?t=${now}`);
+  return contents as { [key: string]: { generator: StyleComponentGenerator } };
+};
+
+const getConfig = async (dirname: string) => {
+  const destDir = getDestDir(dirname);
+  const coreConfigDest = join(destDir, 'salty-config.js');
+  const { config } = await import(coreConfigDest);
+  return config;
 };
 
 export const generateCss = async (dirname: string) => {
@@ -127,29 +165,15 @@ export const generateCss = async (dirname: string) => {
         const isSaltyFile = src.includes('.salty.');
 
         if (isSaltyFile) {
-          const hashedName = toHash(src);
-          const dest = join(destDir, 'js', hashedName + '.js');
-
-          await esbuild.build({
-            entryPoints: [src],
-            minify: true,
-            treeShaking: true,
-            bundle: true,
-            outfile: dest,
-            format: 'esm',
-            target: ['es2022'],
-            keepNames: true,
-            external: ['react'],
-          });
-
-          const now = Date.now();
-          const contents = await import(`${dest}?t=${now}`);
-
-          Object.entries(contents).forEach(([key, value]: [string, any]) => {
+          const config = await getConfig(dirname);
+          const contents = await compileSaltyFile(src, destDir);
+          Object.entries(contents).forEach(([name, value]) => {
             if (!value.generator) return;
-            const generator = value.generator._withCallerName(
-              key
-            ) as StyleComponentGenerator;
+
+            const generator = value.generator._withBuildContext({
+              name,
+              config,
+            });
 
             const fileName = `${generator.hash}-${generator.priority}.css`;
             if (!cssFiles[generator.priority])
@@ -174,6 +198,7 @@ export const generateCss = async (dirname: string) => {
     const globalImports = [
       "@import url('../saltygen/css/variables.css');",
       "@import url('../saltygen/css/global.css');",
+      "@import url('../saltygen/css/templates.css');",
     ];
     const cssContent = `${globalImports.join('\n')}\n${cssFileImports}`;
 
@@ -188,35 +213,19 @@ export const generateFile = async (dirname: string, file: string) => {
     const cssFiles: string[] = [];
     const destDir = join(dirname, './saltygen');
     const cssFile = join(destDir, 'index.css');
-    const coreConfigDest = join(destDir, 'salty-config.js');
-    const { config } = await import(coreConfigDest);
 
     const isSaltyFile = file.includes('.salty.');
 
     if (isSaltyFile) {
-      const hashedName = toHash(file);
-      const dest = join(destDir, 'js', hashedName + '.js');
-
-      await esbuild.build({
-        entryPoints: [file],
-        minify: false,
-        treeShaking: true,
-        bundle: true,
-        outfile: dest,
-        format: 'esm',
-        target: ['es2022'],
-        keepNames: true,
-        external: ['react'],
-      });
-
-      const now = Date.now();
-      const contents = await import(`${dest}?t=${now}`);
-
-      Object.entries(contents).forEach(([key, value]: [string, any]) => {
+      const config = await getConfig(dirname);
+      const contents = await compileSaltyFile(file, destDir);
+      Object.entries(contents).forEach(([name, value]: [string, any]) => {
         if (!value.generator) return;
-        const generator = value.generator._withCallerName(
-          key
-        ) as StyleComponentGenerator;
+
+        const generator = value.generator._withBuildContext({
+          name,
+          config,
+        });
 
         const fileName = `${generator.hash}-${generator.priority}.css`;
         const filePath = `css/${fileName}`;
@@ -247,43 +256,29 @@ export const minimizeFile = async (dirname: string, file: string) => {
     const isSaltyFile = file.includes('.salty.');
 
     if (isSaltyFile) {
-      const hashedName = toHash(file);
-      const dest = join(destDir, 'js', hashedName + '.js');
-
       let original = readFileSync(file, 'utf8');
-      const copy = original;
-      original = original.replace(
+
+      const copy = original.replace(
         /^(?!export\s)const\s.*/gm,
         (original) => `export ${original}`
       );
 
       if (copy !== original) await writeFile(file, original);
 
-      await esbuild.build({
-        entryPoints: [file],
-        minify: false,
-        treeShaking: true,
-        bundle: true,
-        outfile: dest,
-        format: 'esm',
-        target: ['es2022'],
-        keepNames: true,
-        external: ['react'],
-      });
-
-      const now = Date.now();
-      const contents = await import(`${dest}?t=${now}`);
+      const config = await getConfig(dirname);
+      const contents = await compileSaltyFile(file, destDir);
 
       let current = original;
-      Object.entries(contents).forEach(([key, value]: [string, any]) => {
+      Object.entries(contents).forEach(([name, value]) => {
         if (!value.generator) return;
 
-        const generator = value.generator._withCallerName(
-          key
-        ) as StyleComponentGenerator;
+        const generator = value.generator._withBuildContext({
+          name,
+          config,
+        });
 
         const regexpResult = new RegExp(
-          `${key}[=\\s]+[^()]+styled\\(([^,]+),`,
+          `${name}[=\\s]+[^()]+styled\\(([^,]+),`,
           'g'
         ).exec(original);
 
@@ -294,14 +289,14 @@ export const minimizeFile = async (dirname: string, file: string) => {
         const tagName = regexpResult.at(1)?.trim();
         const { element, variantKeys } = generator.props;
 
-        const clientVersion = `${key} = styled(${tagName}, "${
+        const clientVersion = `${name} = styled(${tagName}, "${
           generator.classNames
         }", "${generator._callerName}", ${JSON.stringify(
           element
         )}, ${JSON.stringify(variantKeys)});`;
 
         const regexp = new RegExp(
-          `${key}[=\\s]+[^()]+styled\\(([^,]+),[^;]+;`,
+          `${name}[=\\s]+[^()]+styled\\(([^,]+),[^;]+;`,
           'g'
         );
 

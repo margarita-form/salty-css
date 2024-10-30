@@ -1,16 +1,17 @@
-import { CompoundVariant } from '../types';
+import { CompoundVariant, SaltyConfig } from '../types';
 import { dashCase } from '../util';
 
 export const parseStyles = <T extends object>(
   styles: T,
   currentClass: string,
-  layer?: number
-) => {
+  layer?: number,
+  config?: SaltyConfig | undefined
+): string => {
   const classes: string[] = [];
   const current = Object.entries(styles).reduce((acc, [key, value]) => {
+    const _key = key.trim();
     if (typeof value === 'object') {
       if (!value) return acc;
-      const _key = key.trim();
 
       if (_key === 'variants') {
         Object.entries<any>(value).forEach(([prop, conditions]) => {
@@ -59,8 +60,18 @@ export const parseStyles = <T extends object>(
       return acc;
     }
 
-    const propertyName = key.startsWith('-') ? key : dashCase(key);
-    const addValue = (val: unknown) => `${acc}${propertyName}: ${val};`;
+    if (config?.templates && config.templates[_key]) {
+      const path = value.split('.');
+      const templateStyles = path.reduce(
+        (acc: Record<string, any>, key: string) => acc[key],
+        config.templates[_key]
+      );
+      const result = parseStyles(templateStyles, '');
+      return `${acc}${result}`;
+    }
+
+    const propertyName = _key.startsWith('-') ? _key : dashCase(_key);
+    const addValue = (val: unknown) => `${acc}${propertyName}:${val};`;
 
     if (typeof value === 'number') return addValue(value);
     if (typeof value !== 'string') return acc;
@@ -77,8 +88,8 @@ export const parseStyles = <T extends object>(
     return addValue(value);
   }, '');
 
-  if (!currentClass) return classes.join('\n');
   if (!current) return classes.join('\n');
+  if (!currentClass) return current;
 
   let css = '';
   if (layer !== undefined)

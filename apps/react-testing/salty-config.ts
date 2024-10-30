@@ -27,4 +27,17 @@ export const config = {
       backgroundColor: '#f8f8f8',
     },
   },
+  templates: {
+    textStyle: {
+      headline: {
+        large: {
+          fontSize: '60px',
+        },
+        regular: {
+          fontSize: '42px',
+          color: 'blue',
+        },
+      },
+    },
+  },
 };

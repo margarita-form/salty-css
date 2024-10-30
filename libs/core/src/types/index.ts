@@ -43,3 +43,11 @@ export interface GeneratorOptions {
   displayName?: string;
   element?: string;
 }
+
+//
+
+export interface SaltyConfig {
+  global?: Styles;
+  templates?: Record<PropertyKey, any>;
+  variables?: Record<PropertyKey, any>;
+}

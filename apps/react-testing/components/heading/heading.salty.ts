@@ -7,6 +7,7 @@ export const HeadingBase = styled(
     fontFamily: 'Arial, sans-serif',
     margin: '2vw 0',
     fontSize: 'var(--font-size-heading-regular)',
+    textStyle: 'headline.regular',
   },
   { className: 'heading' }
 );
@@ -14,7 +15,7 @@ export const HeadingBase = styled(
 export const LargeHeading = styled(
   HeadingBase,
   {
-    fontSize: '5vw',
+    textStyle: 'headline.large',
     color: '#888',
   },
   { className: 'large-heading', element: 'h2' }
