@@ -1,17 +1,21 @@
-import { elementBuilderClient, Props, Tag } from './element-builder-client';
+import { Tag } from '@salty-css/core/types';
+import { elementFactory } from './element-factory';
 
-export const styledClient = <P extends Props>(
-  tagName: Tag<P>,
+export const styledClient = (
+  tagName: Tag<any>,
   className: string,
   callerName?: string,
   element?: string,
   variantKeys?: string[]
 ) => {
-  return elementBuilderClient(
-    tagName,
+  const fn = elementFactory(tagName, className, element, variantKeys, {
+    'data-component-name': callerName,
+  });
+
+  Object.assign(fn, {
     className,
-    callerName,
-    element,
-    variantKeys
-  );
+    toString: () => `.${className}`,
+  });
+
+  return fn;
 };

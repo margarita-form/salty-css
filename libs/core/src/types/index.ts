@@ -30,6 +30,20 @@ type Variants = {
   compoundVariants?: CompoundVariant[];
 };
 
+type VariantPropValue<T> = T extends 'true' ? 'true' | true : T;
+
+export type VariantProps<STYLES extends Styles> =
+  STYLES['variants'] extends undefined
+    ? {}
+    : {
+        [K in keyof STYLES['variants']]?:
+          | VariantPropValue<keyof STYLES['variants'][K]>
+          | '';
+      };
+
+export type ParentComponentProps<TAG extends Tag<any>> =
+  TAG extends FnComponent<infer P> ? P : unknown;
+
 type StylePropertyValue = Record<never, never> & unknown;
 
 interface CssStyles {

@@ -1,35 +1,22 @@
-import { createElement, ReactNode } from 'react';
+import { createElement } from 'react';
 import { clsx } from 'clsx';
+import { StyledComponentProps, Tag } from '@salty-css/core/types';
 
-type CreateElementProps = {
-  extend?: Tag<any>;
-  children?: ReactNode;
-  className?: string;
-  inlineStyles?: boolean;
-  element?: string;
-};
-
-export type Props = Record<string, unknown> & CreateElementProps;
-
-type FnComponent<P extends Props> = (props: P) => ReactNode;
-
-export type Tag<P extends Props> = string | FnComponent<P>;
-
-export const elementBuilderClient = <T extends Props>(
-  tagName: Tag<T>,
+export const elementFactory = (
+  tagName: Tag<any>,
   _className: string,
-  _callerName?: string,
   _element?: string,
-  _variantKeys?: string[]
+  _variantKeys?: string[],
+  _additionalProps?: Record<PropertyKey, any>
 ) => {
-  const fn = ({
+  return ({
     extend = tagName,
     element = _element,
     children,
     className,
     inlineStyles,
     ...props
-  }: T) => {
+  }: StyledComponentProps) => {
     const additionalClasses: string[] = [];
 
     const extendsComponent = typeof extend === 'function';
@@ -49,16 +36,15 @@ export const elementBuilderClient = <T extends Props>(
     }
 
     const joinedClassNames = clsx(_className, className, additionalClasses);
+    const rest = _additionalProps ? { ..._additionalProps, ...props } : props;
     return createElement(
       type,
       {
         element: extendsComponent ? element : undefined,
         className: joinedClassNames,
-        ...props,
+        ...rest,
       },
       children
     );
   };
-
-  return fn;
 };
