@@ -7,12 +7,12 @@ import {
   LargeHeading,
   LargeHeadingH1,
 } from './components/heading/heading.salty';
-import { Wrapper } from './components/wrapper/wrapper.salty';
+import { Wrapper } from './components/wrapper/wrapper.styled';
 import {
   Button,
   ButtonsWrapper,
   LargeButton,
-} from './components/button/button.salty';
+} from './components/button/button.css';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -29,6 +29,7 @@ root.render(
           variant="solid"
           borderRadius="regular"
           onClick={() => alert('It is a button.')}
+          href="https://google.com"
         >
           Solid
         </Button>
