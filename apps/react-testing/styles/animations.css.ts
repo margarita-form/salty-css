@@ -4,7 +4,7 @@ export const fadeIn = keyframes({
   animationName: 'fadeIn',
   appendInitialStyles: true,
   params: {
-    delay: '1s',
+    delay: '250ms',
     fillMode: 'forwards',
   },
   from: {

@@ -1,11 +1,16 @@
 import { styled } from '@salty-css/react/styled';
 import { fadeIn } from '../../styles/animations.css';
+import { largePortrait } from '../../styles/media.css';
 
 export const Wrapper = styled('div', {
   display: 'block',
   animation: fadeIn({ duration: '750ms' }),
   '@media (max-width: 768px)': {
     margin: '10vw',
+  },
+  [largePortrait]: {
+    border: '1px solid red',
+    padding: '5vw',
   },
   variants: {
     margin: {

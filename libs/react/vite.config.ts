@@ -33,6 +33,7 @@ export default defineConfig({
         styled: 'src/styled.ts',
         'styled-client': 'src/styled-client.ts',
         keyframes: 'src/keyframes.ts',
+        media: 'src/media.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;

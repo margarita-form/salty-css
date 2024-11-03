@@ -25,6 +25,10 @@
     "./keyframes": {
       "import": "./keyframes.js",
       "require": "./keyframes.cjs"
+    },
+    "./media": {
+      "import": "./media.js",
+      "require": "./media.cjs"
     }
   }
 }
