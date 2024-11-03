@@ -28,6 +28,11 @@ export const logger = winston.createLogger({
 
 const getDestDir = (dirname: string) => join(dirname, './saltygen');
 
+// const fileExtensions = 'salty|css|styles'
+const fileExtensions = ['salty', 'css', 'styles', 'styled'];
+export const isSaltyFile = (file: string) =>
+  new RegExp(`\\.(${fileExtensions.join('|')})\\.`).test(file);
+
 const generateConfig = async (dirname: string) => {
   const destDir = getDestDir(dirname);
   const coreConfigPath = join(dirname, 'salty-config.ts');
@@ -162,9 +167,9 @@ export const generateCss = async (dirname: string) => {
           )
         );
       } else if (stats.isFile()) {
-        const isSaltyFile = src.includes('.salty.');
+        const validFile = isSaltyFile(src);
 
-        if (isSaltyFile) {
+        if (validFile) {
           const config = await getConfig(dirname);
           const contents = await compileSaltyFile(src, destDir);
           Object.entries(contents).forEach(([name, value]) => {
@@ -214,9 +219,9 @@ export const generateFile = async (dirname: string, file: string) => {
     const destDir = join(dirname, './saltygen');
     const cssFile = join(destDir, 'index.css');
 
-    const isSaltyFile = file.includes('.salty.');
+    const validFile = isSaltyFile(file);
 
-    if (isSaltyFile) {
+    if (validFile) {
       const config = await getConfig(dirname);
       const contents = await compileSaltyFile(file, destDir);
       Object.entries(contents).forEach(([name, value]: [string, any]) => {
@@ -253,9 +258,9 @@ export const generateFile = async (dirname: string, file: string) => {
 export const minimizeFile = async (dirname: string, file: string) => {
   try {
     const destDir = join(dirname, './saltygen');
-    const isSaltyFile = file.includes('.salty.');
+    const validFile = isSaltyFile(file);
 
-    if (isSaltyFile) {
+    if (validFile) {
       let original = readFileSync(file, 'utf8');
 
       const copy = original.replace(
@@ -314,5 +319,5 @@ export const minimizeFile = async (dirname: string, file: string) => {
   } catch (e) {
     console.error(e);
   }
-  return '';
+  return undefined;
 };
