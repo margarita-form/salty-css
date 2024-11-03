@@ -28,7 +28,8 @@ export type CompoundVariant = { [key: PropertyKey]: any; css: CssStyles };
 
 type InvalidVariantKeys = keyof AllHTMLAttributes<HTMLElement>;
 type StyleKeys = keyof Required<AllHTMLAttributes<HTMLElement>>['style'];
-type StyleValue<K extends string> = K extends StyleKeys
+
+export type StyleValue<K extends string> = K extends StyleKeys
   ? Required<AllHTMLAttributes<HTMLElement>>['style'][K]
   : never;
 
@@ -61,7 +62,7 @@ export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (
 
 type StylePropertyValue = Record<never, never> & unknown;
 
-type CssStyles = {
+export type CssStyles = {
   [key in StyleKeys | OrString]?:
     | StyleValue<key>
     | StylePropertyValue

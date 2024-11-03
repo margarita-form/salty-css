@@ -126,7 +126,15 @@ export const compileSaltyFile = async (
 
   const now = Date.now();
   const contents = await import(`${outputFilePath}?t=${now}`);
-  return contents as { [key: string]: { generator: StyleComponentGenerator } };
+
+  return contents as {
+    [key: string]: {
+      generator: StyleComponentGenerator;
+      isKeyframes?: boolean;
+      animationName?: string;
+      css?: string;
+    };
+  };
 };
 
 const getConfig = async (dirname: string) => {
@@ -173,6 +181,19 @@ export const generateCss = async (dirname: string) => {
           const config = await getConfig(dirname);
           const contents = await compileSaltyFile(src, destDir);
           Object.entries(contents).forEach(([name, value]) => {
+            if (value.isKeyframes && value.css) {
+              const fileName = `${value.animationName}-0.css`;
+              const filePath = `css/${fileName}`;
+              const cssPath = join(destDir, filePath);
+
+              if (!cssFiles[0]) cssFiles[0] = [];
+              cssFiles[0].push(fileName);
+
+              writeFileSync(cssPath, value.css);
+
+              return;
+            }
+
             if (!value.generator) return;
 
             const generator = value.generator._withBuildContext({
@@ -275,6 +296,12 @@ export const minimizeFile = async (dirname: string, file: string) => {
 
       let current = original;
       Object.entries(contents).forEach(([name, value]) => {
+        if (value.isKeyframes) {
+          console.log('value', value);
+
+          return;
+        }
+
         if (!value.generator) return;
 
         const generator = value.generator._withBuildContext({

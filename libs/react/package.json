@@ -21,6 +21,10 @@
     "./styled-client": {
       "import": "./styled-client.js",
       "require": "./styled-client.cjs"
+    },
+    "./keyframes": {
+      "import": "./keyframes.js",
+      "require": "./keyframes.cjs"
     }
   }
 }
