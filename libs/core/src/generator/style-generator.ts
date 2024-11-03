@@ -61,7 +61,8 @@ export class StyleComponentGenerator {
     const variantKeys = this.styles.variants
       ? Object.keys(this.styles.variants).map((name) => {
           const defaultVariant = this.styles.defaultVariants?.[name];
-          if (defaultVariant) return `${name}=${String(defaultVariant)}`;
+          if (defaultVariant !== undefined)
+            return `${name}=${String(defaultVariant)}`;
           return name;
         })
       : undefined;
