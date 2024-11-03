@@ -53,8 +53,11 @@ export type VariantProps<STYLES extends Styles> =
           | '';
       };
 
-export type ParentComponentProps<TAG extends Tag<any>> =
-  TAG extends FnComponent<infer P> ? P : unknown;
+export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (
+  props: infer P
+) => ReactNode
+  ? P
+  : unknown;
 
 type StylePropertyValue = Record<never, never> & unknown;
 

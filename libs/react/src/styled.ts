@@ -13,7 +13,7 @@ import { elementFactory } from './element-factory';
 
 export const styled = <
   const PROPS extends StyledComponentProps,
-  const TAG extends Tag<PROPS>,
+  const TAG extends Tag<Required<PROPS>>,
   const STYLES extends Styles
 >(
   tagName: TAG,
@@ -35,10 +35,9 @@ export const styled = <
   });
 
   type ComponentType = <T extends object>(
-    props: T &
-      CreateElementProps &
-      ParentComponentProps<TAG> &
-      VariantProps<STYLES>
+    props:
+      | (T & CreateElementProps & ParentComponentProps<TAG>)
+      | VariantProps<STYLES>
   ) => ReactNode;
 
   return fn as ComponentType & string;
