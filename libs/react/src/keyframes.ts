@@ -34,7 +34,7 @@ export const keyframes = ({
 }: KeyframesProps) => {
   const animationName = _name || toHash(keyframes);
 
-  const fn = (params: KeyframesParams) => {
+  const fn = (params: KeyframesParams = {}) => {
     const {
       duration = '500ms',
       easing = 'ease-in-out',
@@ -61,6 +61,7 @@ export const keyframes = ({
   const css = `@keyframes ${animationName} {${keyframesCss}}`;
 
   Object.assign(fn, {
+    toString: fn,
     isKeyframes: true,
     animationName,
     css,
