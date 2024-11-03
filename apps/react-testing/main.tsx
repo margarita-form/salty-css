@@ -40,6 +40,7 @@ root.render(
       <ButtonsWrapper>
         <LargeButton
           warning
+          disabled
           variant="solid"
           onClick={() => alert('It is a button.')}
         >

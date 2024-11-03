@@ -8,14 +8,7 @@ export const styledClient = (
   element?: string,
   variantKeys?: string[]
 ) => {
-  const fn = elementFactory(tagName, className, element, variantKeys, {
+  return elementFactory(tagName, className, element, variantKeys, {
     'data-component-name': callerName,
   });
-
-  Object.assign(fn, {
-    className,
-    toString: () => `.${className}`,
-  });
-
-  return fn;
 };

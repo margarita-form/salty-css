@@ -32,8 +32,6 @@ export const styled = <
 
   Object.assign(fn, {
     generator,
-    className: generator.cssClassName,
-    toString: () => `.${generator.cssClassName}`,
   });
 
   type ComponentType = <T extends object>(

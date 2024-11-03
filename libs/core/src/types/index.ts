@@ -1,12 +1,14 @@
-import type { ReactNode } from 'react';
+import type { AllHTMLAttributes, ReactNode } from 'react';
 import type { StyleComponentGenerator } from '../generator';
+import type { OrString } from './util-types';
 
 export type CreateElementProps = {
   extend?: Tag<any>;
   children?: ReactNode;
   className?: string;
-  inlineStyles?: boolean;
   element?: string;
+  /** vks = Variant key set */
+  _vks?: Set<string>;
 };
 
 export type StyledComponentProps = Record<string, unknown> & CreateElementProps;
@@ -22,10 +24,20 @@ export type Tag<PROPS extends StyledComponentProps> =
 
 //
 
-export type CompoundVariant = { [key: PropertyKey]: any; css: Styles };
+export type CompoundVariant = { [key: PropertyKey]: any; css: CssStyles };
+
+type InvalidVariantKeys = keyof AllHTMLAttributes<HTMLElement>;
+type StyleKeys = keyof Required<AllHTMLAttributes<HTMLElement>>['style'];
+type StyleValue<K extends string> = K extends StyleKeys
+  ? Required<AllHTMLAttributes<HTMLElement>>['style'][K]
+  : never;
+
+type VariantOptions = {
+  [key in InvalidVariantKeys]?: never;
+};
 
 type Variants = {
-  variants?: { [key: PropertyKey]: { [key: PropertyKey]: Styles } };
+  variants?: VariantOptions & { [key: PropertyKey]: { [key: string]: Styles } };
   defaultVariants?: { [key: PropertyKey]: any };
   compoundVariants?: CompoundVariant[];
 };
@@ -46,9 +58,13 @@ export type ParentComponentProps<TAG extends Tag<any>> =
 
 type StylePropertyValue = Record<never, never> & unknown;
 
-interface CssStyles {
-  [key: string]: StylePropertyValue | PropertyValueToken | CssStyles;
-}
+type CssStyles = {
+  [key in StyleKeys | OrString]?:
+    | StyleValue<key>
+    | StylePropertyValue
+    | PropertyValueToken
+    | CssStyles;
+};
 
 export type Styles = CssStyles & Variants;
 

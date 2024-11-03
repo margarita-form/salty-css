@@ -20,6 +20,10 @@ export const Button = styled('button', {
     borderColor: 'black',
     color: 'white',
   },
+  '&:disabled': {
+    opacity: 0.25,
+    pointerEvents: 'none',
+  },
   variants: {
     variant: {
       outlined: {
