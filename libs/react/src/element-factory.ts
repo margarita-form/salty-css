@@ -2,6 +2,8 @@ import { createElement } from 'react';
 import { clsx } from 'clsx';
 import { StyledComponentProps, Tag } from '@salty-css/core/types';
 
+const _styledKeys = ['passVariantProps'];
+
 export const elementFactory = (
   tagName: Tag<any>,
   _className: string,
@@ -14,10 +16,11 @@ export const elementFactory = (
     element = _element,
     className = '',
     children,
+    passVariantProps,
     _vks = new Set<string>(),
     ...props
   }: StyledComponentProps) => {
-    const passedProps = {} as StyledComponentProps;
+    const passedProps = { passVariantProps } as StyledComponentProps;
     if (props) Object.assign(passedProps, props);
     if (_additionalProps) Object.assign(passedProps, _additionalProps);
 
@@ -41,9 +44,12 @@ export const elementFactory = (
       });
     }
 
-    if (!extendsComponent && _vks) _vks.forEach((vk) => delete passedProps[vk]);
+    const deleteVKS =
+      !extendsComponent || (!extendsStyled && !passVariantProps);
+    if (_vks && deleteVKS) _vks.forEach((vk) => delete passedProps[vk]);
     else if (extendsStyled) Object.assign(passedProps, { _vks });
 
+    if (!extendsStyled) _styledKeys.forEach((key) => delete passedProps[key]);
     const joinedClassNames = clsx(_className, ...additionalClasses);
 
     return createElement(

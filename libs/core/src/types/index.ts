@@ -7,6 +7,7 @@ export type CreateElementProps = {
   children?: ReactNode;
   className?: string;
   element?: string;
+  passVariantProps?: boolean;
   /** vks = Variant key set */
   _vks?: Set<string>;
 };
