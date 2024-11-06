@@ -146,6 +146,7 @@ const getConfig = async (dirname: string) => {
 
 export const generateCss = async (dirname: string) => {
   try {
+    const globalCssFiles: string[] = [];
     const cssFiles: string[][] = [];
     const destDir = getDestDir(dirname);
     const cssFile = join(destDir, 'index.css');
@@ -163,6 +164,9 @@ export const generateCss = async (dirname: string) => {
     // Generate variables
     await generateVariables(dirname);
 
+    // Get config
+    const config = await getConfig(dirname);
+
     // Function to copy files/directories recursively
     async function copyRecursively(src: string, dest: string) {
       const stats = statSync(src);
@@ -178,16 +182,14 @@ export const generateCss = async (dirname: string) => {
         const validFile = isSaltyFile(src);
 
         if (validFile) {
-          const config = await getConfig(dirname);
           const contents = await compileSaltyFile(src, destDir);
+          const localCssFiles: string[] = [];
           Object.entries(contents).forEach(([name, value]) => {
             if (value.isKeyframes && value.css) {
-              const fileName = `${value.animationName}-0.css`;
+              const fileName = `${value.animationName}.css`;
               const filePath = `css/${fileName}`;
               const cssPath = join(destDir, filePath);
-
-              if (!cssFiles[0]) cssFiles[0] = [];
-              cssFiles[0].push(fileName);
+              globalCssFiles.push(fileName);
 
               writeFileSync(cssPath, value.css);
 
@@ -205,28 +207,45 @@ export const generateCss = async (dirname: string) => {
             if (!cssFiles[generator.priority])
               cssFiles[generator.priority] = [];
             cssFiles[generator.priority].push(fileName);
+            localCssFiles.push(fileName);
 
             const filePath = `css/${fileName}`;
             const cssPath = join(destDir, filePath);
             writeFileSync(cssPath, generator.css);
           });
+
+          const cssContent = localCssFiles
+            .map((file) => `@import url('./${file}');`)
+            .join('\n');
+
+          const hashName = toHash(src, 6);
+          const cssFile = join(destDir, `css/${hashName}.css`);
+          writeFileSync(cssFile, cssContent);
         }
       }
     }
     // Start the copying process
     await copyRecursively(dirname, destDir);
 
-    const cssFileImports = cssFiles
-      .flat()
-      .map((file) => `@import url('../saltygen/css/${file}');`)
+    const otherGlobalCssFiles = globalCssFiles
+      .map((file) => `@import url('./css/${file}');`)
       .join('\n');
 
     const globalImports = [
-      "@import url('../saltygen/css/variables.css');",
-      "@import url('../saltygen/css/global.css');",
-      "@import url('../saltygen/css/templates.css');",
+      "@import url('./css/variables.css');",
+      "@import url('./css/global.css');",
+      "@import url('./css/templates.css');",
     ];
-    const cssContent = `${globalImports.join('\n')}\n${cssFileImports}`;
+    // const cssContent = `${globalImports.join('\n')}\n${cssFileImports}`;
+    let cssContent = `${globalImports.join('\n')}\n${otherGlobalCssFiles}`;
+    if (config.importStrategy !== 'component') {
+      const cssFileImports = cssFiles
+        .flat()
+        .map((file) => `@import url('./css/${file}');`)
+        .join('\n');
+
+      cssContent += cssFileImports;
+    }
 
     writeFileSync(cssFile, cssContent);
   } catch (e) {
@@ -335,6 +354,10 @@ export const minimizeFile = async (dirname: string, file: string) => {
         current = current.replace(regexp, clientVersion);
       });
 
+      const fileHash = toHash(file, 6);
+      if (config.importStrategy === 'component') {
+        current = `import '../../saltygen/css/${fileHash}.css';\n${current}`;
+      }
       current = current.replace(`{ styled }`, `{ styledClient as styled }`);
       current = current.replace(
         `@salty-css/react/styled`,

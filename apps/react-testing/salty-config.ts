@@ -1,6 +1,7 @@
 const generateRandom = () => Math.random().toString(36).substring(7);
 
 export const config = {
+  importStrategy: 'component',
   variables: {
     colors: {
       brand: 'red',
