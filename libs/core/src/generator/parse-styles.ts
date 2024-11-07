@@ -1,4 +1,5 @@
-import { CompoundVariant, SaltyConfig } from '../types';
+import { SaltyConfig } from '../config/config-types';
+import { CompoundVariant } from '../types';
 import { dashCase } from '../util';
 
 export const parseStyles = <T extends object>(

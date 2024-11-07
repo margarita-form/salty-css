@@ -1,6 +1,6 @@
-const generateRandom = () => Math.random().toString(36).substring(7);
+import { defineConfig } from '@salty-css/core/config';
 
-export const config = {
+export const config = defineConfig({
   importStrategy: 'component',
   variables: {
     colors: {
@@ -41,4 +41,4 @@ export const config = {
       },
     },
   },
-};
+});

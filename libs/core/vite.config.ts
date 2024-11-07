@@ -33,6 +33,7 @@ export default defineConfig({
         'compiler/index': 'src/compiler/index.ts',
         'css/index': 'src/css/index.ts',
         'generator/index': 'src/generator/index.ts',
+        'config/index': 'src/config/index.ts',
         'types/index': 'src/types/index.ts',
         'util/index': 'src/util/index.ts',
       },
