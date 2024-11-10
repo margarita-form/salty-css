@@ -4,7 +4,7 @@ export const config = defineConfig({
   importStrategy: 'component',
   variables: {
     colors: {
-      brand: 'red',
+      brand: '#111',
       highlight: 'yellow',
     },
     fontSize: {
@@ -21,6 +21,18 @@ export const config = defineConfig({
       emExtraLarge: '1.8em',
       emLarge: '1.2em',
       emRegular: '0.6em',
+    },
+  },
+  conditionalVariables: {
+    theme: {
+      dark: {
+        backgroundColor: '{colors.brand}',
+        textColor: 'white',
+      },
+      light: {
+        backgroundColor: 'white',
+        textColor: '{colors.brand}',
+      },
     },
   },
   global: {

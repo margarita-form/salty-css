@@ -1,6 +1,7 @@
 import { SaltyConfig } from '../config/config-types';
 import { CompoundVariant } from '../types';
 import { dashCase } from '../util';
+import { parseTokens } from './parse-tokens';
 
 export const parseStyles = <T extends object>(
   styles: T,
@@ -77,16 +78,8 @@ export const parseStyles = <T extends object>(
     if (typeof value === 'number') return addValue(value);
     if (typeof value !== 'string') return acc;
 
-    const hasToken = /\{[^{}]+\}/g.test(value);
-    if (hasToken) {
-      const tokens = value.replace(/\{([^{}]+)\}/g, (...args) => {
-        const variable = dashCase(args[1].replaceAll('.', '-'));
-        return `var(--${variable})`;
-      });
-      return addValue(tokens);
-    }
-
-    return addValue(value);
+    const tokenized = parseTokens(value);
+    return addValue(tokenized);
   }, '');
 
   if (!current) return classes.join('\n');

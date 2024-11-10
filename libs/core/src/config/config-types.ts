@@ -2,7 +2,13 @@ import { CssStyles } from '../types';
 
 type CssTemplate = CssStyles | { [key: PropertyKey]: CssTemplate };
 
-interface CssTemplates {
+export interface CssConditionalVariables {
+  [key: PropertyKey]: {
+    [key: PropertyKey]: CssStyles;
+  };
+}
+
+export interface CssTemplates {
   [key: PropertyKey]: {
     [key: PropertyKey]: CssTemplate;
   };
@@ -19,6 +25,10 @@ export interface SaltyConfig {
    * The variables that can be used in styles.
    */
   variables: Record<string, unknown>;
+  /**
+   * The conditional variables that can be used in styles.
+   */
+  conditionalVariables: CssConditionalVariables;
   /**
    * The global styles that are imported in the root of the project.
    */

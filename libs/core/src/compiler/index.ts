@@ -16,6 +16,8 @@ import { dashCase } from '../util/dash-case';
 import { writeFile } from 'fs/promises';
 import { parseStyles } from '../generator/parse-styles';
 import { parseTemplates } from '../generator/parse-templates';
+import { CssConditionalVariables } from '../config';
+import { parseTokens } from '../generator/parse-tokens';
 
 export const logger = winston.createLogger({
   level: 'info',
@@ -58,37 +60,64 @@ export const generateVariables = async (dirname: string) => {
   const config = await generateConfig(dirname);
 
   // Generate variables css file
+  const variableTokens = new Set<string>();
 
-  type Variables = { css?: string; ts?: string };
+  type Variables = string | undefined;
   const parseVariables = <T extends object>(
     obj: T,
     path: PropertyKey[] = []
   ): Variables[] => {
-    if (!obj) throw 'Invalid variable layer';
+    if (!obj) return [];
     return Object.entries(obj).flatMap(
       ([key, value]): Variables | Variables[] => {
-        if (!value) return {};
+        if (!value) return undefined;
         if (typeof value === 'object')
           return parseVariables(value, [...path, key]);
 
-        const cssName = [...path.map(dashCase), dashCase(key)].join('-');
         const tsName = [...path, key].join('.');
-        return { css: `--${cssName}: ${value};`, ts: `"${tsName}"` };
+        variableTokens.add(`"${tsName}"`);
+
+        const cssName = [...path.map(dashCase), dashCase(key)].join('-');
+        const tokenized = parseTokens(value);
+        return `--${cssName}: ${tokenized};`;
+      }
+    );
+  };
+
+  const parseConditionalVariables = <T extends CssConditionalVariables>(
+    obj: T
+  ): Variables[] => {
+    if (!obj) return [];
+
+    return Object.entries(obj).flatMap(
+      ([property, conditions]): Variables | Variables[] => {
+        return Object.entries(conditions).flatMap(
+          ([condition, values]): Variables | Variables[] => {
+            const variables = parseVariables(values, [property]);
+            const conditionScope = `.${property}-${condition}, [data-${property}="${condition}"]`;
+            const combined = variables.join('');
+            return `${conditionScope} { ${combined} }`;
+          }
+        );
       }
     );
   };
 
   const variables = parseVariables(config.variables);
+  const conditionalVariables = parseConditionalVariables(
+    config.conditionalVariables
+  );
 
   const destDir = getDestDir(dirname);
 
   const variablesPath = join(destDir, 'css/variables.css');
-  const cssVariables = variables.map(({ css }) => css);
-  const variablesCss = `:root { ${cssVariables.join(' ')} }`;
+  const variablesCss = `:root { ${variables.join(
+    ''
+  )} } ${conditionalVariables.join('')}`;
   writeFileSync(variablesPath, variablesCss);
 
   const tsTokensPath = join(destDir, 'types/css-tokens.d.ts');
-  const tsTokens = variables.map(({ ts }) => ts).join('|');
+  const tsTokens = [...variableTokens].join('|');
   const tsTokensTypes = `type VariableTokens = ${tsTokens}; type PropertyValueToken = \`{\${VariableTokens}}\``;
   writeFileSync(tsTokensPath, tsTokensTypes);
 
