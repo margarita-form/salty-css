@@ -1,4 +1,4 @@
-import type { AllHTMLAttributes, ReactNode } from 'react';
+import type { AllHTMLAttributes, ReactDOM, ReactNode } from 'react';
 import type { StyleComponentGenerator } from '../generator';
 import type { OrString } from './util-types';
 
@@ -20,7 +20,8 @@ type FnComponent<PROPS extends StyledComponentProps> = {
 };
 
 export type Tag<PROPS extends StyledComponentProps> =
-  | string
+  | OrString
+  | keyof ReactDOM
   | FnComponent<PROPS>;
 
 //

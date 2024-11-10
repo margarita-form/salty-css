@@ -266,7 +266,9 @@ export const generateCss = async (dirname: string) => {
       "@import url('./css/templates.css');",
     ];
     // const cssContent = `${globalImports.join('\n')}\n${cssFileImports}`;
-    let cssContent = `${globalImports.join('\n')}\n${otherGlobalCssFiles}`;
+    let cssContent = `@layer l0, l1, l2, l3, l4, l5, l6, l7, l8;\n\n${globalImports.join(
+      '\n'
+    )}\n${otherGlobalCssFiles}`;
     if (config.importStrategy !== 'component') {
       const cssFileImports = cssFiles
         .flat()
@@ -314,7 +316,7 @@ export const generateFile = async (dirname: string, file: string) => {
         (file) => `@import url('../saltygen/css/${file}');`
       );
 
-      const set = new Set([...cssFileImports, ...current]);
+      const set = new Set([...current, ...cssFileImports]);
       const merged = [...set].join('\n');
 
       writeFileSync(cssFile, merged);

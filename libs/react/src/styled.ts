@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { AllHTMLAttributes, HTMLAttributes, ReactDOM, ReactNode } from 'react';
 import {
   Tag,
   StyledComponentProps,
@@ -34,10 +34,21 @@ export const styled = <
     generator,
   });
 
+  type TagAttributes = TAG extends keyof ReactDOM
+    ? ReactDOM[TAG] extends (...props: infer R) => any
+      ? R[0]
+      : TAG extends string
+      ? HTMLAttributes<HTMLElement>
+      : never
+    : TAG extends string
+    ? HTMLAttributes<HTMLElement>
+    : never;
+
   type ComponentType = <T extends object>(
     props:
       | (T & CreateElementProps & ParentComponentProps<TAG>)
       | VariantProps<STYLES>
+      | TagAttributes
   ) => ReactNode;
 
   return fn as ComponentType & string;
