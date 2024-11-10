@@ -12,6 +12,9 @@ export const parseStyles = <T extends object>(
   const classes: string[] = [];
   const current = Object.entries(styles).reduce((acc, [key, value]) => {
     const _key = key.trim();
+
+    if (typeof value === 'function') value = value();
+
     if (typeof value === 'object') {
       if (!value) return acc;
 

@@ -4,7 +4,7 @@ import { largePortrait } from '../../styles/media.css';
 
 export const Wrapper = styled('div', {
   display: 'block',
-  animation: fadeIn({ duration: '750ms' }),
+  animation: fadeIn,
   backgroundColor: '{theme.backgroundColor}',
   padding: '2vw',
   '@media (max-width: 768px)': {
