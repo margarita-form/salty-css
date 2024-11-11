@@ -7,11 +7,7 @@ export class StyleComponentGenerator {
   public _callerName: string | undefined;
   public _context: { name: string; config: any } | undefined;
 
-  constructor(
-    public tagName: Tag<any>,
-    public styles: Styles,
-    private options: GeneratorOptions
-  ) {}
+  constructor(public tagName: Tag<any>, public styles: Styles, private options: GeneratorOptions) {}
 
   get hash() {
     return toHash(this.styles);
@@ -41,18 +37,11 @@ export class StyleComponentGenerator {
   }
 
   get templateKeys() {
-    return this._context?.config.templates
-      ? getTemplateKeys(this._context.config.templates)
-      : [];
+    return this._context?.config.templates ? getTemplateKeys(this._context.config.templates) : [];
   }
 
   get css() {
-    return parseStyles(
-      this.styles,
-      `.${this.cssClassName}`,
-      this.priority,
-      this._context?.config
-    );
+    return parseStyles(this.styles, `.${this.cssClassName}`, this.priority, this._context?.config);
   }
 
   get props() {
@@ -61,8 +50,7 @@ export class StyleComponentGenerator {
     const variantKeys = this.styles.variants
       ? Object.keys(this.styles.variants).map((name) => {
           const defaultVariant = this.styles.defaultVariants?.[name];
-          if (defaultVariant !== undefined)
-            return `${name}=${String(defaultVariant)}`;
+          if (defaultVariant !== undefined) return `${name}=${String(defaultVariant)}`;
           return name;
         })
       : undefined;

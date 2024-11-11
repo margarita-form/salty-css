@@ -26,12 +26,7 @@ interface KeyframesParams {
 
 type KeyframesProps = Keyframes & KeyframesConfig;
 
-export const keyframes = ({
-  animationName: _name,
-  params: _params,
-  appendInitialStyles,
-  ...keyframes
-}: KeyframesProps) => {
+export const keyframes = ({ animationName: _name, params: _params, appendInitialStyles, ...keyframes }: KeyframesProps) => {
   const animationName = _name || toHash(keyframes);
 
   const fn = (params: KeyframesParams = {}) => {

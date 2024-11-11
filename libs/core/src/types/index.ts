@@ -19,10 +19,7 @@ type FnComponent<PROPS extends StyledComponentProps> = {
   generator?: StyleComponentGenerator;
 };
 
-export type Tag<PROPS extends StyledComponentProps> =
-  | OrString
-  | keyof ReactDOM
-  | FnComponent<PROPS>;
+export type Tag<PROPS extends StyledComponentProps> = OrString | keyof ReactDOM | FnComponent<PROPS>;
 
 //
 
@@ -31,9 +28,7 @@ export type CompoundVariant = { [key: PropertyKey]: any; css: CssStyles };
 type InvalidVariantKeys = keyof AllHTMLAttributes<HTMLElement>;
 type StyleKeys = keyof Required<AllHTMLAttributes<HTMLElement>>['style'];
 
-export type StyleValue<K extends string> = K extends StyleKeys
-  ? Required<AllHTMLAttributes<HTMLElement>>['style'][K]
-  : never;
+export type StyleValue<K extends string> = K extends StyleKeys ? Required<AllHTMLAttributes<HTMLElement>>['style'][K] : never;
 
 type VariantOptions = {
   [key in InvalidVariantKeys]?: never;
@@ -47,29 +42,18 @@ type Variants = {
 
 type VariantPropValue<T> = T extends 'true' ? 'true' | true : T;
 
-export type VariantProps<STYLES extends Styles> =
-  STYLES['variants'] extends undefined
-    ? {}
-    : {
-        [K in keyof STYLES['variants']]?:
-          | VariantPropValue<keyof STYLES['variants'][K]>
-          | '';
-      };
+export type VariantProps<STYLES extends Styles> = STYLES['variants'] extends undefined
+  ? {}
+  : {
+      [K in keyof STYLES['variants']]?: VariantPropValue<keyof STYLES['variants'][K]> | '';
+    };
 
-export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (
-  props: infer P
-) => ReactNode
-  ? P
-  : unknown;
+export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (props: infer P) => ReactNode ? P : unknown;
 
 type StylePropertyValue = Record<never, never> & unknown;
 
 export type CssStyles = {
-  [key in StyleKeys | OrString]?:
-    | StyleValue<key>
-    | StylePropertyValue
-    | PropertyValueToken
-    | CssStyles;
+  [key in StyleKeys | OrString]?: StyleValue<key> | StylePropertyValue | PropertyValueToken | CssStyles;
 };
 
 export type Styles = CssStyles & Variants;

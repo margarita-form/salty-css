@@ -1,12 +1,10 @@
-const toAlphabeticChar = (code: number) =>
-  String.fromCharCode(code + (code > 25 ? 39 : 97));
+const toAlphabeticChar = (code: number) => String.fromCharCode(code + (code > 25 ? 39 : 97));
 
 const toAlphabeticName = (code: number, length: number) => {
   let name = '';
   let x;
 
-  for (x = Math.abs(code); x > 52; x = (x / 52) | 0)
-    name = toAlphabeticChar(x % 52) + name;
+  for (x = Math.abs(code); x > 52; x = (x / 52) | 0) name = toAlphabeticChar(x % 52) + name;
 
   name = toAlphabeticChar(x % 52) + name;
 

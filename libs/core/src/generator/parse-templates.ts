@@ -1,10 +1,7 @@
 import { dashCase } from '../util';
 import { parseStyles } from './parse-styles';
 
-export const parseTemplates = <T extends object>(
-  obj: T,
-  path: PropertyKey[] = []
-): string => {
+export const parseTemplates = <T extends object>(obj: T, path: PropertyKey[] = []): string => {
   const classes: string[] = [];
 
   const levelStyles = {} as Record<PropertyKey, any>;

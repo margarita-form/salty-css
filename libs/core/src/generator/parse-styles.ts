@@ -3,12 +3,7 @@ import { CompoundVariant } from '../types';
 import { dashCase } from '../util';
 import { parseTokens } from './parse-tokens';
 
-export const parseStyles = <T extends object>(
-  styles: T,
-  currentClass: string,
-  layer?: number,
-  config?: SaltyConfig | undefined
-): string => {
+export const parseStyles = <T extends object>(styles: T, currentClass: string, layer?: number, config?: SaltyConfig | undefined): string => {
   const classes: string[] = [];
   const current = Object.entries(styles).reduce((acc, [key, value]) => {
     const _key = key.trim();
@@ -54,11 +49,7 @@ export const parseStyles = <T extends object>(
         return acc;
       }
 
-      const scope = key.includes('&')
-        ? _key.replace('&', currentClass)
-        : _key.startsWith(':')
-        ? `${currentClass}${_key}`
-        : `${currentClass} ${_key}`;
+      const scope = key.includes('&') ? _key.replace('&', currentClass) : _key.startsWith(':') ? `${currentClass}${_key}` : `${currentClass} ${_key}`;
 
       const result = parseStyles(value, scope, layer);
       classes.push(result);
@@ -67,10 +58,7 @@ export const parseStyles = <T extends object>(
 
     if (config?.templates && config.templates[_key]) {
       const path = value.split('.');
-      const templateStyles = path.reduce(
-        (acc: Record<string, any>, key: string) => acc[key],
-        config.templates[_key]
-      );
+      const templateStyles = path.reduce((acc: Record<string, any>, key: string) => acc[key], config.templates[_key]);
       const result = parseStyles(templateStyles, '');
       return `${acc}${result}`;
     }
@@ -89,8 +77,7 @@ export const parseStyles = <T extends object>(
   if (!currentClass) return current;
 
   let css = '';
-  if (layer !== undefined)
-    css = `@layer l${layer} { ${currentClass} { ${current} } }`;
+  if (layer !== undefined) css = `@layer l${layer} { ${currentClass} { ${current} } }`;
   else css = `${currentClass} { ${current} }`;
 
   return [css, ...classes].join('\n');

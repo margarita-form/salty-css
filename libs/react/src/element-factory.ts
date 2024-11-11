@@ -44,8 +44,7 @@ export const elementFactory = (
       });
     }
 
-    const deleteVKS =
-      !extendsComponent || (!extendsStyled && !passVariantProps);
+    const deleteVKS = !extendsComponent || (!extendsStyled && !passVariantProps);
     if (_vks && deleteVKS) _vks.forEach((vk) => delete passedProps[vk]);
     else if (extendsStyled) Object.assign(passedProps, { _vks });
 

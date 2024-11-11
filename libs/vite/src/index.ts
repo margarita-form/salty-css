@@ -1,9 +1,4 @@
-import {
-  generateCss,
-  generateFile,
-  generateVariables,
-  minimizeFile,
-} from '@salty-css/core/compiler';
+import { generateCss, generateFile, generateVariables, minimizeFile } from '@salty-css/core/compiler';
 
 export const saltyPlugin = (dir: string) => ({
   name: 'stylegen',

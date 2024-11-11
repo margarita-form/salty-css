@@ -1,14 +1,6 @@
 import { useRef } from 'react';
-import {
-  ButtonsWrapper,
-  Button,
-  LargeButton,
-} from '../components/button/button.css';
-import {
-  LargeHeadingH1,
-  LargeHeading,
-  HeadingBase,
-} from '../components/heading/heading.salty';
+import { ButtonsWrapper, Button, LargeButton } from '../components/button/button.css';
+import { LargeHeadingH1, LargeHeading, HeadingBase } from '../components/heading/heading.salty';
 import { Wrapper } from '../components/wrapper/wrapper.styled';
 
 export const IndexPage = () => {
@@ -21,12 +13,7 @@ export const IndexPage = () => {
       <HeadingBase>Heading base H3</HeadingBase>
 
       <ButtonsWrapper>
-        <Button
-          variant="solid"
-          borderRadius="regular"
-          onClick={() => alert('It is a button.')}
-          href="https://google.com"
-        >
+        <Button variant="solid" borderRadius="regular" onClick={() => alert('It is a button.')} href="https://google.com">
           Solid
         </Button>
         <Button variant="outlined" onClick={() => alert('It is a button.')}>
@@ -35,13 +22,7 @@ export const IndexPage = () => {
       </ButtonsWrapper>
 
       <ButtonsWrapper>
-        <LargeButton
-          warning
-          disabled
-          variant="solid"
-          onClick={() => alert('It is a button.')}
-          asd="123"
-        >
+        <LargeButton warning disabled variant="solid" onClick={() => alert('It is a button.')} asd="123">
           Large and red
         </LargeButton>
       </ButtonsWrapper>
