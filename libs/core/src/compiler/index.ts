@@ -9,7 +9,7 @@ import { dashCase } from '../util/dash-case';
 import { writeFile } from 'fs/promises';
 import { parseStyles } from '../generator/parse-styles';
 import { parseTemplates } from '../generator/parse-templates';
-import { CssConditionalVariables } from '../config';
+import { CssConditionalVariables, CssResponsiveVariables } from '../config';
 import { parseValueTokens } from '../generator/parse-tokens';
 
 export const logger = winston.createLogger({
@@ -67,6 +67,16 @@ export const generateVariables = async (dirname: string) => {
     });
   };
 
+  const parseResponsiveVariables = <T extends CssResponsiveVariables>(obj: T): Variables[] => {
+    if (!obj) return [];
+
+    return Object.entries(obj).flatMap(([mediaQuery, values]): Variables | Variables[] => {
+      const variables = parseVariables(values);
+      if (mediaQuery === 'base') return variables.join('');
+      return `${mediaQuery} { ${variables.join('')} }`;
+    });
+  };
+
   const parseConditionalVariables = <T extends CssConditionalVariables>(obj: T): Variables[] => {
     if (!obj) return [];
 
@@ -81,12 +91,13 @@ export const generateVariables = async (dirname: string) => {
   };
 
   const variables = parseVariables(config.variables);
+  const responsiveVariables = parseResponsiveVariables(config.responsiveVariables);
   const conditionalVariables = parseConditionalVariables(config.conditionalVariables);
 
   const destDir = getDestDir(dirname);
 
   const variablesPath = join(destDir, 'css/variables.css');
-  const variablesCss = `:root { ${variables.join('')} } ${conditionalVariables.join('')}`;
+  const variablesCss = `:root { ${variables.join('')} ${responsiveVariables.join('')} } ${conditionalVariables.join('')}`;
   writeFileSync(variablesPath, variablesCss);
 
   const tsTokensPath = join(destDir, 'types/css-tokens.d.ts');

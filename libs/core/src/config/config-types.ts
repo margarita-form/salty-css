@@ -2,9 +2,15 @@ import { CssStyles } from '../types';
 
 type CssTemplate = CssStyles | { [key: PropertyKey]: CssTemplate };
 
+export type CssVariables = Record<string, unknown>;
+
+export interface CssResponsiveVariables {
+  [key: string]: CssVariables;
+}
+
 export interface CssConditionalVariables {
   [key: PropertyKey]: {
-    [key: PropertyKey]: CssStyles;
+    [key: PropertyKey]: CssVariables;
   };
 }
 
@@ -32,13 +38,17 @@ export interface SaltyConfig {
    */
   importStrategy: 'root' | 'component';
   /**
-   * The variables that can be used in styles.
+   * Base variables that can be used in all styles as they are applied globally to :root.
    */
-  variables: Record<string, unknown>;
+  variables: CssVariables;
   /**
-   * The conditional variables that can be used in styles.
+   * Variables that are defined for different media queries.
    */
-  conditionalVariables: CssConditionalVariables;
+  responsiveVariables?: CssResponsiveVariables;
+  /**
+   * Variables that are defined for different parent selectors (classes or data attributes).
+   */
+  conditionalVariables?: CssConditionalVariables;
   /**
    * The global styles that are imported in the root of the project.
    */
@@ -46,9 +56,9 @@ export interface SaltyConfig {
   /**
    * The templates that can be used in styles to create reusable css.
    */
-  templates: CssTemplates;
+  templates?: CssTemplates;
   /**
    * The modifiers that can transform css values.
    */
-  modifiers: CssModifiers;
+  modifiers?: CssModifiers;
 }

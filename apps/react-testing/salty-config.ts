@@ -1,5 +1,6 @@
 import { defineConfig } from '@salty-css/core/config';
 import { toHash } from '@salty-css/core/util';
+import { largeMobileDown } from './styles/media.css';
 
 export const config = defineConfig({
   importStrategy: 'component',
@@ -22,6 +23,22 @@ export const config = defineConfig({
       emExtraLarge: '1.8em',
       emLarge: '1.2em',
       emRegular: '0.6em',
+    },
+  },
+  responsiveVariables: {
+    base: {
+      fontSize: {
+        heading: {
+          regular: '2.5vw',
+        },
+      },
+    },
+    [largeMobileDown]: {
+      fontSize: {
+        heading: {
+          regular: '5vw',
+        },
+      },
     },
   },
   conditionalVariables: {
@@ -48,7 +65,7 @@ export const config = defineConfig({
           fontSize: '60px',
         },
         regular: {
-          fontSize: '42px',
+          fontSize: '{fontSize.heading.regular}',
           color: 'blue',
         },
       },
