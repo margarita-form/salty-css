@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "pretty": "prettier --write .",
     "dev:react-testing": "nx run react-testing:serve",
     "build:core": "nx run core:build",
     "build:react": "nx run react:build",
