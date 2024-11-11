@@ -10,7 +10,7 @@ import { writeFile } from 'fs/promises';
 import { parseStyles } from '../generator/parse-styles';
 import { parseTemplates } from '../generator/parse-templates';
 import { CssConditionalVariables } from '../config';
-import { parseTokens } from '../generator/parse-tokens';
+import { parseValueTokens } from '../generator/parse-tokens';
 
 export const logger = winston.createLogger({
   level: 'info',
@@ -62,8 +62,8 @@ export const generateVariables = async (dirname: string) => {
       variableTokens.add(`"${tsName}"`);
 
       const cssName = [...path.map(dashCase), dashCase(key)].join('-');
-      const tokenized = parseTokens(value);
-      return `--${cssName}: ${tokenized};`;
+      const { result } = parseValueTokens(value);
+      return `--${cssName}: ${result};`;
     });
   };
 

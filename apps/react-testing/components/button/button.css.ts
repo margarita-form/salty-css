@@ -15,7 +15,7 @@ export const Button = styled(
     padding: `${token('spacings.emRegular')} ${token('spacings.emLarge')}`,
     border: '1px solid currentColor',
     background: 'transparent',
-    color: 'currentColor',
+    color: 'currentColor/40',
     cursor: 'pointer',
     transition: '200ms',
     textDecoration: 'none',

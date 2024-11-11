@@ -1,7 +1,8 @@
 import { SaltyConfig } from '../config/config-types';
 import { CompoundVariant } from '../types';
 import { dashCase } from '../util';
-import { parseTokens } from './parse-tokens';
+import { parseValueModifiers } from './parse-modifiers';
+import { parseValueTokens } from './parse-tokens';
 
 export const parseStyles = <T extends object>(styles: T, currentClass: string, layer?: number, config?: SaltyConfig | undefined): string => {
   const classes: string[] = [];
@@ -64,13 +65,32 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, l
     }
 
     const propertyName = _key.startsWith('-') ? _key : dashCase(_key);
-    const addValue = (val: unknown) => `${acc}${propertyName}:${val};`;
+    const appendString = (val: string, eol = ';') => (acc = `${acc}${val}${eol}`);
+    const appendValue = (val: unknown) => appendString(`${propertyName}:${val}`);
 
-    if (typeof value === 'number') return addValue(value);
-    if (typeof value !== 'string') return acc;
+    if (typeof value === 'number') return appendValue(value);
+    if (typeof value !== 'string') {
+      if ('toString' in value) value = value.toString();
+      else return acc;
+    }
 
-    const tokenized = parseTokens(value);
-    return addValue(tokenized);
+    const { modifiers } = config || {};
+    const runParsers = function* () {
+      yield parseValueTokens(value);
+      yield parseValueModifiers(value, modifiers);
+    };
+
+    const generator = runParsers();
+
+    for (const { result, additionalCss = [] } of generator) {
+      value = result;
+      additionalCss.forEach((css) => {
+        const result = parseStyles(css, '');
+        appendString(result, '');
+      });
+    }
+
+    return appendValue(value);
   }, '');
 
   if (!current) return classes.join('\n');

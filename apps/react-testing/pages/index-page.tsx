@@ -22,7 +22,7 @@ export const IndexPage = () => {
       </ButtonsWrapper>
 
       <ButtonsWrapper>
-        <LargeButton warning disabled variant="solid" onClick={() => alert('It is a button.')} asd="123">
+        <LargeButton warning disabled variant="solid" onClick={() => alert('It is a button.')}>
           Large and red
         </LargeButton>
       </ButtonsWrapper>

@@ -14,6 +14,16 @@ export interface CssTemplates {
   };
 }
 
+export interface CssModifier {
+  pattern: RegExp;
+  transform: (regexMatch: string) => {
+    css?: CssStyles;
+    value: string;
+  };
+}
+
+export type CssModifiers = Record<string, CssModifier>;
+
 export interface SaltyConfig {
   /**
    * The import strategy to use when importing css files.
@@ -37,4 +47,8 @@ export interface SaltyConfig {
    * The templates that can be used in styles to create reusable css.
    */
   templates: CssTemplates;
+  /**
+   * The modifiers that can transform css values.
+   */
+  modifiers: CssModifiers;
 }
