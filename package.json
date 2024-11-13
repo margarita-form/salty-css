@@ -9,7 +9,12 @@
     "build:react": "nx run react:build",
     "build:vite": "nx run vite:build",
     "build:webpack": "nx run webpack:build",
-    "build:all": "nx run-many --target=build --projects core react vite webpack"
+    "build:all": "nx run-many --target=build --projects core react vite webpack",
+    "publish:core": "cd libs/core/dist && npm publish",
+    "publish:react": "cd libs/react/dist && npm publish",
+    "publish:vite": "cd libs/vite/dist && npm publish",
+    "publish:webpack": "cd libs/webpack/dist && npm publish",
+    "publish:all-dev": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && npm run publish:core --tag dev && npm run publish:react --tag dev && npm run publish:angular --tag dev"
   },
   "private": true,
   "type": "module",
@@ -36,6 +41,7 @@
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
     "jsdom": "~22.1.0",
+    "lerna": "^8.1.9",
     "nx": "20.0.12",
     "prettier": "^2.6.2",
     "tslib": "^2.3.0",
