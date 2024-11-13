@@ -36,11 +36,11 @@ export interface SaltyConfig {
    * - `root` will import the css file from the root of the project.
    * - `component` will import the css file from the component's directory.
    */
-  importStrategy: 'root' | 'component';
+  importStrategy?: 'root' | 'component';
   /**
    * Base variables that can be used in all styles as they are applied globally to :root.
    */
-  variables: CssVariables;
+  variables?: CssVariables;
   /**
    * Variables that are defined for different media queries.
    */
@@ -52,7 +52,7 @@ export interface SaltyConfig {
   /**
    * The global styles that are imported in the root of the project.
    */
-  global: CssStyles;
+  global?: CssStyles;
   /**
    * The templates that can be used in styles to create reusable css.
    */
