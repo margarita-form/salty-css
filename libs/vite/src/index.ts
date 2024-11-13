@@ -1,17 +1,19 @@
-import { generateCss, generateFile, generateVariables, minimizeFile } from '@salty-css/core/compiler';
+import { generateCss, generateFile, generateVariables, isSaltyFile, minimizeFile } from '@salty-css/core/compiler';
 
 export const saltyPlugin = (dir: string) => ({
   name: 'stylegen',
   buildStart: () => generateCss(dir),
   load: async (filePath: string) => {
-    if (filePath.includes('.salty.')) {
+    const saltyFile = isSaltyFile(filePath);
+    if (saltyFile) {
       return await minimizeFile(dir, filePath);
     }
     return undefined;
   },
   watchChange: {
     handler: async (filePath: string) => {
-      if (filePath.includes('.salty.')) {
+      const saltyFile = isSaltyFile(filePath);
+      if (saltyFile) {
         await generateFile(dir, filePath);
       }
       if (filePath.includes('salty-config')) {
