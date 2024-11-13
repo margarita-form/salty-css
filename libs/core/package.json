@@ -26,29 +26,29 @@
     "winston": ">=3.x"
   },
   "exports": {
-    ".": {
-      "import": "./index.js",
-      "require": "./index.cjs"
+    "./compiler": {
+      "import": "./compiler/index.js",
+      "require": "./compiler/index.cjs"
     },
-    "./react/styled": {
-      "import": "./react/styled.js",
-      "require": "./react/styled.cjs"
+    "./css": {
+      "import": "./css/index.js",
+      "require": "./css/index.cjs"
     },
-    "./react/styled-client": {
-      "import": "./react/styled-client.js",
-      "require": "./react/styled-client.cjs"
+    "./generator": {
+      "import": "./generator/index.js",
+      "require": "./generator/index.cjs"
     },
-    "./react/css-helpers": {
-      "import": "./react/css-helpers.js",
-      "require": "./react/css-helpers.cjs"
+    "./config": {
+      "import": "./config/index.js",
+      "require": "./config/index.cjs"
     },
-    "./vite": {
-      "import": "./vite/index.js",
-      "require": "./vite/index.cjs"
+    "./types": {
+      "import": "./types/index.js",
+      "require": "./types/index.cjs"
     },
-    "./webpack/salty-loader": {
-      "import": "./webpack/salty-loader.js",
-      "require": "./webpack/salty-loader.cjs"
+    "./util": {
+      "import": "./util/index.js",
+      "require": "./util/index.cjs"
     }
   }
 }
