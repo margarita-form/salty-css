@@ -5,6 +5,15 @@
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
   "type": "module",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/margarita-form/salty-css",
+  "bugs": {
+    "url": "https://github.com/margarita-form/salty-css/issues"
+  },
   "files": [
     "dist",
     "!**/*.tsbuildinfo"
