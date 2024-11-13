@@ -38,10 +38,8 @@ import { Wrapper } from '../components/wrapper/wrapper.css';
 import { Button } from '../components/button/button.css';
 
 export const IndexPage = () => {
-  const wrapper = useRef<HTMLElement>(null);
-
   return (
-    <Wrapper className="theme-light" ref={wrapper}>
+    <Wrapper>
       <Button variant="solid" onClick={() => alert('It is a button.')}>
         Outlined
       </Button>
@@ -50,7 +48,7 @@ export const IndexPage = () => {
 };
 ```
 
-**Wrapper** (`components/wrapper/wrapper.css`)
+**Wrapper** (`components/wrapper/wrapper.css.ts`)
 
 ```tsx
 import { styled } from '@salty-css/react/styled';
@@ -61,7 +59,7 @@ export const Wrapper = styled('div', {
 });
 ```
 
-**Button** (`components/button/button.css`)
+**Button** (`components/button/button.css.ts`)
 
 ```tsx
 import { styled } from '@salty-css/react/styled';
