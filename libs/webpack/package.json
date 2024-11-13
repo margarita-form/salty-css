@@ -15,7 +15,7 @@
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
   "files": [
-    "dist",
+    "**/*",
     "!**/*.tsbuildinfo"
   ],
   "nx": {
