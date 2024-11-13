@@ -14,7 +14,7 @@
     "publish:react": "cd libs/react/dist && npm publish",
     "publish:vite": "cd libs/vite/dist && npm publish",
     "publish:webpack": "cd libs/webpack/dist && npm publish",
-    "publish:all-dev": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && npm run publish:core --tag dev && npm run publish:react --tag dev && npm run publish:angular --tag dev"
+    "publish:all-dev": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && npm run publish:core --tag dev && npm run publish:react --tag dev && npm run publish:vite --tag dev && npm run publish:webpack --tag dev"
   },
   "private": true,
   "type": "module",
