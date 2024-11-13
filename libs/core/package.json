@@ -21,6 +21,10 @@
   "nx": {
     "name": "core"
   },
+  "peerDependencies": {
+    "clsx": ">=2.x",
+    "winston": ">=3.x"
+  },
   "exports": {
     ".": {
       "import": "./index.js",
