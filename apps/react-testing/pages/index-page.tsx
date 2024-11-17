@@ -11,7 +11,7 @@ export const IndexPage = () => {
   }, []);
 
   return (
-    <Wrapper className="theme-light" ref={wrapper}>
+    <Wrapper className="theme-light" ref={wrapper} cssValues={{ lorem: 'blue' }}>
       <LargeHeadingH1 id="main-heading">Large heading H1</LargeHeadingH1>
       <LargeHeading>Large heading H2</LargeHeading>
       <HeadingBase>Heading base H3</HeadingBase>

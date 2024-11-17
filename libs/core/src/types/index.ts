@@ -1,4 +1,4 @@
-import type { AllHTMLAttributes, ReactDOM, ReactNode } from 'react';
+import type { AllHTMLAttributes, ReactDOM, ReactNode, StyleHTMLAttributes } from 'react';
 import type { StyleComponentGenerator } from '../generator';
 import type { OrString } from './util-types';
 
@@ -8,11 +8,12 @@ export type CreateElementProps = {
   className?: string;
   element?: string;
   passVariantProps?: boolean;
+  style?: any;
   /** vks = Variant key set */
   _vks?: Set<string>;
 };
 
-export type StyledComponentProps = Record<string, unknown> & CreateElementProps;
+export type StyledComponentProps = Record<string, unknown> & CreateElementProps & CssRuntimeValues;
 
 type FnComponent<PROPS extends StyledComponentProps> = {
   (props: PROPS): ReactNode;
@@ -49,6 +50,8 @@ export type VariantProps<STYLES extends StyledParams> = STYLES['variants'] exten
     };
 
 export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (props: infer P) => ReactNode ? P : unknown;
+
+export type CssRuntimeValues = { cssValues?: Record<string, unknown> };
 
 type StylePropertyValue = Record<never, never> & unknown;
 

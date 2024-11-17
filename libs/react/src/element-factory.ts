@@ -1,6 +1,7 @@
 import { createElement, ForwardedRef, forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { StyledComponentProps, Tag } from '@salty-css/core/types';
+import { dashCase } from '@salty-css/core/util';
 
 const _styledKeys = ['passVariantProps'];
 
@@ -12,7 +13,7 @@ export const elementFactory = (
   _additionalProps?: Record<PropertyKey, any>
 ) => {
   const fn = (
-    { extend = tagName, element = _element, className = '', children, passVariantProps, _vks = new Set<string>(), ...props }: StyledComponentProps,
+    { extend = tagName, element = _element, className = '', children, passVariantProps, cssValues, _vks = new Set<string>(), ...props }: StyledComponentProps,
     elementRef: ForwardedRef<any>
   ) => {
     const passedProps = { passVariantProps } as StyledComponentProps;
@@ -25,6 +26,15 @@ export const elementFactory = (
     const extendsStyled = extendsComponent && 'isStyled' in extend;
     const type = extendsComponent ? extend : element || extend;
     if (!type) throw new Error('No element provided');
+
+    if (cssValues) {
+      console.log(cssValues);
+      if (!passedProps['style']) passedProps['style'] = {};
+      Object.entries(cssValues).forEach(([key, value]) => {
+        const variableName = `--${dashCase(key)}`;
+        passedProps['style'][variableName] = value;
+      });
+    }
 
     if (_variantKeys) {
       _variantKeys.forEach((key) => {
