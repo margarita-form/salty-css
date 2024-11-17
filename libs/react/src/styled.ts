@@ -1,14 +1,13 @@
 import { AllHTMLAttributes, HTMLAttributes, ReactDOM, ReactNode } from 'react';
-import { Tag, StyledComponentProps, Styles, GeneratorOptions, CreateElementProps, VariantProps, ParentComponentProps } from '@salty-css/core/types';
+import { Tag, StyledComponentProps, CreateElementProps, VariantProps, ParentComponentProps, StyledParams } from '@salty-css/core/types';
 import { StyleComponentGenerator } from '@salty-css/core/generator';
 import { elementFactory } from './element-factory';
 
-export const styled = <const PROPS extends StyledComponentProps, const TAG extends Tag<Required<PROPS>>, const STYLES extends Styles>(
+export const styled = <const PROPS extends StyledComponentProps, const TAG extends Tag<Required<PROPS>>, const STYLE_PARAMS extends StyledParams>(
   tagName: TAG,
-  styles: STYLES,
-  options: GeneratorOptions = {}
+  params: STYLE_PARAMS
 ) => {
-  const generator = new StyleComponentGenerator(tagName, styles, options);
+  const generator = new StyleComponentGenerator(tagName, params);
 
   const fn = elementFactory(tagName, generator.cssClassName, generator.props.element, generator.props.variantKeys, {
     'data-unoptimized-client-component': true,
@@ -22,13 +21,15 @@ export const styled = <const PROPS extends StyledComponentProps, const TAG exten
     ? ReactDOM[TAG] extends (...props: infer R) => any
       ? R[0]
       : TAG extends string
-      ? HTMLAttributes<HTMLElement>
+      ? AllHTMLAttributes<HTMLElement>
       : never
     : TAG extends string
-    ? HTMLAttributes<HTMLElement>
+    ? AllHTMLAttributes<HTMLElement>
     : never;
 
-  type ComponentType = <T extends object>(props: (T & CreateElementProps & ParentComponentProps<TAG>) | VariantProps<STYLES> | TagAttributes) => ReactNode;
+  type Ref = TAG extends string ? { ref: any } : never;
+
+  type ComponentType = (props: (CreateElementProps & ParentComponentProps<TAG>) | Ref | VariantProps<STYLE_PARAMS> | TagAttributes) => ReactNode;
 
   return fn as ComponentType & string;
 };

@@ -42,7 +42,7 @@ type Variants = {
 
 type VariantPropValue<T> = T extends 'true' ? 'true' | true : T;
 
-export type VariantProps<STYLES extends Styles> = STYLES['variants'] extends undefined
+export type VariantProps<STYLES extends StyledParams> = STYLES['variants'] extends undefined
   ? {}
   : {
       [K in keyof STYLES['variants']]?: VariantPropValue<keyof STYLES['variants'][K]> | '';
@@ -62,4 +62,8 @@ export interface GeneratorOptions {
   className?: string;
   displayName?: string;
   element?: string;
+}
+
+export interface StyledParams extends GeneratorOptions, Variants {
+  base?: CssStyles;
 }

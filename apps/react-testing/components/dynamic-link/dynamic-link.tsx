@@ -1,6 +1,6 @@
-import { createElement } from 'react';
+import { AllHTMLAttributes, createElement } from 'react';
 
-interface DynamicLinkProps {
+interface DynamicLinkProps extends AllHTMLAttributes<HTMLElement> {
   href?: string;
   children: React.ReactNode;
   className?: string;
