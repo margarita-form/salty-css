@@ -31,5 +31,5 @@ export const styled = <const PROPS extends StyledComponentProps, const TAG exten
 
   type ComponentType = (props: (CreateElementProps & ParentComponentProps<TAG>) | Ref | VariantProps<STYLE_PARAMS> | TagAttributes) => ReactNode;
 
-  return fn as ComponentType & string;
+  return fn as unknown as ComponentType & string;
 };

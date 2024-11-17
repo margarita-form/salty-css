@@ -1,10 +1,14 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { ButtonsWrapper, Button, LargeButton } from '../components/button/button.css';
 import { LargeHeadingH1, LargeHeading, HeadingBase } from '../components/heading/heading.salty';
 import { Wrapper } from '../components/wrapper/wrapper.styled';
 
 export const IndexPage = () => {
   const wrapper = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    console.log('ref', wrapper);
+  }, []);
 
   return (
     <Wrapper className="theme-light" ref={wrapper}>
@@ -22,7 +26,7 @@ export const IndexPage = () => {
       </ButtonsWrapper>
 
       <ButtonsWrapper>
-        <LargeButton warning disabled variant="solid" onClick={() => alert('It is a button.')}>
+        <LargeButton warning disabled variant="" onClick={() => alert('It is a button.')}>
           Large and red
         </LargeButton>
       </ButtonsWrapper>

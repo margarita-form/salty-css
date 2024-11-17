@@ -1,4 +1,4 @@
-import { createElement } from 'react';
+import { createElement, ForwardedRef, forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { StyledComponentProps, Tag } from '@salty-css/core/types';
 
@@ -11,22 +11,17 @@ export const elementFactory = (
   _variantKeys?: string[],
   _additionalProps?: Record<PropertyKey, any>
 ) => {
-  const fn = ({
-    extend = tagName,
-    element = _element,
-    className = '',
-    children,
-    passVariantProps,
-    _vks = new Set<string>(),
-    ...props
-  }: StyledComponentProps) => {
+  const fn = (
+    { extend = tagName, element = _element, className = '', children, passVariantProps, _vks = new Set<string>(), ...props }: StyledComponentProps,
+    elementRef: ForwardedRef<any>
+  ) => {
     const passedProps = { passVariantProps } as StyledComponentProps;
-    if (props) Object.assign(passedProps, props);
     if (_additionalProps) Object.assign(passedProps, _additionalProps);
+    if (props) Object.assign(passedProps, props);
 
     const additionalClasses = new Set<string>(className.split(' '));
 
-    const extendsComponent = typeof extend === 'function';
+    const extendsComponent = typeof extend === 'function' || typeof extend === 'object';
     const extendsStyled = extendsComponent && 'isStyled' in extend;
     const type = extendsComponent ? extend : element || extend;
     if (!type) throw new Error('No element provided');
@@ -56,17 +51,20 @@ export const elementFactory = (
       {
         element: extendsComponent ? element : undefined,
         className: joinedClassNames,
+        ref: elementRef,
         ...passedProps,
       },
       children
     );
   };
 
-  Object.assign(fn, {
+  const withRef = forwardRef(fn);
+
+  Object.assign(withRef, {
     isStyled: true,
     className: _className,
     toString: () => `.${_className}`,
   });
 
-  return fn;
+  return withRef;
 };

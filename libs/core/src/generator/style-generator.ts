@@ -14,7 +14,7 @@ export class StyleComponentGenerator {
   }
 
   get priority(): number {
-    if (typeof this.tagName === 'function') {
+    if (typeof this.tagName === 'function' || typeof this.tagName === 'object') {
       const prev = this.tagName.generator?.priority || 0;
       return prev + 1;
     }
