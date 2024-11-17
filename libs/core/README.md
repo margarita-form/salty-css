@@ -54,8 +54,10 @@ export const IndexPage = () => {
 import { styled } from '@salty-css/react/styled';
 
 export const Wrapper = styled('div', {
-  display: 'block',
-  padding: '2vw',
+  base: {
+    display: 'block',
+    padding: '2vw',
+  },
 });
 ```
 
@@ -65,22 +67,24 @@ export const Wrapper = styled('div', {
 import { styled } from '@salty-css/react/styled';
 
 export const Button = styled('button', {
-  display: 'block',
-  padding: `0.6em 1.2em`,
-  border: '1px solid currentColor',
-  background: 'transparent',
-  color: 'currentColor/40',
-  cursor: 'pointer',
-  transition: '200ms',
-  textDecoration: 'none',
-  '&:hover': {
-    background: 'black',
-    borderColor: 'black',
-    color: 'white',
-  },
-  '&:disabled': {
-    opacity: 0.25,
-    pointerEvents: 'none',
+  base: {
+    display: 'block',
+    padding: `0.6em 1.2em`,
+    border: '1px solid currentColor',
+    background: 'transparent',
+    color: 'currentColor/40',
+    cursor: 'pointer',
+    transition: '200ms',
+    textDecoration: 'none',
+    '&:hover': {
+      background: 'black',
+      borderColor: 'black',
+      color: 'white',
+    },
+    '&:disabled': {
+      opacity: 0.25,
+      pointerEvents: 'none',
+    },
   },
   variants: {
     variant: {
