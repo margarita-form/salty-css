@@ -1,0 +1,6 @@
+{
+  "name": "eslint-plugin-core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/eslint-plugin-core",
+  "projectType": "library"
+}

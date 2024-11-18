@@ -7,7 +7,7 @@ import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 
 export default defineConfig({
   root: __dirname,
-  cacheDir: '../../node_modules/.vite/libs/core',
+  cacheDir: '../../node_modules/.vite/libs/eslint-plugin-core',
   plugins: [
     nxViteTsPaths(),
     nxCopyAssetsPlugin(['*.md']),
@@ -28,14 +28,9 @@ export default defineConfig({
     },
     lib: {
       // Could also be a dictionary or array of multiple entry points.
-      name: 'salty-css-core',
+      name: 'salty-css-eslint-plugin-core',
       entry: {
-        'compiler/index': 'src/compiler/index.ts',
-        'css/index': 'src/css/index.ts',
-        'generator/index': 'src/generator/index.ts',
-        'config/index': 'src/config/index.ts',
-        'types/index': 'src/types/index.ts',
-        'util/index': 'src/util/index.ts',
+        index: 'src/index.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;
@@ -53,7 +48,7 @@ export default defineConfig({
     },
     rollupOptions: {
       // External packages that should not be bundled into your library.
-      external: ['path', 'fs', 'fs/promises', 'esbuild', 'winston', 'child_process', 'react'],
+      external: ['@salty-css/core', 'path', 'fs', 'fs/promises', 'esbuild', 'winston', 'child_process', 'react'],
     },
   },
   test: {
@@ -63,7 +58,7 @@ export default defineConfig({
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {
-      reportsDirectory: '../../coverage/libs/core',
+      reportsDirectory: '../../coverage/libs/eslint-plugin-core',
       provider: 'v8',
     },
   },

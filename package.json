@@ -9,12 +9,14 @@
     "build:react": "nx run react:build",
     "build:vite": "nx run vite:build",
     "build:webpack": "nx run webpack:build",
-    "build:all": "nx run-many --target=build --projects core react vite webpack",
+    "build:eslint-plugin-core": "nx run eslint-plugin-core:build",
+    "build:all": "nx run-many --target=build --projects core react vite webpack eslint-plugin-core",
     "publish:core": "cd libs/core/dist && npm publish",
     "publish:react": "cd libs/react/dist && npm publish",
     "publish:vite": "cd libs/vite/dist && npm publish",
     "publish:webpack": "cd libs/webpack/dist && npm publish",
-    "publish:all-dev": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && npm run publish:core --tag dev && npm run publish:react --tag dev && npm run publish:vite --tag dev && npm run publish:webpack --tag dev"
+    "publish:eslint-plugin-core": "cd libs/eslint-plugin-core/dist && npm publish",
+    "publish:all-dev": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && npm run publish:core --tag dev && npm run publish:react --tag dev && npm run publish:vite --tag dev && npm run publish:webpack --tag dev && npm run publish:eslint-plugin-core --tag dev"
   },
   "private": true,
   "type": "module",

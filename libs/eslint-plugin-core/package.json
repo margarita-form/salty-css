@@ -1,0 +1,35 @@
+{
+  "name": "@salty-css/eslint-plugin-core",
+  "version": "0.0.1-alpha.11",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "typings": "./dist/index.d.ts",
+  "type": "module",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/margarita-form/salty-css",
+  "bugs": {
+    "url": "https://github.com/margarita-form/salty-css/issues"
+  },
+  "files": [
+    "**/*",
+    "!**/*.tsbuildinfo"
+  ],
+  "nx": {
+    "sourceRoot": "libs/eslint-plugin-core/src",
+    "name": "eslint-plugin-core"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.cjs"
+    }
+  },
+  "peerDependencies": {
+    "eslint": ">=9.x || >=8.x >=7.x",
+    "@salty-css/core": ">=1.x || >=0.x"
+  }
+}

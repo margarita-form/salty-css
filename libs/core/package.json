@@ -23,9 +23,8 @@
     "name": "core"
   },
   "peerDependencies": {
-    "esbuild": "0.21.x",
-    "eslint": "^9.x",
-    "react": "^18.x",
+    "esbuild": ">=0.21.x",
+    "react": ">=18.x || >=19.x",
     "winston": ">=3.x"
   },
   "exports": {
