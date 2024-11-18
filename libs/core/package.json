@@ -23,8 +23,10 @@
     "name": "core"
   },
   "peerDependencies": {
-    "clsx": ">=2.x",
-    "winston": ">=3.x"
+    "winston": ">=3.x",
+    "esbuild": "0.21.x",
+    "eslint": "^9.x",
+    "react": "^18.x"
   },
   "exports": {
     "./compiler": {

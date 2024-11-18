@@ -30,6 +30,7 @@ export default defineConfig({
       // Could also be a dictionary or array of multiple entry points.
       name: 'salty-css-core',
       entry: {
+        'eslint/index': 'src/eslint/index.ts',
         'compiler/index': 'src/compiler/index.ts',
         'css/index': 'src/css/index.ts',
         'generator/index': 'src/generator/index.ts',
