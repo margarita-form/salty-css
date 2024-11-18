@@ -20,9 +20,9 @@ export const logger = winston.createLogger({
 
 const getDestDir = (dirname: string) => join(dirname, './saltygen');
 
-// const fileExtensions = 'salty|css|styles'
-const fileExtensions = ['salty', 'css', 'styles', 'styled'];
-export const isSaltyFile = (file: string) => new RegExp(`\\.(${fileExtensions.join('|')})\\.`).test(file);
+export const saltyFileExtensions = ['salty', 'css', 'styles', 'styled'];
+export const saltyFileRegExp = (additional: string[] = []) => new RegExp(`\\.(${[...saltyFileExtensions, ...additional].join('|')})\\.`);
+export const isSaltyFile = (file: string, additional: string[] = []) => saltyFileRegExp(additional).test(file);
 
 const generateConfig = async (dirname: string) => {
   const destDir = getDestDir(dirname);
