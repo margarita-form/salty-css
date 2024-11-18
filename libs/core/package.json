@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/core",
-  "version": "0.0.1-alpha.10",
+  "version": "0.0.1-alpha.11",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -23,10 +23,10 @@
     "name": "core"
   },
   "peerDependencies": {
-    "winston": ">=3.x",
     "esbuild": "0.21.x",
     "eslint": "^9.x",
-    "react": "^18.x"
+    "react": "^18.x",
+    "winston": ">=3.x"
   },
   "exports": {
     "./compiler": {
