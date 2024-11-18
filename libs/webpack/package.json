@@ -19,6 +19,7 @@
     "!**/*.tsbuildinfo"
   ],
   "nx": {
+    "sourceRoot": "libs/webpack/src",
     "name": "webpack"
   },
   "exports": {

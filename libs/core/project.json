@@ -1,6 +1,6 @@
 {
   "name": "core",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/parsing",
+  "sourceRoot": "libs/core",
   "projectType": "library"
 }

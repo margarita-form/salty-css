@@ -19,6 +19,7 @@
     "!**/*.tsbuildinfo"
   ],
   "nx": {
+    "sourceRoot": "libs/react/src",
     "name": "react"
   },
   "exports": {
