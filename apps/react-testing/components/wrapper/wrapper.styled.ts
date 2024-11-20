@@ -6,7 +6,7 @@ export const Wrapper = styled('div', {
   base: {
     display: 'block',
     animation: fadeIn,
-    backgroundColor: '{theme.backgroundColor}',
+    backgroundColor: '{props.loremValue}',
     padding: '2vw',
     '@media (max-width: 768px)': {
       margin: '10vw',

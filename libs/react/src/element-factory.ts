@@ -1,3 +1,4 @@
+import type { GeneratorProps } from '@salty-css/core/generator';
 import { createElement, ForwardedRef, forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { StyledComponentProps, Tag } from '@salty-css/core/types';
@@ -5,15 +6,17 @@ import { dashCase } from '@salty-css/core/util';
 
 const _styledKeys = ['passVariantProps'];
 
-export const elementFactory = (
-  tagName: Tag<any>,
-  _className: string,
-  _element?: string,
-  _variantKeys?: string[],
-  _additionalProps?: Record<PropertyKey, any>
-) => {
+export const elementFactory = (tagName: Tag<any>, _className: string, _generatorProps: GeneratorProps, _additionalProps?: Record<PropertyKey, any>) => {
   const fn = (
-    { extend = tagName, element = _element, className = '', children, passVariantProps, cssValues, _vks = new Set<string>(), ...props }: StyledComponentProps,
+    {
+      extend = tagName,
+      element = _generatorProps.element,
+      className = '',
+      children,
+      passVariantProps,
+      _vks = new Set<string>(),
+      ...props
+    }: StyledComponentProps,
     elementRef: ForwardedRef<any>
   ) => {
     const passedProps = { passVariantProps } as StyledComponentProps;
@@ -27,22 +30,24 @@ export const elementFactory = (
     const type = extendsComponent ? extend : element || extend;
     if (!type) throw new Error('No element provided');
 
-    if (cssValues) {
-      console.log(cssValues);
+    if (_generatorProps.propValueKeys) {
       if (!passedProps['style']) passedProps['style'] = {};
-      Object.entries(cssValues).forEach(([key, value]) => {
-        const variableName = `--${dashCase(key)}`;
+      _generatorProps.propValueKeys.forEach((key) => {
+        const name = `css-${key}`;
+        const value = props[name];
+        if (value === undefined) return;
+        const variableName = `--props-${dashCase(key)}`;
         passedProps['style'][variableName] = value;
+        if (_vks) _vks.add(name);
       });
     }
 
-    if (_variantKeys) {
-      _variantKeys.forEach((key) => {
+    if (_generatorProps.variantKeys) {
+      _generatorProps.variantKeys.forEach((key) => {
         const [name, defaultValue] = key.split('=');
         if (props[name] !== undefined) {
           additionalClasses.add(`${name}-${props[name]}`);
-          if (!extendsComponent) delete passedProps[name];
-          else if (_vks) _vks.add(name);
+          if (_vks) _vks.add(name);
         } else if (defaultValue !== undefined) {
           additionalClasses.add(`${name}-${defaultValue}`);
         }

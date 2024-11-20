@@ -4,14 +4,14 @@ import { LargeHeadingH1, LargeHeading, HeadingBase } from '../components/heading
 import { Wrapper } from '../components/wrapper/wrapper.styled';
 
 export const IndexPage = () => {
-  const wrapper = useRef<HTMLElement>(null);
+  const wrapper = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     console.log('ref', wrapper);
   }, []);
 
   return (
-    <Wrapper className="theme-light" ref={wrapper} cssValues={{ lorem: 'blue' }}>
+    <Wrapper className="theme-light" ref={wrapper} css-loremValue="#fefefe">
       <LargeHeadingH1 id="main-heading">Large heading H1</LargeHeadingH1>
       <LargeHeading>Large heading H2</LargeHeading>
       <HeadingBase>Heading base H3</HeadingBase>
@@ -26,7 +26,7 @@ export const IndexPage = () => {
       </ButtonsWrapper>
 
       <ButtonsWrapper>
-        <LargeButton warning disabled variant="" onClick={() => alert('It is a button.')}>
+        <LargeButton warning disabled variant="outlined" onClick={() => alert('It is a button.')}>
           Large and red
         </LargeButton>
       </ButtonsWrapper>

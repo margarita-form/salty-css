@@ -13,7 +13,7 @@ export type CreateElementProps = {
   _vks?: Set<string>;
 };
 
-export type StyledComponentProps = Record<string, unknown> & CreateElementProps & CssRuntimeValues;
+export type StyledComponentProps = Record<string, unknown> & CreateElementProps;
 
 type FnComponent<PROPS extends StyledComponentProps> = {
   (props: PROPS): ReactNode;
@@ -44,14 +44,18 @@ type Variants = {
 type VariantPropValue<T> = T extends 'true' ? 'true' | true : T;
 
 export type VariantProps<STYLES extends StyledParams> = STYLES['variants'] extends undefined
-  ? {}
+  ? object
   : {
       [K in keyof STYLES['variants']]?: VariantPropValue<keyof STYLES['variants'][K]> | '';
     };
 
-export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (props: infer P) => ReactNode ? P : unknown;
+type CssValuePropKey = `props-${string}`;
 
-export type CssRuntimeValues = { cssValues?: Record<string, unknown> };
+export type ValueProps = {
+  [key: CssValuePropKey]: string;
+};
+
+export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (props: infer P) => ReactNode ? P : unknown;
 
 type StylePropertyValue = Record<never, never> & unknown;
 

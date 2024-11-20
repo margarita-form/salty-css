@@ -296,7 +296,7 @@ export const minimizeFile = async (dirname: string, file: string) => {
     const validFile = isSaltyFile(file);
 
     if (validFile) {
-      let original = readFileSync(file, 'utf8');
+      const original = readFileSync(file, 'utf8');
 
       const copy = original.replace(/^(?!export\s)const\s.*/gm, (original) => `export ${original}`);
 
@@ -327,11 +327,9 @@ export const minimizeFile = async (dirname: string, file: string) => {
         }
 
         const tagName = regexpResult.at(1)?.trim();
-        const { element, variantKeys } = generator.props;
+        // const { element, variantKeys } = generator.props;
 
-        const clientVersion = `${name} = styled(${tagName}, "${generator.classNames}", "${generator._callerName}", ${JSON.stringify(element)}, ${JSON.stringify(
-          variantKeys
-        )});`;
+        const clientVersion = `${name} = styled(${tagName}, "${generator.classNames}", "${generator._callerName}", ${JSON.stringify(generator.props)});`;
 
         const regexp = new RegExp(`${name}[=\\s]+[^()]+styled\\(([^,]+),[^;]+;`, 'g');
 

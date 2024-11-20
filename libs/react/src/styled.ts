@@ -1,5 +1,5 @@
-import { AllHTMLAttributes, HTMLAttributes, ReactDOM, ReactNode } from 'react';
-import { Tag, StyledComponentProps, CreateElementProps, VariantProps, ParentComponentProps, StyledParams, CssRuntimeValues } from '@salty-css/core/types';
+import { AllHTMLAttributes, ReactDOM, ReactNode } from 'react';
+import { Tag, StyledComponentProps, CreateElementProps, VariantProps, ParentComponentProps, StyledParams, ValueProps } from '@salty-css/core/types';
 import { StyleComponentGenerator } from '@salty-css/core/generator';
 import { elementFactory } from './element-factory';
 
@@ -9,7 +9,7 @@ export const styled = <const PROPS extends StyledComponentProps, const TAG exten
 ) => {
   const generator = new StyleComponentGenerator(tagName, params);
 
-  const fn = elementFactory(tagName, generator.cssClassName, generator.props.element, generator.props.variantKeys, {
+  const fn = elementFactory(tagName, generator.cssClassName, generator.props, {
     'data-unoptimized-client-component': true,
   });
 
@@ -29,9 +29,7 @@ export const styled = <const PROPS extends StyledComponentProps, const TAG exten
 
   type Ref = TAG extends string ? { ref: any } : never;
 
-  type ComponentType = (
-    props: (CreateElementProps & ParentComponentProps<TAG>) | Ref | CssRuntimeValues | VariantProps<STYLE_PARAMS> | TagAttributes
-  ) => ReactNode;
+  type ComponentType = (props: (CreateElementProps & ParentComponentProps<TAG>) | Ref | VariantProps<STYLE_PARAMS> | ValueProps | TagAttributes) => ReactNode;
 
   return fn as unknown as ComponentType & string;
 };

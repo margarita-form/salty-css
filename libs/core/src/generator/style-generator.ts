@@ -1,7 +1,13 @@
-import { GeneratorOptions, StyledParams, Styles, Tag } from '../types';
+import { StyledParams, Styles, Tag } from '../types';
 import { toHash } from '../util/to-hash';
 import { getTemplateKeys } from './parse-templates';
 import { parseStyles } from './parse-styles';
+
+export interface GeneratorProps {
+  element?: string;
+  variantKeys?: string[];
+  propValueKeys?: string[];
+}
 
 export class StyleComponentGenerator {
   public _callerName: string | undefined;
@@ -46,7 +52,7 @@ export class StyleComponentGenerator {
     return parseStyles(combinedStyles, `.${this.cssClassName}`, this.priority, this._context?.config);
   }
 
-  get props() {
+  get props(): GeneratorProps {
     const { element } = this.params;
 
     const variantKeys = this.params.variants
@@ -57,9 +63,19 @@ export class StyleComponentGenerator {
         })
       : undefined;
 
+    const propValueKeys = new Set<string>([]);
+    const matches = /\{props\.([\w\d]+)\}/gi.exec(JSON.stringify(this.params.base));
+    if (matches) {
+      matches.forEach((x, y, groups) => {
+        const value = groups.at(1);
+        if (value) propValueKeys.add(value);
+      });
+    }
+
     return {
       element,
       variantKeys,
+      propValueKeys: [...propValueKeys],
     };
   }
 
