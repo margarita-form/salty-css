@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/eslint-plugin-core",
-  "version": "0.0.1-alpha.18",
+  "version": "0.0.1-alpha.19",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
