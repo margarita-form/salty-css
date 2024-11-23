@@ -1,15 +1,26 @@
 /// <reference types='vitest' />
-import { defineConfig } from 'vite';
+import { defineConfig, PluginOption } from 'vite';
 import dts from 'vite-plugin-dts';
 import * as path from 'path';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+
+const templateLoaderPlugin: () => PluginOption = () => ({
+  name: 'gqlLoader',
+  transform: (code, id) => {
+    if (id.endsWith('__template')) {
+      return `export default ${JSON.stringify(code)}`;
+    }
+    return undefined;
+  },
+});
 
 export default defineConfig({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/libs/core',
   plugins: [
     nxViteTsPaths(),
+    templateLoaderPlugin(),
     nxCopyAssetsPlugin(['*.md']),
     dts({
       entryRoot: 'src',
@@ -30,6 +41,7 @@ export default defineConfig({
       // Could also be a dictionary or array of multiple entry points.
       name: 'salty-css-core',
       entry: {
+        'bin/index': 'src/bin/index.ts',
         'compiler/index': 'src/compiler/index.ts',
         'css/index': 'src/css/index.ts',
         'generator/index': 'src/generator/index.ts',
@@ -53,7 +65,7 @@ export default defineConfig({
     },
     rollupOptions: {
       // External packages that should not be bundled into your library.
-      external: ['path', 'fs', 'fs/promises', 'esbuild', 'winston', 'child_process', 'react'],
+      external: ['path', 'fs', 'fs/promises', 'esbuild', 'winston', 'child_process', 'react', 'commander', 'ejs'],
     },
   },
   test: {

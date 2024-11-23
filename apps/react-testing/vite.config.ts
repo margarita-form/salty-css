@@ -4,7 +4,7 @@ import dts from 'vite-plugin-dts';
 import * as path from 'path';
 import react from '@vitejs/plugin-react-swc';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { generateCss, generateFile, generateVariables, isSaltyFile, minimizeFile } from '../../libs/core/src/compiler';
+import { generateCss, generateFile, generateConfigStyles, isSaltyFile, minimizeFile } from '../../libs/core/src/compiler';
 
 // Copy of the Vite config from the React Testing app.
 export const saltyPlugin = (dir: string) => ({
@@ -23,8 +23,8 @@ export const saltyPlugin = (dir: string) => ({
       if (saltyFile) {
         await generateFile(dir, filePath);
       }
-      if (filePath.includes('salty-config')) {
-        await generateVariables(dir);
+      if (filePath.includes('salty.config')) {
+        await generateConfigStyles(dir);
       }
     },
   },

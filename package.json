@@ -2,6 +2,8 @@
   "name": "@salty-css/source",
   "version": "0.0.0",
   "license": "MIT",
+  "private": true,
+  "type": "module",
   "scripts": {
     "pretty": "prettier --write .",
     "dev:react-testing": "nx run react-testing:serve",
@@ -18,8 +20,6 @@
     "publish:eslint-plugin-core": "cd libs/eslint-plugin-core/dist && npm publish",
     "publish:all-dev": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && npm run publish:core --tag dev && npm run publish:react --tag dev && npm run publish:vite --tag dev && npm run publish:webpack --tag dev && npm run publish:eslint-plugin-core --tag dev"
   },
-  "private": true,
-  "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.8.0",
     "@nx/eslint": "20.1.2",
@@ -31,6 +31,7 @@
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
+    "@types/ejs": "^3.1.5",
     "@types/node": "18.16.9",
     "@types/react": "^18.3.12",
     "@vitejs/plugin-react-swc": "^3.7.1",
@@ -59,6 +60,8 @@
   ],
   "dependencies": {
     "clsx": "^2.1.1",
+    "commander": "^12.1.0",
+    "ejs": "^3.1.10",
     "react": "^18.3.1",
     "winston": "^3.15.0"
   },

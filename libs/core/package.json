@@ -25,7 +25,9 @@
   "peerDependencies": {
     "esbuild": ">=0.21.x",
     "react": ">=18.x || >=19.x",
-    "winston": ">=3.x"
+    "winston": ">=3.x",
+    "commander": ">=12.x",
+    "ejs": ">=3.x"
   },
   "exports": {
     "./compiler": {
@@ -52,5 +54,9 @@
       "import": "./util/index.js",
       "require": "./util/index.cjs"
     }
+  },
+  "bin": {
+    "salty-css": "./bin/index.js",
+    "salty-css-cjs": "./bin/index.cjs"
   }
 }

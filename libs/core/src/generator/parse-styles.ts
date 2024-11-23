@@ -5,6 +5,7 @@ import { parseValueModifiers } from './parse-modifiers';
 import { parseValueTokens } from './parse-tokens';
 
 export const parseStyles = <T extends object>(styles: T, currentClass: string, layer?: number, config?: SaltyConfig | undefined): string => {
+  if (!styles) return '';
   const classes: string[] = [];
   const current = Object.entries(styles).reduce((acc, [key, value]) => {
     const _key = key.trim();

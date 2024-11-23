@@ -5,7 +5,7 @@
 ### Initial requirements
 
 1. Add `saltyPlugin` to vite or webpack config from `@salty-css/vite` or `@salty-css/webpack`
-2. Create `salty-config.ts` to the root of your project
+2. Create `salty.config.ts` to the root of your project
 3. Import global styles to any regular .css file from `saltygen/index.css` (does not exist during first run, cli command coming later)
 4. Create salty components with styled only inside files that end with `.css.ts`, `.salty.ts` `.styled.ts` or `.styles.ts`
 

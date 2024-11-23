@@ -39,5 +39,10 @@
       "import": "./media.js",
       "require": "./media.cjs"
     }
+  },
+  "dependencies": {
+    "@salty-css/core": ">=0.0.1-alpha.14",
+    "clsx": ">=2.x",
+    "react": ">=18.3.x"
   }
 }

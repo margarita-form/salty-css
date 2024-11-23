@@ -1,5 +1,4 @@
 import * as esbuild from 'esbuild';
-import * as winston from 'winston';
 import { execSync } from 'child_process';
 import { toHash } from '../util/to-hash';
 import { join } from 'path';
@@ -12,12 +11,6 @@ import { parseTemplates } from '../generator/parse-templates';
 import { CssConditionalVariables, CssResponsiveVariables } from '../config';
 import { parseValueTokens } from '../generator/parse-tokens';
 
-export const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(winston.format.colorize(), winston.format.cli()),
-  transports: [new winston.transports.Console({})],
-});
-
 const getDestDir = (dirname: string) => join(dirname, './saltygen');
 
 export const saltyFileExtensions = ['salty', 'css', 'styles', 'styled'];
@@ -26,8 +19,8 @@ export const isSaltyFile = (file: string, additional: string[] = []) => saltyFil
 
 const generateConfig = async (dirname: string) => {
   const destDir = getDestDir(dirname);
-  const coreConfigPath = join(dirname, 'salty-config.ts');
-  const coreConfigDest = join(destDir, 'salty-config.js');
+  const coreConfigPath = join(dirname, 'salty.config.ts');
+  const coreConfigDest = join(destDir, 'salty.config.js');
 
   await esbuild.build({
     entryPoints: [coreConfigPath],
@@ -44,7 +37,7 @@ const generateConfig = async (dirname: string) => {
   return config;
 };
 
-export const generateVariables = async (dirname: string) => {
+export const generateConfigStyles = async (dirname: string) => {
   // Generate the config files
   const config = await generateConfig(dirname);
 
@@ -149,7 +142,7 @@ export const compileSaltyFile = async (sourceFilePath: string, outputDirectory: 
 
 const getConfig = async (dirname: string) => {
   const destDir = getDestDir(dirname);
-  const coreConfigDest = join(destDir, 'salty-config.js');
+  const coreConfigDest = join(destDir, 'salty.config.js');
   const { config } = await import(coreConfigDest);
   return config;
 };
@@ -172,7 +165,7 @@ export const generateCss = async (dirname: string) => {
     clearDistDir();
 
     // Generate variables
-    await generateVariables(dirname);
+    await generateConfigStyles(dirname);
 
     // Get config
     const config = await getConfig(dirname);
