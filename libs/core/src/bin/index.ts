@@ -7,7 +7,7 @@ import { generateCss } from '../compiler';
 import { pascalCase } from '../util';
 import { logger } from './logger';
 import { formatWithPrettier } from './prettier';
-import { execAsync } from './bin-util';
+import { npmInstall } from './bin-util';
 
 async function main() {
   const program = new Command();
@@ -63,6 +63,10 @@ async function main() {
     .option('--css-file <css-file>', 'Existing CSS file where to import the generated CSS. Path must be relative to the given project directory.')
     // Validate that all options are provided
     .action(async function (this: Command) {
+      logger.info('Installing salty-css packages core, eslint-plugin and react');
+      await npmInstall('@salty-css/core @salty-css/react');
+      await npmInstall('-D @salty-css/eslint-plugin-core');
+
       logger.info('Initializing a new Salty-CSS project...');
 
       const { dir, cssFile } = this.opts<InitOptions>();
@@ -155,8 +159,8 @@ async function main() {
           const pluginConfig = 'saltyPlugin(__dirname),';
           const newContent = viteConfigContent.replace(/(plugins: \[)/, `$1\n  ${pluginConfig}`);
 
-          logger.info('Installing @salty-css/vite...');
-          await execAsync('npm install @salty-css/vite');
+          logger.info('Installing @salty-css/vite');
+          await npmInstall('@salty-css/vite');
 
           logger.info('Adding Salty-CSS plugin to Vite config...');
           await writeFile(viteConfigPath, pluginImport + newContent);
