@@ -191,7 +191,7 @@ async function main() {
 
           logger.info('Installing @salty-css/vite');
           if (!skipInstall) {
-            await npmInstall(packages.vite);
+            await npmInstall(`-D ${packages.vite}`);
           }
 
           logger.info('Adding Salty-CSS plugin to Vite config...');
