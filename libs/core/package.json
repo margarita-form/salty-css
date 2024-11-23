@@ -56,7 +56,9 @@
     }
   },
   "bin": {
+    "salty": "./bin/index.js",
     "salty-css": "./bin/index.js",
-    "salty-css-cjs": "./bin/index.cjs"
+    "salty-css-cjs": "./bin/index.cjs",
+    "@salty-css/core": "./bin/index.js"
   }
 }
