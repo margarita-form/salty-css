@@ -9,8 +9,6 @@ import { logger } from './logger';
 import { formatWithPrettier } from './prettier';
 import { npmInstall } from './bin-util';
 
-const __dirname = new URL('.', import.meta.url).pathname;
-
 async function main() {
   const program = new Command();
 
@@ -47,7 +45,7 @@ async function main() {
   };
 
   const readThisPackageJson = async () => {
-    const packageJsonPath = join(__dirname, '../package.json');
+    const packageJsonPath = new URL('../package.json', import.meta.url);
     const packageJsonContent = await readFile(packageJsonPath, 'utf-8')
       .then(JSON.parse)
       .catch(() => ({}));
@@ -92,7 +90,6 @@ async function main() {
     .option('--css-file <css-file>', 'Existing CSS file where to import the generated CSS. Path must be relative to the given project directory.')
     // Validate that all options are provided
     .action(async function (this: Command) {
-      logger.info('Installing salty-css packages core, eslint-plugin and react');
       await npmInstall(packages.core, packages.react);
       await npmInstall(`-D ${packages.eslintPluginCore}`);
 

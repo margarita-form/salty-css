@@ -65,7 +65,7 @@ export default defineConfig({
     },
     rollupOptions: {
       // External packages that should not be bundled into your library.
-      external: ['path', 'fs', 'fs/promises', 'esbuild', 'winston', 'child_process', 'react', 'commander', 'ejs'],
+      external: ['path', 'fs', 'fs/promises', 'esbuild', 'winston', 'child_process', 'react', 'commander', 'ejs', 'ora'],
     },
   },
   test: {
