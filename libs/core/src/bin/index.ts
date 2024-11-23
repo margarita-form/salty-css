@@ -84,18 +84,18 @@ async function main() {
   };
 
   program
-    .command('init')
+    .command('init [directory]')
     .description('Initialize a new Salty-CSS project.')
-    .requiredOption('-d, --dir <dir>', 'Project directory to initialize the project in.')
+    .option('-d, --dir <dir>', 'Project directory to initialize the project in.')
     .option('--css-file <css-file>', 'Existing CSS file where to import the generated CSS. Path must be relative to the given project directory.')
     // Validate that all options are provided
-    .action(async function (this: Command) {
+    .action(async function (this: Command, _dir: string) {
       await npmInstall(packages.core, packages.react);
       await npmInstall(`-D ${packages.eslintPluginCore}`);
 
       logger.info('Initializing a new Salty-CSS project...');
 
-      const { dir, cssFile } = this.opts<InitOptions>();
+      const { dir = _dir, cssFile } = this.opts<InitOptions>();
       const rootDir = process.cwd();
       const projectDir = join(rootDir, dir);
       const projectFiles = await Promise.all([readTemplate('salty.config.ts'), readTemplate('saltygen/index.css')]);
@@ -200,18 +200,19 @@ async function main() {
   }
 
   program
-    .command('build')
+    .command('build [directory]')
     .alias('b')
     .description('Build the Salty-CSS project.')
-    .option('-d, --dir <dir>', 'Project directory to build the project in.', defaultProject)
-    .action(async function (this: Command) {
+    .option('-d, --dir <dir>', 'Project directory to build the project in.')
+    .action(async function (this: Command, _dir = defaultProject) {
       logger.info('Building the Salty-CSS project...');
-      const { dir } = this.opts<BuildOptions>();
+      const { dir = _dir } = this.opts<BuildOptions>();
       const projectDir = join(process.cwd(), dir);
       await generateCss(projectDir);
     });
 
   interface GenerateOptions {
+    file: string;
     dir: string;
     tag: string;
     name?: string;
@@ -219,15 +220,16 @@ async function main() {
   }
 
   program
-    .command('generate <file>')
+    .command('generate [file]')
     .alias('g')
     .description('Generate a new component file.')
+    .option('-f, --file <file>', 'File to generate.')
     .option('-d, --dir <dir>', 'Project directory to generate the file in.', defaultProject)
     .option('-t, --tag <tag>', 'HTML tag of the component.', 'div')
     .option('-n, --name <name>', 'Name of the component.')
     .option('-c, --className <className>', 'CSS class of the component.')
-    .action(async function (this: Command, file: string) {
-      const { dir, tag, name, className } = this.opts<GenerateOptions>();
+    .action(async function (this: Command, _file: string) {
+      const { file = _file, dir, tag, name, className } = this.opts<GenerateOptions>();
       const projectDir = join(process.cwd(), dir);
       const filePath = join(projectDir, file);
 
