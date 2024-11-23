@@ -29,7 +29,7 @@
     }
   },
   "peerDependencies": {
-    "@salty-css/core": ">=1.x || >=0.x",
+    "@salty-css/core": "^0.0.1-alpha.15",
     "eslint": ">=9.x || >=8.x >=7.x"
   }
 }
