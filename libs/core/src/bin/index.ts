@@ -72,6 +72,7 @@ async function main() {
   interface InitOptions {
     dir: string;
     cssFile?: string;
+    skipInstall?: boolean;
   }
 
   const currentPackageJson = await readThisPackageJson();
@@ -88,14 +89,17 @@ async function main() {
     .description('Initialize a new Salty-CSS project.')
     .option('-d, --dir <dir>', 'Project directory to initialize the project in.')
     .option('--css-file <css-file>', 'Existing CSS file where to import the generated CSS. Path must be relative to the given project directory.')
+    .option('--skip-install', 'Skip installing dependencies.')
     // Validate that all options are provided
     .action(async function (this: Command, _dir: string) {
-      await npmInstall(packages.core, packages.react);
-      await npmInstall(`-D ${packages.eslintPluginCore}`);
+      logger.info('Initializing a new Salty-CSS project!');
+      const { dir = _dir, cssFile, skipInstall } = this.opts<InitOptions>();
 
-      logger.info('Initializing a new Salty-CSS project...');
+      if (!skipInstall) {
+        await npmInstall(packages.core, packages.react);
+        await npmInstall(`-D ${packages.eslintPluginCore}`);
+      }
 
-      const { dir = _dir, cssFile } = this.opts<InitOptions>();
       const rootDir = process.cwd();
       const projectDir = join(rootDir, dir);
       const projectFiles = await Promise.all([readTemplate('salty.config.ts'), readTemplate('saltygen/index.css')]);
@@ -186,7 +190,9 @@ async function main() {
           const newContent = viteConfigContent.replace(/(plugins: \[)/, `$1\n  ${pluginConfig}`);
 
           logger.info('Installing @salty-css/vite');
-          await npmInstall(packages.vite);
+          if (!skipInstall) {
+            await npmInstall(packages.vite);
+          }
 
           logger.info('Adding Salty-CSS plugin to Vite config...');
           await writeFile(viteConfigPath, pluginImport + newContent);
