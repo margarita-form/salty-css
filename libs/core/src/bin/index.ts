@@ -9,6 +9,8 @@ import { logger } from './logger';
 import { formatWithPrettier } from './prettier';
 import { npmInstall } from './bin-util';
 
+const __dirname = new URL('.', import.meta.url).pathname;
+
 async function main() {
   const program = new Command();
 
@@ -44,6 +46,24 @@ async function main() {
     return rcContent as RCFile;
   };
 
+  const readThisPackageJson = async () => {
+    const packageJsonPath = join(__dirname, '../package.json');
+    const packageJsonContent = await readFile(packageJsonPath, 'utf-8')
+      .then(JSON.parse)
+      .catch(() => ({}));
+
+    return packageJsonContent;
+  };
+
+  const readPackageJson = async (projectDir: string) => {
+    const packageJsonPath = join(projectDir, 'package.json');
+    const packageJsonContent = await readFile(packageJsonPath, 'utf-8')
+      .then(JSON.parse)
+      .catch(() => ({}));
+
+    return packageJsonContent;
+  };
+
   const getDefaultProject = async () => {
     const rcContent = await readRCFile();
     return rcContent.defaultProject;
@@ -56,6 +76,15 @@ async function main() {
     cssFile?: string;
   }
 
+  const currentPackageJson = await readThisPackageJson();
+
+  const packages = {
+    core: `@salty-css/core@${currentPackageJson.version}`,
+    react: `@salty-css/react@${currentPackageJson.version}`,
+    eslintPluginCore: `@salty-css/eslint-plugin-core@${currentPackageJson.version}`,
+    vite: `@salty-css/vite@${currentPackageJson.version}`,
+  };
+
   program
     .command('init')
     .description('Initialize a new Salty-CSS project.')
@@ -64,8 +93,8 @@ async function main() {
     // Validate that all options are provided
     .action(async function (this: Command) {
       logger.info('Installing salty-css packages core, eslint-plugin and react');
-      await npmInstall('@salty-css/core @salty-css/react');
-      await npmInstall('-D @salty-css/eslint-plugin-core');
+      await npmInstall(packages.core, packages.react);
+      await npmInstall(`-D ${packages.eslintPluginCore}`);
 
       logger.info('Initializing a new Salty-CSS project...');
 
@@ -160,7 +189,7 @@ async function main() {
           const newContent = viteConfigContent.replace(/(plugins: \[)/, `$1\n  ${pluginConfig}`);
 
           logger.info('Installing @salty-css/vite');
-          await npmInstall('@salty-css/vite');
+          await npmInstall(packages.vite);
 
           logger.info('Adding Salty-CSS plugin to Vite config...');
           await writeFile(viteConfigPath, pluginImport + newContent);

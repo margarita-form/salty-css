@@ -9,6 +9,7 @@ export const execAsync = (command: string) => {
   });
 };
 
-export const npmInstall = async (packageName: string) => {
-  await execAsync(`npm install ${packageName}`);
+export const npmInstall = async (...packages: string[]) => {
+  const asString = packages.join(' ');
+  await execAsync(`npm install ${asString}`);
 };
