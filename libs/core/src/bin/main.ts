@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { readFile, writeFile, mkdir, FileHandle } from 'fs/promises';
+import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join, relative, parse as parsePath, format as formatPath } from 'path';
 import { render } from 'ejs';
 import { generateCss } from '../compiler';
@@ -44,7 +44,7 @@ export async function main() {
     return rcContent as RCFile;
   };
 
-  const readPackageJson = async (filePath: PathLike) => {
+  const readPackageJson = async (filePath: PathLike = join(process.cwd(), 'package.json')) => {
     const packageJsonContent = await readFile(filePath, 'utf-8')
       .then(JSON.parse)
       .catch(() => undefined);
@@ -94,6 +94,9 @@ export async function main() {
     .option('--skip-install', 'Skip installing dependencies.')
     // Validate that all options are provided
     .action(async function (this: Command, _dir = '.') {
+      const packageJson = await readPackageJson().catch(() => undefined);
+      if (!packageJson) return logError('Salty CSS project must be initialized in a directory with a package.json file.');
+
       logger.info('Initializing a new Salty-CSS project!');
       const { dir = _dir, cssFile, skipInstall } = this.opts<InitOptions>();
       if (!dir) return logError('Project directory must be provided. Add it as the first argument after init command or use the --dir option.');
