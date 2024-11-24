@@ -79,6 +79,13 @@ export async function main() {
     vite: `@salty-css/vite@${currentPackageJson.version}`,
   };
 
+  const resolveProjectDir = (dir: string) => {
+    const dirName = dir === '.' ? '' : dir;
+    const rootDir = process.cwd();
+    const projectDir = join(rootDir, dirName);
+    return projectDir;
+  };
+
   program
     .command('init [directory]')
     .description('Initialize a new Salty-CSS project.')
@@ -86,7 +93,7 @@ export async function main() {
     .option('--css-file <css-file>', 'Existing CSS file where to import the generated CSS. Path must be relative to the given project directory.')
     .option('--skip-install', 'Skip installing dependencies.')
     // Validate that all options are provided
-    .action(async function (this: Command, _dir: string) {
+    .action(async function (this: Command, _dir = '.') {
       logger.info('Initializing a new Salty-CSS project!');
       const { dir = _dir, cssFile, skipInstall } = this.opts<InitOptions>();
       if (!dir) return logError('Project directory must be provided. Add it as the first argument after init command or use the --dir option.');
@@ -97,7 +104,8 @@ export async function main() {
       }
 
       const rootDir = process.cwd();
-      const projectDir = join(rootDir, dir);
+
+      const projectDir = resolveProjectDir(dir);
       const projectFiles = await Promise.all([readTemplate('salty.config.ts'), readTemplate('saltygen/index.css')]);
 
       // Create the project structure if it doesn't exist
@@ -120,7 +128,7 @@ export async function main() {
       await Promise.all(writeFiles);
 
       // Create saltyrc file
-      const relativeProjectPath = relative(rootDir, projectDir);
+      const relativeProjectPath = relative(rootDir, projectDir) || '.';
       const saltyrcPath = join(rootDir, '.saltyrc');
       const existingSaltyrc = await readFile(saltyrcPath, 'utf-8').catch(() => undefined);
       if (existingSaltyrc === undefined) {
@@ -210,7 +218,7 @@ export async function main() {
       logger.info('Building the Salty-CSS project...');
       const { dir = _dir } = this.opts<BuildOptions>();
       if (!dir) return logError('Project directory must be provided. Add it as the first argument after build command or use the --dir option.');
-      const projectDir = join(process.cwd(), dir);
+      const projectDir = resolveProjectDir(dir);
       await generateCss(projectDir);
     });
 
@@ -236,7 +244,7 @@ export async function main() {
       if (!file) return logError('File to generate must be provided. Add it as the first argument after generate command or use the --file option.');
       if (!dir) return logError('Project directory must be provided. Add it as the second argument after generate command or use the --dir option.');
 
-      const projectDir = join(process.cwd(), dir);
+      const projectDir = resolveProjectDir(dir);
       const filePath = join(projectDir, file);
 
       const parsedFilePath = parsePath(filePath);
