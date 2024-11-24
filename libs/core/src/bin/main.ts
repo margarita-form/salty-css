@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { existsSync } from 'fs';
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join, relative, parse as parsePath, format as formatPath } from 'path';
 import { render } from 'ejs';
@@ -196,14 +197,43 @@ export async function main() {
           const pluginConfig = 'saltyPlugin(__dirname),';
           const newContent = viteConfigContent.replace(/(plugins: \[)/, `$1\n  ${pluginConfig}`);
 
-          logger.info('Installing @salty-css/vite');
-          if (!skipInstall) {
-            await npmInstall(`-D ${packages.vite}`);
-          }
+          if (!skipInstall) await npmInstall(`-D ${packages.vite}`);
 
           logger.info('Adding Salty-CSS plugin to Vite config...');
           await writeFile(viteConfigPath, pluginImport + newContent);
           await formatWithPrettier(viteConfigPath);
+        }
+      }
+
+      // Detect next.js and add the plugin
+      const nextConfigFiles = ['next.config.js', 'next.config.cjs', 'next.config.ts', 'next.config.mjs'];
+      const nextConfigPath = nextConfigFiles.map((file) => join(projectDir, file)).find((path) => existsSync(path));
+      if (nextConfigPath) {
+        let nextConfigContent = await readFile(nextConfigPath, 'utf-8').catch(() => undefined);
+        if (nextConfigContent !== undefined) {
+          const alreadyHasPlugin = nextConfigContent.includes('withSaltyCss');
+          if (!alreadyHasPlugin) {
+            logger.info('Edit file: ' + nextConfigPath);
+            const useRequire = nextConfigContent.includes('module.exports');
+
+            const pluginImport = useRequire ? "const { withSaltyCss } = require('@salty-css/next');\n" : "import { withSaltyCss } from '@salty-css/next';\n";
+
+            if (useRequire) {
+              nextConfigContent = nextConfigContent.replace(/module.exports = (.+)/, (_, config) => {
+                return `module.exports = withSaltyCss(${config})`;
+              });
+            } else {
+              nextConfigContent = nextConfigContent.replace(/export default (.+)/, (_, config) => {
+                return `export default withSaltyCss(${config})`;
+              });
+            }
+
+            if (!skipInstall) await npmInstall(`-D @salty-css/next`);
+
+            logger.info('Adding Salty-CSS plugin to Next.js config...');
+            await writeFile(nextConfigPath, pluginImport + nextConfigContent);
+            await formatWithPrettier(nextConfigPath);
+          }
         }
       }
     });
@@ -286,7 +316,7 @@ export async function main() {
     .alias('up')
     .description('Update Salty-CSS packages to the latest version.')
     .option('--legacy-peer-deps <legacyPeerDeps>', 'Use legacy peer dependencies (not recommended).', false)
-    .action(async function (this: Command, _file: string, _dir = defaultProject) {
+    .action(async function (this: Command) {
       const { legacyPeerDeps } = this.opts<UpdateOptions>();
       const packageJSONPath = join(process.cwd(), 'package.json');
       const packageJson = await readPackageJson(packageJSONPath).catch((err) => logError(err));
