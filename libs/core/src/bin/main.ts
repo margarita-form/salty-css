@@ -125,7 +125,7 @@ export async function main() {
         const additionalFolders = fileName.split('/').slice(0, -1).join('/');
         // Create additional folders if they don't exist
         if (additionalFolders) await mkdir(join(projectDir, additionalFolders), { recursive: true });
-        logger.info('Writing file: ' + filePath);
+        logger.info('Creating file: ' + filePath);
         await writeFile(filePath, content);
         await formatWithPrettier(filePath);
       });
@@ -214,7 +214,6 @@ export async function main() {
         if (nextConfigContent !== undefined) {
           const alreadyHasPlugin = nextConfigContent.includes('withSaltyCss');
           if (!alreadyHasPlugin) {
-            logger.info('Edit file: ' + nextConfigPath);
             const useRequire = nextConfigContent.includes('module.exports');
 
             const pluginImport = useRequire ? "const { withSaltyCss } = require('@salty-css/next');\n" : "import { withSaltyCss } from '@salty-css/next';\n";
