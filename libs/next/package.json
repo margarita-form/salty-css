@@ -1,0 +1,35 @@
+{
+  "name": "@salty-css/next",
+  "version": "0.0.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "typings": "./dist/index.d.ts",
+  "type": "module",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/margarita-form/salty-css",
+  "bugs": {
+    "url": "https://github.com/margarita-form/salty-css/issues"
+  },
+  "files": [
+    "**/*",
+    "!**/*.tsbuildinfo"
+  ],
+  "nx": {
+    "sourceRoot": "libs/next/src",
+    "name": "next"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.cjs"
+    }
+  },
+  "dependencies": {
+    "@salty-css/core": "^0.0.1-alpha.36",
+    "@salty-css/webpack": "^0.0.1-alpha.36"
+  }
+}
