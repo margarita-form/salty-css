@@ -93,6 +93,7 @@ export async function main() {
     .action(async function (this: Command, _dir: string) {
       logger.info('Initializing a new Salty-CSS project!');
       const { dir = _dir, cssFile, skipInstall } = this.opts<InitOptions>();
+      if (!dir) throw new Error('Project directory must be provided. Add it as the first argument after init command or use the --dir option.');
 
       if (!skipInstall) {
         await npmInstall(packages.core, packages.react);
@@ -212,6 +213,7 @@ export async function main() {
     .action(async function (this: Command, _dir = defaultProject) {
       logger.info('Building the Salty-CSS project...');
       const { dir = _dir } = this.opts<BuildOptions>();
+      if (!dir) throw new Error('Project directory must be provided. Add it as the first argument after build command or use the --dir option.');
       const projectDir = join(process.cwd(), dir);
       await generateCss(projectDir);
     });
@@ -225,16 +227,19 @@ export async function main() {
   }
 
   program
-    .command('generate [file]')
+    .command('generate [file] [directory]')
     .alias('g')
     .description('Generate a new component file.')
     .option('-f, --file <file>', 'File to generate.')
-    .option('-d, --dir <dir>', 'Project directory to generate the file in.', defaultProject)
+    .option('-d, --dir <dir>', 'Project directory to generate the file in.')
     .option('-t, --tag <tag>', 'HTML tag of the component.', 'div')
     .option('-n, --name <name>', 'Name of the component.')
     .option('-c, --className <className>', 'CSS class of the component.')
-    .action(async function (this: Command, _file: string) {
-      const { file = _file, dir, tag, name, className } = this.opts<GenerateOptions>();
+    .action(async function (this: Command, _file: string, _dir = defaultProject) {
+      const { file = _file, dir = _dir, tag, name, className } = this.opts<GenerateOptions>();
+      if (!file) throw new Error('File to generate must be provided. Add it as the first argument after generate command or use the --file option.');
+      if (!dir) throw new Error('Project directory must be provided. Add it as the second argument after generate command or use the --dir option.');
+
       const projectDir = join(process.cwd(), dir);
       const filePath = join(projectDir, file);
 
