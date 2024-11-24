@@ -1,4 +1,4 @@
-# Salty CSS - Kinda sweet but yet spicy CSS-in-JS library 🧂
+# Salty CSS - Kinda sweet but yet spicy CSS-in-JS library
 
 In the world of frontend dev is there anything saltier than CSS? Salty CSS is built to provide better developer experience for developers looking for performant and feature rich CSS-in-JS solutions.
 
@@ -12,11 +12,17 @@ In the world of frontend dev is there anything saltier than CSS? Salty CSS is bu
 
 ## Get started
 
+### TL;DR
+
+- Initialize: `npx salty-css init [directory]`
+- Create component: `npx salty-css generate [filePath]`
+- Build: `npx salty-css build [directory]`
+
 ### Quick way of using `salty-css` CLI
 
 #### Initialize Salty CSS for a project
 
-In your repository run `npx salty-css init [directory]` which installs required salty-css packages to the current directory and creates project files to the provided directory. Directory can be left blank if you want files to be created to the current directory.
+In your existing repository run `npx salty-css init [directory]` which installs required salty-css packages to the current directory and creates project files to the provided directory. Directory can be left blank if you want files to be created to the current directory. Init will also create `.saltyrc` which contains some metadata for future CLI commands.
 
 #### Create components
 
@@ -24,7 +30,7 @@ Components can be created with `npx salty-css generate [filePath]` which then cr
 
 #### Build / Compile Salty CSS
 
-If you want to manually build your project that can be done by running `npx salty-css build [directory]`
+If you want to manually build your project that can be done by running `npx salty-css build [directory]`. Directory is not required as CLI can use default directory defined in `.saltyrc`. Note that build generates css files but Vite / Webpack plugin is still required for full support.
 
 #### Update Salty CSS packages
 
