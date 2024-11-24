@@ -168,8 +168,33 @@ export async function main() {
       }
 
       // Edit the CSS file if provided
-      if (cssFile) {
-        const cssFilePath = join(projectDir, cssFile);
+      const cssFileFoldersToLookFor = ['src', 'public', 'assets', 'styles', 'css', 'app'];
+      const secondLevelFolders = ['styles', 'css', 'app', 'pages'];
+      const cssFilesToLookFor = ['index', 'styles', 'main', 'global'];
+      const cssFileExtensions = ['.css', '.scss', '.sass'];
+
+      const getTargetCssFile = async () => {
+        if (cssFile) return cssFile;
+        for (const folder of cssFileFoldersToLookFor) {
+          for (const file of cssFilesToLookFor) {
+            for (const ext of cssFileExtensions) {
+              const filePath = join(projectDir, folder, file + ext);
+              const fileContent = await readFile(filePath, 'utf-8').catch(() => undefined);
+              if (fileContent !== undefined) return relative(projectDir, filePath);
+              for (const secondLevelFolder of secondLevelFolders) {
+                const filePath = join(projectDir, folder, secondLevelFolder, file + ext);
+                const fileContent = await readFile(filePath, 'utf-8').catch(() => undefined);
+                if (fileContent !== undefined) return relative(projectDir, filePath);
+              }
+            }
+          }
+        }
+        return undefined;
+      };
+
+      const targetCSSFile = await getTargetCssFile();
+      if (targetCSSFile) {
+        const cssFilePath = join(projectDir, targetCSSFile);
         const cssFileContent = await readFile(cssFilePath, 'utf-8').catch(() => undefined);
         if (cssFileContent !== undefined) {
           const alreadyImportsSaltygen = cssFileContent.includes('saltygen');
@@ -177,7 +202,7 @@ export async function main() {
             const cssFileFolder = join(cssFilePath, '..');
             const relativePath = relative(cssFileFolder, join(projectDir, 'saltygen/index.css'));
             const importStatement = `@import '${relativePath}';`;
-            logger.info('Edit file: ' + cssFilePath);
+            logger.info('Adding global import statement to CSS file: ' + cssFilePath);
             await writeFile(cssFilePath, importStatement + '\n' + cssFileContent);
             await formatWithPrettier(cssFilePath);
           }
