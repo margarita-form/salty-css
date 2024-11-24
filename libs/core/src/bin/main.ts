@@ -207,6 +207,8 @@ export async function main() {
             await formatWithPrettier(cssFilePath);
           }
         }
+      } else {
+        logger.warn('Could not find a CSS file to import the generated CSS. Please add it manually.');
       }
 
       // Framework / build tool specific files
