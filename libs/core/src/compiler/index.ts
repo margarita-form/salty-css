@@ -300,12 +300,7 @@ export const minimizeFile = async (dirname: string, file: string) => {
 
       let current = original;
       Object.entries(contents).forEach(([name, value]) => {
-        if (value.isKeyframes) {
-          console.log('value', value);
-
-          return;
-        }
-
+        if (value.isKeyframes) return;
         if (!value.generator) return;
 
         const generator = value.generator._withBuildContext({
@@ -324,7 +319,7 @@ export const minimizeFile = async (dirname: string, file: string) => {
 
         const clientVersion = `${name} = styled(${tagName}, "${generator.classNames}", "${generator._callerName}", ${JSON.stringify(generator.props)});`;
 
-        const regexp = new RegExp(`${name}[=\\s]+[^()]+styled\\(([^,]+),[^;]+;`, 'g');
+        const regexp = new RegExp(`${name}[=\\s]+[^()]+styled\\(([^)]|\\n|\\(.*\\){1})+\\)$`, 'gm');
 
         current = current.replace(regexp, clientVersion);
       });
@@ -339,7 +334,7 @@ export const minimizeFile = async (dirname: string, file: string) => {
       return current;
     }
   } catch (e) {
-    console.error(e);
+    console.error('Error in minimizeFile', e);
   }
   return undefined;
 };
