@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/vite",
-  "version": "0.0.1-alpha.39",
+  "version": "0.0.1-alpha.40",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -29,6 +29,6 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.0.1-alpha.39"
+    "@salty-css/core": "^0.0.1-alpha.40"
   }
 }
