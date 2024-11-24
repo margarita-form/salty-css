@@ -260,6 +260,9 @@ export async function main() {
       parsedFilePath.base = parsedFilePath.name + parsedFilePath.ext;
       const formattedFilePath = formatPath(parsedFilePath);
 
+      const additionalFolders = formattedFilePath.split('/').slice(0, -1).join('/');
+      if (additionalFolders) await mkdir(join(projectDir, additionalFolders), { recursive: true });
+
       const alreadyExists = await readFile(formattedFilePath, 'utf-8').catch(() => undefined);
       if (alreadyExists !== undefined) {
         logger.error('File already exists:', formattedFilePath);
