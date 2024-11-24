@@ -5,3 +5,7 @@ export const logger = createLogger({
   format: format.combine(format.colorize(), format.cli()),
   transports: [new transports.Console({})],
 });
+
+export const logError = (message: string) => {
+  logger.error(message);
+};
