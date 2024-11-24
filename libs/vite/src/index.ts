@@ -22,3 +22,5 @@ export const saltyPlugin = (dir: string) => ({
     },
   },
 });
+
+export default saltyPlugin;

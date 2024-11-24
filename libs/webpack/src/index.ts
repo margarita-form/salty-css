@@ -23,3 +23,5 @@ export const saltyPlugin = (config: Configuration, dir: string, isServer = false
     });
   }
 };
+
+export default saltyPlugin;
