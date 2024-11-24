@@ -31,6 +31,7 @@ export default defineConfig({
       name: 'salty-css-webpack',
       entry: {
         index: 'src/index.ts',
+        loader: 'src/loader.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;
