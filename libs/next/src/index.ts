@@ -1,7 +1,8 @@
 import { saltyPlugin } from '@salty-css/webpack';
 
+type NextWebpackFNLike = (config: any, options: any) => any;
 interface NextConfigLike {
-  webpack?: (config: any, options: any) => any;
+  webpack?: null | undefined | NextWebpackFNLike;
 }
 
 export const withSaltyCss = <T extends NextConfigLike>(nextConfig: T): T => {
