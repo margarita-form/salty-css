@@ -31,6 +31,10 @@
     "winston": ">=3.x"
   },
   "exports": {
+    "./bin/main": {
+      "import": "./bin/main.js",
+      "require": "./bin/main.cjs"
+    },
     "./compiler": {
       "import": "./compiler/index.js",
       "require": "./compiler/index.cjs"

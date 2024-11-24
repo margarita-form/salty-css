@@ -42,6 +42,7 @@ export default defineConfig({
       name: 'salty-css-core',
       entry: {
         'bin/index': 'src/bin/index.ts',
+        'bin/main': 'src/bin/main.ts',
         'compiler/index': 'src/compiler/index.ts',
         'css/index': 'src/css/index.ts',
         'generator/index': 'src/generator/index.ts',
