@@ -219,11 +219,11 @@ export async function main() {
             const pluginImport = useRequire ? "const { withSaltyCss } = require('@salty-css/next');\n" : "import { withSaltyCss } from '@salty-css/next';\n";
 
             if (useRequire) {
-              nextConfigContent = nextConfigContent.replace(/module.exports = (.+)/, (_, config) => {
+              nextConfigContent = nextConfigContent.replace(/module.exports = ([^;]+)/, (_, config) => {
                 return `module.exports = withSaltyCss(${config})`;
               });
             } else {
-              nextConfigContent = nextConfigContent.replace(/export default (.+)/, (_, config) => {
+              nextConfigContent = nextConfigContent.replace(/export default ([^;]+)/, (_, config) => {
                 return `export default withSaltyCss(${config})`;
               });
             }
