@@ -95,7 +95,7 @@ export const generateConfigStyles = async (dirname: string) => {
 
   const tsTokensPath = join(destDir, 'types/css-tokens.d.ts');
   const tsTokens = [...variableTokens].join('|');
-  const tsTokensTypes = `type VariableTokens = ${tsTokens}; type PropertyValueToken = \`{\${VariableTokens}}\``;
+  const tsTokensTypes = `type VariableTokens = ${tsTokens || '""'}; type PropertyValueToken = \`{\${VariableTokens}}\``;
   writeFileSync(tsTokensPath, tsTokensTypes);
 
   // Generate global styles
