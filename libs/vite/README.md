@@ -1,15 +1,56 @@
-# Salty Css
+# Salty CSS - Kinda sweet but yet spicy CSS-in-JS library 🧂
 
-## Basic usage example with Button
+In the world of frontend dev is there anything saltier than CSS? Salty CSS is built to provide better developer experience for developers looking for performant and feature rich CSS-in-JS solutions.
 
-### Initial requirements
+## Features
 
-1. Add `saltyPlugin` to vite or webpack config from `@salty-css/vite` or `@salty-css/webpack`
-2. Create `salty.config.ts` to the root of your project
-3. Import global styles to any regular .css file from `saltygen/index.css` (does not exist during first run, cli command coming later)
-4. Create salty components with styled only inside files that end with `.css.ts`, `.salty.ts` `.styled.ts` or `.styles.ts`
+- Build time compilation to achieve awesome runtime performance and minimal size
+- Next.js, React Server Components, Vite and Webpack support
+- Type safety with out of the box TypeScript and ESLint plugin
+- Advanced CSS variables configuration to allow smooth token usage
+- Style templates to create reusable styles easily
 
-### Code examples
+## Get started
+
+### Quick way of using `salty-css` CLI
+
+#### Initialize Salty CSS for a project
+
+In your repository run `npx salty-css init [directory]` which installs required salty-css packages to the current directory and creates project files to the provided directory. Directory can be left blank if you want files to be created to the current directory.
+
+#### Create components
+
+Components can be created with `npx salty-css generate [filePath]` which then creates a new Salty CSS component file to the specified path. Additional options like `--dir, --tag, --name and --className` are also supported. Read more about them with `npx salty-css generate --help`
+
+#### Build / Compile Salty CSS
+
+If you want to manually build your project that can be done by running `npx salty-css build [directory]`
+
+#### Update Salty CSS packages
+
+To ease the pain of package updates all Salty CSS packages can be updated with `npx salty-css update`
+
+### Manual work
+
+#### React
+
+1. Install related dependencies: `npm i @salty-css/core @salty-css/react`
+2. Create `salty.config.ts` to your app directory
+
+#### Vite
+
+1. First check the instructions for React
+2. For Vite support install `npm i -D @salty-css/vite`
+3. In `vite.config.ts` add import for salty plugin `import { saltyPlugin } from '@salty-css/vite';` and then add `saltyPlugin(__dirname)` to your vite configuration plugins
+4. Make sure that `salty.config.ts` and `vite.config.ts` are in the same folder!
+
+### Create components
+
+1. Create salty components with styled only inside files that end with `.css.ts`, `.salty.ts` `.styled.ts` or `.styles.ts`
+
+## Code examples
+
+### Basic usage example with Button
 
 **Salty config**
 
