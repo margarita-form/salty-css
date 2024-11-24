@@ -170,7 +170,7 @@ export async function main() {
       // Edit the CSS file if provided
       const cssFileFoldersToLookFor = ['src', 'public', 'assets', 'styles', 'css', 'app'];
       const secondLevelFolders = ['styles', 'css', 'app', 'pages'];
-      const cssFilesToLookFor = ['index', 'styles', 'main', 'global'];
+      const cssFilesToLookFor = ['index', 'styles', 'main', 'global', 'globals'];
       const cssFileExtensions = ['.css', '.scss', '.sass'];
 
       const getTargetCssFile = async () => {
