@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { readFile, writeFile, mkdir } from 'fs/promises';
+import { readFile, writeFile, mkdir, FileHandle } from 'fs/promises';
 import { join, relative, parse as parsePath, format as formatPath } from 'path';
 import { render } from 'ejs';
 import { generateCss } from '../compiler';
@@ -7,6 +7,7 @@ import { pascalCase } from '../util';
 import { logError, logger } from './logger';
 import { formatWithPrettier } from './prettier';
 import { npmInstall } from './bin-util';
+import { PathLike } from 'fs';
 
 export async function main() {
   const program = new Command();
@@ -43,22 +44,17 @@ export async function main() {
     return rcContent as RCFile;
   };
 
-  const readThisPackageJson = async () => {
-    const packageJsonPath = new URL('../package.json', import.meta.url);
-    const packageJsonContent = await readFile(packageJsonPath, 'utf-8')
+  const readPackageJson = async (filePath: PathLike) => {
+    const packageJsonContent = await readFile(filePath, 'utf-8')
       .then(JSON.parse)
-      .catch(() => ({}));
-
+      .catch(() => undefined);
+    if (!packageJsonContent) throw 'Could not read package.json file!';
     return packageJsonContent;
   };
 
-  const readPackageJson = async (projectDir: string) => {
-    const packageJsonPath = join(projectDir, 'package.json');
-    const packageJsonContent = await readFile(packageJsonPath, 'utf-8')
-      .then(JSON.parse)
-      .catch(() => ({}));
-
-    return packageJsonContent;
+  const readThisPackageJson = async () => {
+    const packageJsonPath = new URL('../package.json', import.meta.url);
+    return readPackageJson(packageJsonPath);
   };
 
   const getDefaultProject = async () => {
@@ -265,6 +261,42 @@ export async function main() {
       await writeFile(formattedFilePath, content);
 
       await formatWithPrettier(formattedFilePath);
+    });
+
+  interface UpdateOptions {
+    legacyPeerDeps: boolean;
+  }
+
+  program
+    .command('update')
+    .alias('up')
+    .description('Update Salty-CSS packages to the latest version.')
+    .option('--legacy-peer-deps <legacyPeerDeps>', 'Use legacy peer dependencies (not recommended).', false)
+    .action(async function (this: Command, _file: string, _dir = defaultProject) {
+      const { legacyPeerDeps } = this.opts<UpdateOptions>();
+      const packageJSONPath = join(process.cwd(), 'package.json');
+      const packageJson = await readPackageJson(packageJSONPath).catch((err) => logError(err));
+      if (!packageJson) return;
+      const allDependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
+      const saltyCssPackages = Object.keys(allDependencies).filter((dep) => dep === 'salty-css' || dep.startsWith('@salty-css/'));
+      if (!saltyCssPackages.length) {
+        return logError(
+          'No Salty-CSS packages found in package.json. Make sure you are running update command in the same directory! Used package.json path: ' +
+            packageJSONPath
+        );
+      }
+      const packagesToUpdate = saltyCssPackages.map((dep) => {
+        return `${dep}@${currentPackageJson.version}`;
+      });
+
+      if (legacyPeerDeps) {
+        logger.warn('Using legacy peer dependencies to update packages.');
+        await npmInstall(...packagesToUpdate, '--legacy-peer-deps');
+      } else {
+        await npmInstall(...packagesToUpdate);
+      }
+
+      logger.info('Salty-CSS packages updated successfully!');
     });
 
   program.parseAsync(process.argv);
