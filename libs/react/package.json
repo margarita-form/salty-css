@@ -43,6 +43,6 @@
   "dependencies": {
     "@salty-css/core": "^0.0.1-alpha.27",
     "clsx": ">=2.x",
-    "react": ">=18.3.x"
+    "react": ">=19.x || >=18.3.x"
   }
 }

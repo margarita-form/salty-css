@@ -28,8 +28,8 @@
       "require": "./index.cjs"
     }
   },
-  "peerDependencies": {
-    "@salty-css/core": "^0.0.1-alpha.15",
+  "dependencies": {
+    "@salty-css/core": "^0.0.1-alpha.27",
     "webpack": ">=5.x"
   }
 }
