@@ -78,6 +78,7 @@ export async function main() {
     react: `@salty-css/react@${currentPackageJson.version}`,
     eslintPluginCore: `@salty-css/eslint-plugin-core@${currentPackageJson.version}`,
     vite: `@salty-css/vite@${currentPackageJson.version}`,
+    next: `@salty-css/next@${currentPackageJson.version}`,
   };
 
   const resolveProjectDir = (dir: string) => {
@@ -228,7 +229,7 @@ export async function main() {
               });
             }
 
-            if (!skipInstall) await npmInstall(`-D @salty-css/next`);
+            if (!skipInstall) await npmInstall(`-D ${packages.next}`);
 
             logger.info('Adding Salty-CSS plugin to Next.js config...');
             await writeFile(nextConfigPath, pluginImport + nextConfigContent);
