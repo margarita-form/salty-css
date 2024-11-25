@@ -12,13 +12,22 @@ In the world of frontend dev is there anything saltier than CSS? Salty CSS is bu
 
 ## Get started
 
-### TL;DR
-
 - Initialize: `npx salty-css init [directory]`
 - Create component: `npx salty-css generate [filePath]`
 - Build: `npx salty-css build [directory]`
 
-### Quick way of using `salty-css` CLI
+### Packages
+
+- [React](#react) → `npm install @salty-css/react`
+- [Next.js](#nextjs) → `npm install @salty-css/next`
+- [Vite](#vite) → `npm install @salty-css/vite`
+- [Webpack](https://www.npmjs.com/package/@salty-css/webpack) → `npm install @salty-css/webpack`
+- [Core](https://www.npmjs.com/package/@salty-css/react) → `npm install @salty-css/core`
+- [ESLint](https://www.npmjs.com/package/@salty-css/eslint-plugin-core) → `npm install @salty-css/eslint-plugin-core`
+
+[View React example](#example-dynamic-form-with-react)
+
+### Add Salty CSS to your project with `salty-css` CLI
 
 #### Initialize Salty CSS for a project
 
@@ -45,7 +54,7 @@ To ease the pain of package updates all Salty CSS packages can be updated with `
 
 #### Next.js
 
-1. First check the instructions for React
+1. First check the instructions for [React](#react)
 2. For Next.js support install `npm i -D @salty-css/next`
 3. Add Salty CSS plugin to next.js config
 
@@ -53,13 +62,17 @@ To ease the pain of package updates all Salty CSS packages can be updated with `
 - **Next.js 14 and older:** In `next.config.js` add import for salty plugin `const { withSaltyCss } = require('@salty-css/next');` and then add `withSaltyCss` to wrap your nextConfig export like so `module.exports = withSaltyCss(nextConfig);`
 
 4. Make sure that `salty.config.ts` and `next.config.ts` are in the same folder!
+5. Build `saltygen` directory by running your app once or with cli `npx salty-css build [directory]`
+6. Import global styles from `saltygen/index.css` to some global css file with `@import 'insert_path_to_index_css';`.
 
 #### Vite
 
-1. First check the instructions for React
+1. First check the instructions for [React](#react)
 2. For Vite support install `npm i -D @salty-css/vite`
 3. In `vite.config` add import for salty plugin `import { saltyPlugin } from '@salty-css/vite';` and then add `saltyPlugin(__dirname)` to your vite configuration plugins
 4. Make sure that `salty.config.ts` and `vite.config.ts` are in the same folder!
+5. Build `saltygen` directory by running your app once or with cli `npx salty-css build [directory]`
+6. Import global styles from `saltygen/index.css` to some global css file with `@import 'insert_path_to_index_css';`.
 
 ### Create components
 
