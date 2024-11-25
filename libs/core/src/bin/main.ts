@@ -241,15 +241,27 @@ export async function main() {
         if (nextConfigContent !== undefined) {
           const alreadyHasPlugin = nextConfigContent.includes('withSaltyCss');
           if (!alreadyHasPlugin) {
-            const useRequire = nextConfigContent.includes('module.exports');
+            let saltyCssAppended = false;
 
+            // Detect plugins array that is used at least with NX
+            const hasPluginsArray = /plugins[^=]*=/.test(nextConfigContent);
+            if (hasPluginsArray && !saltyCssAppended) {
+              nextConfigContent = nextConfigContent.replace(/plugins([^=]*)=/, (_, config) => {
+                return `plugins${config}= [withSaltyCss,`;
+              });
+              saltyCssAppended = true;
+            }
+
+            // Default way of adding plugin
+            const useRequire = nextConfigContent.includes('module.exports');
             const pluginImport = useRequire ? "const { withSaltyCss } = require('@salty-css/next');\n" : "import { withSaltyCss } from '@salty-css/next';\n";
 
-            if (useRequire) {
+            if (useRequire && !saltyCssAppended) {
               nextConfigContent = nextConfigContent.replace(/module.exports = ([^;]+)/, (_, config) => {
                 return `module.exports = withSaltyCss(${config})`;
               });
-            } else {
+              saltyCssAppended = true;
+            } else if (!saltyCssAppended) {
               nextConfigContent = nextConfigContent.replace(/export default ([^;]+)/, (_, config) => {
                 return `export default withSaltyCss(${config})`;
               });
