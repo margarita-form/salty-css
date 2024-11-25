@@ -12,13 +12,20 @@ In the world of frontend dev is there anything saltier than CSS? Salty CSS is bu
 
 ## Get started
 
-### TL;DR
-
 - Initialize: `npx salty-css init [directory]`
 - Create component: `npx salty-css generate [filePath]`
 - Build: `npx salty-css build [directory]`
 
-### Quick way of using `salty-css` CLI
+### Packages
+
+- [React](https://www.npmjs.com/package/@salty-css/react) → `npm install @salty-css/react`
+- [Next.js](https://www.npmjs.com/package/@salty-css/next) → `npm install @salty-css/next`
+- [Vite](https://www.npmjs.com/package/@salty-css/vite) → `npm install @salty-css/vite`
+- [Webpack](https://www.npmjs.com/package/@salty-css/webpack) → `npm install @salty-css/webpack`
+- [Core](https://www.npmjs.com/package/@salty-css/react) → `npm install @salty-css/core`
+- [ESLint](https://www.npmjs.com/package/@salty-css/eslint-plugin-core) → `npm install @salty-css/eslint-plugin-core`
+
+### Add Salty CSS to your project with `salty-css` CLI
 
 #### Initialize Salty CSS for a project
 
