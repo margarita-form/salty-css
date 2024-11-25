@@ -391,7 +391,7 @@ export async function main() {
     .description('Show the current version of Salty-CSS.')
     .action(async function () {
       const currentPackageJson = await readThisPackageJson();
-      logger.info('CLI is running:', currentPackageJson.version);
+      logger.info('CLI is running: ' + currentPackageJson.version);
 
       const packageJSONPath = join(process.cwd(), 'package.json');
       const packageJson = await readPackageJson(packageJSONPath).catch((err) => logError(err));
@@ -405,7 +405,7 @@ export async function main() {
         );
       }
       for (const dep of saltyCssPackages) {
-        logger.info(dep, allDependencies[dep]);
+        logger.info(`${dep}: ${allDependencies[dep]}`);
       }
     });
 
