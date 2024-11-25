@@ -308,11 +308,11 @@ export const minimizeFile = async (dirname: string, file: string) => {
           config,
         });
 
-        const regexpResult = new RegExp(`${name}[=\\s]+[^()]+styled\\(([^,]+),`, 'g').exec(original);
+        const regexpResult = new RegExp(`\\s${name}[=\\s]+[^()]+styled\\(([^,]+),`, 'g').exec(original);
         if (!regexpResult) return console.error('Could not find the original declaration');
         const tagName = regexpResult.at(1)?.trim();
 
-        const matches = new RegExp(`${name}[=\\s]+styled\\(`, 'g').exec(current);
+        const matches = new RegExp(`\\s${name}[=\\s]+styled\\(`, 'g').exec(current);
         if (!matches) return console.error('Could not find the original declaration');
         const { index: rangeStart } = matches;
 
@@ -341,7 +341,7 @@ export const minimizeFile = async (dirname: string, file: string) => {
 
         // Replace the styled call with the client version
         const copy = current;
-        const clientVersion = `${name} = styled(${tagName}, "${generator.classNames}", "${generator._callerName}", ${JSON.stringify(generator.props)});`;
+        const clientVersion = ` ${name} = styled(${tagName}, "${generator.classNames}", "${generator._callerName}", ${JSON.stringify(generator.props)});`;
         current = current.replace(range, clientVersion);
 
         if (copy === current) console.error('Minimize file failed to change content', { name, tagName });

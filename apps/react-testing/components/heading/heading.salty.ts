@@ -29,3 +29,14 @@ export const LargeHeadingH1 = styled(LargeHeading, {
     },
   },
 });
+
+export const HeadingH1 = styled(LargeHeading, {
+  element: 'h1',
+  base: {
+    color: '{custom.variables.thatCanGoDeep}',
+    transition: '200ms',
+    '&:hover': {
+      opacity: 0.5,
+    },
+  },
+});
