@@ -225,8 +225,16 @@ export const generateCss = async (dirname: string) => {
 
     const otherGlobalCssFiles = globalCssFiles.map((file) => `@import url('./css/${file}');`).join('\n');
 
-    const globalImports = ["@import url('./css/variables.css');", "@import url('./css/global.css');", "@import url('./css/templates.css');"];
-    // const cssContent = `${globalImports.join('\n')}\n${cssFileImports}`;
+    const globalCssFilenames = ['variables.css', 'global.css', 'templates.css'];
+    const importsWithData = globalCssFilenames.filter((file) => {
+      try {
+        const data = readFileSync(join(destDir, 'css', file), 'utf8');
+        return data.length > 0;
+      } catch {
+        return false;
+      }
+    });
+    const globalImports = importsWithData.map((file) => `@import url('./css/${file}');`);
     let cssContent = `@layer l0, l1, l2, l3, l4, l5, l6, l7, l8;\n\n${globalImports.join('\n')}\n${otherGlobalCssFiles}`;
     if (config.importStrategy !== 'component') {
       const cssFileImports = cssFiles
