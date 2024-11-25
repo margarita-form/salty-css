@@ -25,7 +25,7 @@ In the world of frontend dev is there anything saltier than CSS? Salty CSS is bu
 - [Core](https://www.npmjs.com/package/@salty-css/react) → `npm install @salty-css/core`
 - [ESLint](https://www.npmjs.com/package/@salty-css/eslint-plugin-core) → `npm install @salty-css/eslint-plugin-core`
 
-[View React example](#example-dynamic-form-with-react)
+[View React example](#code-examples)
 
 ### Add Salty CSS to your project with `salty-css` CLI
 
