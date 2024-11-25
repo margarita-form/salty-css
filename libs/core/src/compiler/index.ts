@@ -309,19 +309,42 @@ export const minimizeFile = async (dirname: string, file: string) => {
         });
 
         const regexpResult = new RegExp(`${name}[=\\s]+[^()]+styled\\(([^,]+),`, 'g').exec(original);
+        if (!regexpResult) return console.error('Could not find the original declaration');
+        const tagName = regexpResult.at(1)?.trim();
 
-        if (!regexpResult) {
-          return console.error('Could not find the original declaration');
+        const matches = new RegExp(`${name}[=\\s]+styled\\(`, 'g').exec(current);
+        if (!matches) return console.error('Could not find the original declaration');
+        const { index: rangeStart } = matches;
+
+        let forceStop = false;
+        const timeout = setTimeout(() => (forceStop = true), 5000);
+
+        let currentIndex = 0;
+        let endBracketFound = false;
+        let innerBracketCount = 0;
+
+        // Find the end of the styled call
+        while (!endBracketFound && !forceStop) {
+          const char = current[rangeStart + currentIndex];
+          if (char === '(') innerBracketCount++;
+          if (char === ')') innerBracketCount--;
+          if (innerBracketCount === 0 && char === ')') endBracketFound = true;
+          if (currentIndex > current.length) forceStop = true;
+          currentIndex++;
         }
 
-        const tagName = regexpResult.at(1)?.trim();
-        // const { element, variantKeys } = generator.props;
+        if (!forceStop) clearTimeout(timeout);
+        else throw new Error('Failed to find the end of the styled call and timed out');
 
+        const rangeEnd = rangeStart + currentIndex;
+        const range = current.slice(rangeStart, rangeEnd);
+
+        // Replace the styled call with the client version
+        const copy = current;
         const clientVersion = `${name} = styled(${tagName}, "${generator.classNames}", "${generator._callerName}", ${JSON.stringify(generator.props)});`;
+        current = current.replace(range, clientVersion);
 
-        const regexp = new RegExp(`${name}[=\\s]+[^()]+styled\\(([^)]|\\n|\\(.*\\){1})+\\)$`, 'gm');
-
-        current = current.replace(regexp, clientVersion);
+        if (copy === current) console.error('Minimize file failed to change content', { name, tagName });
       });
 
       const fileHash = toHash(file, 6);
@@ -334,7 +357,7 @@ export const minimizeFile = async (dirname: string, file: string) => {
       return current;
     }
   } catch (e) {
-    console.error('Error in minimizeFile', e);
+    console.error('Error in minimizeFile:', e);
   }
   return undefined;
 };
