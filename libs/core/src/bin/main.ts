@@ -385,29 +385,25 @@ export async function main() {
       logger.info('Salty-CSS packages updated successfully!');
     });
 
-  program
-    .command('version')
-    .alias('v')
-    .description('Show the current version of Salty-CSS.')
-    .action(async function () {
-      const currentPackageJson = await readThisPackageJson();
-      logger.info('CLI is running: ' + currentPackageJson.version);
+  program.option('-v, --version', 'Show the current version of Salty-CSS.').action(async function () {
+    const currentPackageJson = await readThisPackageJson();
+    logger.info('CLI is running: ' + currentPackageJson.version);
 
-      const packageJSONPath = join(process.cwd(), 'package.json');
-      const packageJson = await readPackageJson(packageJSONPath).catch((err) => logError(err));
-      if (!packageJson) return;
-      const allDependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
-      const saltyCssPackages = Object.keys(allDependencies).filter((dep) => dep === 'salty-css' || dep.startsWith('@salty-css/'));
-      if (!saltyCssPackages.length) {
-        return logError(
-          'No Salty-CSS packages found in package.json. Make sure you are running update command in the same directory! Used package.json path: ' +
-            packageJSONPath
-        );
-      }
-      for (const dep of saltyCssPackages) {
-        logger.info(`${dep}: ${allDependencies[dep]}`);
-      }
-    });
+    const packageJSONPath = join(process.cwd(), 'package.json');
+    const packageJson = await readPackageJson(packageJSONPath).catch((err) => logError(err));
+    if (!packageJson) return;
+    const allDependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
+    const saltyCssPackages = Object.keys(allDependencies).filter((dep) => dep === 'salty-css' || dep.startsWith('@salty-css/'));
+    if (!saltyCssPackages.length) {
+      return logError(
+        'No Salty-CSS packages found in package.json. Make sure you are running update command in the same directory! Used package.json path: ' +
+          packageJSONPath
+      );
+    }
+    for (const dep of saltyCssPackages) {
+      logger.info(`${dep}: ${allDependencies[dep]}`);
+    }
+  });
 
   program.parseAsync(process.argv);
 }
