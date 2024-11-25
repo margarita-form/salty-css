@@ -5,7 +5,7 @@ import { toHash } from '@salty-css/core/util';
 type KeyframeKeys = number | 'from' | 'to' | `${number}%`;
 
 type Keyframes = {
-  [key in KeyframeKeys]: CssStyles;
+  [key in KeyframeKeys]?: CssStyles;
 };
 
 interface KeyframesConfig {
@@ -42,12 +42,14 @@ export const keyframes = ({ animationName: _name, params: _params, appendInitial
 
     const animation = `${animationName} ${duration} ${easing} ${delay} ${iterationCount} ${direction} ${fillMode} ${playState}`;
     if (!appendInitialStyles) return animation;
-
-    const startStyles = parseStyles(keyframes.from || keyframes['0%'], '');
+    const startingFrom = keyframes.from || keyframes['0%'];
+    if (!startingFrom) return animation;
+    const startStyles = parseStyles(startingFrom, '');
     return `${animation};${startStyles}`;
   };
 
   const keyframesCss = Object.entries(keyframes).reduce((acc, [key, value]) => {
+    if (!value) return acc;
     const styles = parseStyles(value, '');
     const keyStr = typeof key === 'number' ? `${key}%` : key;
     return `${acc}${keyStr}{${styles}}`;
