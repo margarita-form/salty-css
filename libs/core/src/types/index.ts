@@ -1,6 +1,6 @@
-import type { AllHTMLAttributes, ReactDOM, ReactNode, StyleHTMLAttributes } from 'react';
+import type { AllHTMLAttributes, ReactDOM, ReactNode } from 'react';
 import type { StyleComponentGenerator } from '../generator';
-import type { OrString } from './util-types';
+import type { OrAny, OrString } from './util-types';
 
 export type CreateElementProps = {
   extend?: Tag<any>;
@@ -16,7 +16,7 @@ export type CreateElementProps = {
 export type StyledComponentProps = Record<string, unknown> & CreateElementProps;
 
 type FnComponent<PROPS extends StyledComponentProps> = {
-  (props: PROPS): ReactNode;
+  (props: OrAny | PROPS): ReactNode;
   generator?: StyleComponentGenerator;
 };
 
