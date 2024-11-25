@@ -244,9 +244,9 @@ export async function main() {
             let saltyCssAppended = false;
 
             // Detect plugins array that is used at least with NX
-            const hasPluginsArray = /plugins[^=]*=/.test(nextConfigContent);
+            const hasPluginsArray = /\splugins([^=]*)=[^[]\[/.test(nextConfigContent);
             if (hasPluginsArray && !saltyCssAppended) {
-              nextConfigContent = nextConfigContent.replace(/plugins([^=]*)=/, (_, config) => {
+              nextConfigContent = nextConfigContent.replace(/\splugins([^=]*)=[^[]\[/, (_, config) => {
                 return `plugins${config}= [withSaltyCss,`;
               });
               saltyCssAppended = true;
