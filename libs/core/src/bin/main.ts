@@ -247,7 +247,7 @@ export async function main() {
             const hasPluginsArray = /\splugins([^=]*)=[^[]\[/.test(nextConfigContent);
             if (hasPluginsArray && !saltyCssAppended) {
               nextConfigContent = nextConfigContent.replace(/\splugins([^=]*)=[^[]\[/, (_, config) => {
-                return `plugins${config}= [withSaltyCss,`;
+                return ` plugins${config}= [withSaltyCss,`;
               });
               saltyCssAppended = true;
             }
