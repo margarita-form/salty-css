@@ -41,7 +41,8 @@ type Variants = {
   compoundVariants?: CompoundVariant[];
 };
 
-type VariantPropValue<T> = T extends 'true' ? 'true' | true : T;
+type BooleanVariantValue = 'true' | 'false' | boolean;
+type VariantPropValue<T> = T extends 'true' ? BooleanVariantValue : T extends 'false' ? BooleanVariantValue : T;
 
 export type VariantProps<STYLES extends StyledParams> = STYLES['variants'] extends undefined
   ? object
