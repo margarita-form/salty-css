@@ -172,10 +172,13 @@ export const generateCss = async (dirname: string) => {
 
     // Function to copy files/directories recursively
     async function copyRecursively(src: string, dest: string) {
+      const foldersToSkip = ['node_modules', 'saltygen'];
       const stats = statSync(src);
 
       if (stats.isDirectory()) {
         const files = readdirSync(src);
+        const shouldSkip = foldersToSkip.some((folder) => src.includes(folder));
+        if (shouldSkip) return;
         await Promise.all(files.map((file) => copyRecursively(join(src, file), join(dest, file))));
       } else if (stats.isFile()) {
         const validFile = isSaltyFile(src);
