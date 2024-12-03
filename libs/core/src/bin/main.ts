@@ -275,6 +275,15 @@ export async function main() {
           }
         }
       }
+
+      // All done & next steps
+      logger.info('🎉 Salty CSS project initialized successfully!');
+      logger.info('Next steps:');
+      logger.info('1. Configure variables and templates in `salty.config.ts`.');
+      logger.info('2. Create a new component with `npx salty-css generate [component-name]`.');
+      logger.info('3. Run `npx salty-css build` to generate the CSS.');
+      logger.info('4. Star the project on GitHub: https://github.com/margarita-form/salty-css');
+      logger.info('5. Read about the features in the documentation: https://salty-css.dev');
     });
 
   interface BuildOptions {
