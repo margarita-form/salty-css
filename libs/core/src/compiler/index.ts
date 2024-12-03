@@ -10,6 +10,7 @@ import { parseStyles } from '../generator/parse-styles';
 import { parseTemplates } from '../generator/parse-templates';
 import { CssConditionalVariables, CssResponsiveVariables } from '../config';
 import { parseValueTokens } from '../generator/parse-tokens';
+import { detectCurrentModuleType } from '../util/module-type';
 
 const getDestDir = (dirname: string) => join(dirname, './saltygen');
 
@@ -22,14 +23,17 @@ const generateConfig = async (dirname: string) => {
   const coreConfigPath = join(dirname, 'salty.config.ts');
   const coreConfigDest = join(destDir, 'salty.config.js');
 
+  const moduleType = detectCurrentModuleType();
+  console.log('Module type:', moduleType);
+
   await esbuild.build({
     entryPoints: [coreConfigPath],
     minify: true,
     treeShaking: true,
     bundle: true,
     outfile: coreConfigDest,
-    format: 'esm',
-    external: ['react'],
+    format: moduleType,
+    // external: ['react'],
   });
 
   const now = Date.now();
@@ -115,16 +119,19 @@ export const compileSaltyFile = async (sourceFilePath: string, outputDirectory: 
   const hashedName = toHash(sourceFilePath);
   const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
 
+  const moduleType = detectCurrentModuleType();
+  console.log('Module type:', moduleType);
+
   await esbuild.build({
     entryPoints: [sourceFilePath],
     minify: true,
     treeShaking: true,
     bundle: true,
     outfile: outputFilePath,
-    format: 'esm',
+    format: moduleType,
     target: ['es2022'],
     keepNames: true,
-    external: ['react'],
+    // external: ['react'],
   });
 
   const now = Date.now();
