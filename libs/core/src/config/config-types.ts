@@ -1,4 +1,5 @@
 import { CssStyles } from '../types';
+import { OrString } from '../types/util-types';
 
 type CssTemplate = CssStyles | { [key: PropertyKey]: CssTemplate };
 
@@ -61,4 +62,8 @@ export interface SaltyConfig {
    * The modifiers that can transform css values.
    */
   modifiers?: CssModifiers;
+  /**
+   * Define modules that should not be bundled when generating the css file. This improves the performance of the css generation and can help with issues relared to external packages being imported in an environment that does not support them.
+   */
+  externalModules?: ('react' | 'react-dom' | OrString)[];
 }
