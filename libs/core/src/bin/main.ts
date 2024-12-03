@@ -45,12 +45,19 @@ export async function main() {
     return rcContent as RCFile;
   };
 
-  const readPackageJson = async (filePath: PathLike = join(process.cwd(), 'package.json')) => {
+  const defaultPackageJsonPath = join(process.cwd(), 'package.json');
+
+  const readPackageJson = async (filePath: PathLike = defaultPackageJsonPath) => {
     const packageJsonContent = await readFile(filePath, 'utf-8')
       .then(JSON.parse)
       .catch(() => undefined);
     if (!packageJsonContent) throw 'Could not read package.json file!';
     return packageJsonContent;
+  };
+
+  const updatePackageJson = async (content: string | object, filePath: PathLike = defaultPackageJsonPath) => {
+    if (typeof content === 'object') content = JSON.stringify(content, null, 2);
+    await writeFile(filePath, content);
   };
 
   const readThisPackageJson = async () => {
@@ -275,6 +282,26 @@ export async function main() {
           }
         }
       }
+
+      // Add prepare script to package.json
+      const packageJsonContent = await readPackageJson()
+        .catch(() => logError('Could not read package.json file.'))
+        .then((content) => {
+          if (!content.scripts) content.scripts = {};
+          if (content.scripts.prepare) {
+            const alreadyHasSaltyCss = content.scripts.prepare.includes('salty-css');
+            if (!alreadyHasSaltyCss) {
+              logger.info('Edit file: ' + defaultPackageJsonPath);
+              content.scripts.prepare = content.scripts.prepare + ' && npx salty-css build';
+            }
+          } else {
+            logger.info('Edit file: ' + defaultPackageJsonPath);
+            content.scripts.prepare = 'npx salty-css build';
+          }
+          return content;
+        });
+
+      await updatePackageJson(packageJsonContent);
 
       // All done & next steps
       logger.info('🎉 Salty CSS project initialized successfully!');
