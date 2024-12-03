@@ -61,8 +61,12 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, l
     if (config?.templates && config.templates[_key]) {
       const path = value.split('.');
       const templateStyles = path.reduce((acc: Record<string, any>, key: string) => acc[key], config.templates[_key]);
-      const result = parseStyles(templateStyles, '');
-      return `${acc}${result}`;
+      if (templateStyles) {
+        const result = parseStyles(templateStyles, '');
+        return `${acc}${result}`;
+      }
+      console.warn(`Template "${_key}" with path of "${value}" was not found in config!`);
+      return acc;
     }
 
     const propertyName = _key.startsWith('-') ? _key : dashCase(_key);
