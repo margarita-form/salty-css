@@ -12,6 +12,28 @@ import { CssConditionalVariables, CssResponsiveVariables } from '../config';
 import { parseValueTokens } from '../generator/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
 
+const getSaltyRc = (dirname: string) => {
+  if (!dirname || dirname === '/') throw new Error('Could not find .saltyrc file');
+  const rcPath = join(dirname, '.saltyrc');
+  if (!existsSync(rcPath)) return getSaltyRc(join(dirname, '..'));
+  return rcPath;
+};
+
+const cache = {
+  externalModules: [] as string[],
+};
+
+const getExternalModules = (dirname: string) => {
+  if (cache.externalModules.length > 0) return cache.externalModules;
+  const coreConfigPath = join(dirname, 'salty.config.ts');
+  const content = readFileSync(coreConfigPath, 'utf8');
+  const match = content.match(/externalModules:\s?\[(.*)\]/);
+  if (!match) return [];
+  const externalModules = match[1].split(',').map((d) => d.replace(/['"`]/g, '').trim());
+  cache.externalModules = externalModules;
+  return externalModules;
+};
+
 const getDestDir = (dirname: string) => join(dirname, './saltygen');
 
 export const saltyFileExtensions = ['salty', 'css', 'styles', 'styled'];
@@ -24,8 +46,7 @@ const generateConfig = async (dirname: string) => {
   const coreConfigDest = join(destDir, 'salty.config.js');
 
   const moduleType = detectCurrentModuleType();
-  console.log('Module type:', moduleType);
-
+  const externalModules = getExternalModules(dirname);
   await esbuild.build({
     entryPoints: [coreConfigPath],
     minify: true,
@@ -33,7 +54,7 @@ const generateConfig = async (dirname: string) => {
     bundle: true,
     outfile: coreConfigDest,
     format: moduleType,
-    // external: ['react'],
+    external: externalModules,
   });
 
   const now = Date.now();
@@ -115,13 +136,12 @@ export const generateConfigStyles = async (dirname: string) => {
   writeFileSync(templateStylesPath, templateStylesString);
 };
 
-export const compileSaltyFile = async (sourceFilePath: string, outputDirectory: string) => {
+export const compileSaltyFile = async (dirname: string, sourceFilePath: string, outputDirectory: string) => {
   const hashedName = toHash(sourceFilePath);
   const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
 
   const moduleType = detectCurrentModuleType();
-  console.log('Module type:', moduleType);
-
+  const externalModules = getExternalModules(dirname);
   await esbuild.build({
     entryPoints: [sourceFilePath],
     minify: true,
@@ -131,7 +151,7 @@ export const compileSaltyFile = async (sourceFilePath: string, outputDirectory: 
     format: moduleType,
     target: ['es2022'],
     keepNames: true,
-    // external: ['react'],
+    external: externalModules,
   });
 
   const now = Date.now();
@@ -191,7 +211,7 @@ export const generateCss = async (dirname: string) => {
         const validFile = isSaltyFile(src);
 
         if (validFile) {
-          const contents = await compileSaltyFile(src, destDir);
+          const contents = await compileSaltyFile(dirname, src, destDir);
           const localCssFiles: string[] = [];
           Object.entries(contents).forEach(([name, value]) => {
             if (value.isKeyframes && value.css) {
@@ -271,7 +291,7 @@ export const generateFile = async (dirname: string, file: string) => {
 
     if (validFile) {
       const config = await getConfig(dirname);
-      const contents = await compileSaltyFile(file, destDir);
+      const contents = await compileSaltyFile(dirname, file, destDir);
       Object.entries(contents).forEach(([name, value]: [string, any]) => {
         if (!value.generator) return;
 
@@ -314,7 +334,7 @@ export const minimizeFile = async (dirname: string, file: string) => {
       if (copy !== original) await writeFile(file, original);
 
       const config = await getConfig(dirname);
-      const contents = await compileSaltyFile(file, destDir);
+      const contents = await compileSaltyFile(dirname, file, destDir);
 
       let current = original;
       Object.entries(contents).forEach(([name, value]) => {
