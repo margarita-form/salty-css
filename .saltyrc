@@ -1,0 +1,6 @@
+{
+  "defaultProject": "apps/react-testing",
+  "projects": [
+    "apps/react-testing"
+  ]
+}
