@@ -1,7 +1,7 @@
 import { CssStyles } from '../types';
 import { OrString } from '../types/util-types';
 
-type CssTemplate = CssStyles | { [key: PropertyKey]: CssTemplate };
+export type GlobalStyles = Record<string, CssStyles>;
 
 export type CssVariables = Record<string, unknown>;
 
@@ -14,6 +14,8 @@ export interface CssConditionalVariables {
     [key: PropertyKey]: CssVariables;
   };
 }
+
+type CssTemplate = CssStyles | { [key: PropertyKey]: CssTemplate };
 
 export interface CssTemplates {
   [key: PropertyKey]: {
@@ -53,7 +55,7 @@ export interface SaltyConfig {
   /**
    * The global styles that are imported in the root of the project.
    */
-  global?: CssStyles;
+  global?: GlobalStyles;
   /**
    * The templates that can be used in styles to create reusable css.
    */
