@@ -4,7 +4,7 @@ interface <%- componentName %>Props {
   // Add your props here
 }
 
-export const <%- componentName %> = (props: <%- name %>Props) => {
+export const <%- componentName %> = (props: <%- componentName %>Props) => {
   return (
     <<%- styledName %>>
       Hellow world
