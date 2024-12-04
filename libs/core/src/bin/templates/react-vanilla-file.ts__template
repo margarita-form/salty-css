@@ -1,0 +1,13 @@
+import { <%- styledName %> } from "./<%- fileName %>.css";
+
+interface <%- name %>Props {
+  // Add your props here
+}
+
+export const <%- componentName %> = (props: <%- name %>Props) => {
+  return (
+    <<%- styledName %>>
+      Hellow world
+    </<%- styledName %>>
+  );
+};

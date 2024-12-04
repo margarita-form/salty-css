@@ -21,6 +21,7 @@ export async function main() {
     'saltygen/index.css': import('./templates/index.css__template'),
     // React
     'react/react-styled-file.ts': import('./templates/react-styled-file.ts__template'),
+    'react/react-vanilla-file.ts': import('./templates/react-vanilla-file.ts__template'),
   } as const;
 
   type Template = keyof typeof files;
@@ -336,6 +337,7 @@ export async function main() {
     tag: string;
     name?: string;
     className?: string;
+    reactComponent?: boolean;
   }
 
   program
@@ -347,8 +349,9 @@ export async function main() {
     .option('-t, --tag <tag>', 'HTML tag of the component.', 'div')
     .option('-n, --name <name>', 'Name of the component.')
     .option('-c, --className <className>', 'CSS class of the component.')
+    .option('-rc, --reactComponent <rc>', 'Generate a React component as well.')
     .action(async function (this: Command, _file: string, _dir = defaultProject) {
-      const { file = _file, dir = _dir, tag, name, className } = this.opts<GenerateOptions>();
+      const { file = _file, dir = _dir, tag, name, className, reactComponent = false } = this.opts<GenerateOptions>();
       if (!file) return logError('File to generate must be provided. Add it as the first argument after generate command or use the --file option.');
       if (!dir) return logError('Project directory must be provided. Add it as the second argument after generate command or use the --dir option.');
 
@@ -373,10 +376,22 @@ export async function main() {
         logger.error('File already exists:', formattedFilePath);
         return;
       }
-      logger.info('Generating a new file: ' + formattedFilePath);
 
       const _name = pascalCase(name || parsedFilePath.base.replace(/\.css\.\w+$/, ''));
+      if (reactComponent) {
+        const componentName = _name + 'Component';
+        const fileName = parsedFilePath.base.replace(/\.css\.\w+$/, '');
+        const { content: reactContent } = await readTemplate('react/react-vanilla-file.ts', { tag, componentName, styledName: _name, className, fileName });
+
+        parsedFilePath.name = fileName.replace(/\.css$/, '');
+        parsedFilePath.ext = '.tsx';
+        parsedFilePath.base = parsedFilePath.name + parsedFilePath.ext;
+        const formattedReactFilePath = formatPath(parsedFilePath);
+        logger.info('Generating a new file: ' + formattedReactFilePath);
+        await writeFile(formattedReactFilePath, reactContent);
+      }
       const { content } = await readTemplate('react/react-styled-file.ts', { tag, name: _name, className });
+      logger.info('Generating a new file: ' + formattedFilePath);
       await writeFile(formattedFilePath, content);
 
       await formatWithPrettier(formattedFilePath);
