@@ -1,6 +1,6 @@
 import { <%- styledName %> } from "./<%- fileName %>.css";
 
-interface <%- name %>Props {
+interface <%- componentName %>Props {
   // Add your props here
 }
 
