@@ -369,19 +369,20 @@ export async function main() {
         parsedFilePath.name = parsedFilePath.name + '.css';
       }
       parsedFilePath.base = parsedFilePath.name + parsedFilePath.ext;
-      const formattedFilePath = formatPath(parsedFilePath);
+      const formattedStyledFilePath = formatPath(parsedFilePath);
 
-      const alreadyExists = await readFile(formattedFilePath, 'utf-8').catch(() => undefined);
+      const alreadyExists = await readFile(formattedStyledFilePath, 'utf-8').catch(() => undefined);
       if (alreadyExists !== undefined) {
-        logger.error('File already exists:', formattedFilePath);
+        logger.error('File already exists:', formattedStyledFilePath);
         return;
       }
 
-      const _name = pascalCase(name || parsedFilePath.base.replace(/\.css\.\w+$/, ''));
+      let styledComponentName = pascalCase(name || parsedFilePath.base.replace(/\.css\.\w+$/, ''));
       if (reactComponent) {
-        const componentName = _name + 'Component';
+        const componentName = styledComponentName + 'Component';
+        styledComponentName = styledComponentName + 'Wrapper';
         const fileName = parsedFilePath.base.replace(/\.css\.\w+$/, '');
-        const { content: reactContent } = await readTemplate('react/react-vanilla-file.ts', { tag, componentName, styledName: _name, className, fileName });
+        const { content: reactContent } = await readTemplate('react/react-vanilla-file.ts', { tag, componentName, styledComponentName, className, fileName });
 
         parsedFilePath.name = fileName.replace(/\.css$/, '');
         parsedFilePath.ext = '.tsx';
@@ -389,12 +390,13 @@ export async function main() {
         const formattedReactFilePath = formatPath(parsedFilePath);
         logger.info('Generating a new file: ' + formattedReactFilePath);
         await writeFile(formattedReactFilePath, reactContent);
+        await formatWithPrettier(formattedReactFilePath);
       }
-      const { content } = await readTemplate('react/react-styled-file.ts', { tag, name: _name, className });
-      logger.info('Generating a new file: ' + formattedFilePath);
-      await writeFile(formattedFilePath, content);
+      const { content } = await readTemplate('react/react-styled-file.ts', { tag, name: styledComponentName, className });
+      logger.info('Generating a new file: ' + formattedStyledFilePath);
+      await writeFile(formattedStyledFilePath, content);
 
-      await formatWithPrettier(formattedFilePath);
+      await formatWithPrettier(formattedStyledFilePath);
     });
 
   interface UpdateOptions {

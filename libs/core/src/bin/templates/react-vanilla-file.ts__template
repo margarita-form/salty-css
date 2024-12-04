@@ -1,13 +1,15 @@
-import { <%- styledName %> } from "./<%- fileName %>.css";
+import { <%- styledComponentName %> } from "./<%- fileName %>.css";
 
 interface <%- componentName %>Props {
-  // Add your props here
+  text?: string;
 }
 
-export const <%- componentName %> = (props: <%- componentName %>Props) => {
+export const <%- componentName %> = ({ text = 'Lorem ipsum' }: <%- componentName %>Props) => {
   return (
-    <<%- styledName %>>
-      Hellow world
-    </<%- styledName %>>
+    <<%- styledComponentName %>>
+      {text}
+    </<%- styledComponentName %>>
   );
 };
+
+export default <%- componentName %>;
