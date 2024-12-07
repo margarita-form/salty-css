@@ -8,6 +8,10 @@
     "access": "public"
   },
   "homepage": "https://salty-css.dev/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/margarita-form/salty-css.git"
+  },
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
