@@ -10,7 +10,7 @@
   "publishConfig": {
     "access": "public"
   },
-  https://salty-css.dev/
+  "homepage": "https://salty-css.dev/",
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
