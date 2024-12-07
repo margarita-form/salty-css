@@ -10,6 +10,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "description": "ESLint plugin for Salty CSS",
   "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",

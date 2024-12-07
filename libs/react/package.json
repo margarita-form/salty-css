@@ -10,6 +10,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "description": "React library for Salty CSS",
   "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",

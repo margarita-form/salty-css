@@ -10,6 +10,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "description": "Core library for Salty CSS. Will be used by other Salty CSS libraries and plugins.",
   "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",

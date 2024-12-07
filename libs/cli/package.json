@@ -8,6 +8,7 @@
     "access": "public"
   },
   "homepage": "https://salty-css.dev/",
+  "description": "CLI for Salty CSS",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/margarita-form/salty-css.git"
