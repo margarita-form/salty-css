@@ -12,13 +12,6 @@ import { CssConditionalVariables, CssResponsiveVariables } from '../config';
 import { parseValueTokens } from '../generator/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
 
-const getSaltyRc = (dirname: string) => {
-  if (!dirname || dirname === '/') throw new Error('Could not find .saltyrc file');
-  const rcPath = join(dirname, '.saltyrc');
-  if (!existsSync(rcPath)) return getSaltyRc(join(dirname, '..'));
-  return rcPath;
-};
-
 const cache = {
   externalModules: [] as string[],
 };
@@ -45,7 +38,7 @@ const generateConfig = async (dirname: string) => {
   const coreConfigPath = join(dirname, 'salty.config.ts');
   const coreConfigDest = join(destDir, 'salty.config.js');
 
-  const moduleType = detectCurrentModuleType();
+  const moduleType = await detectCurrentModuleType(dirname);
   const externalModules = getExternalModules(dirname);
   await esbuild.build({
     entryPoints: [coreConfigPath],
@@ -140,7 +133,7 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
   const hashedName = toHash(sourceFilePath);
   const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
 
-  const moduleType = detectCurrentModuleType();
+  const moduleType = await detectCurrentModuleType(dirname);
   const externalModules = getExternalModules(dirname);
   await esbuild.build({
     entryPoints: [sourceFilePath],
