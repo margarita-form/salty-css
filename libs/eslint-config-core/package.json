@@ -1,5 +1,5 @@
 {
-  "name": "@salty-css/vite",
+  "name": "@salty-css/eslint-config-core",
   "version": "0.0.1-alpha.77",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -10,7 +10,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "Vite plugin for Salty CSS",
+  "description": "ESLint plugin for Salty CSS",
   "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",
@@ -24,8 +24,8 @@
     "!**/*.tsbuildinfo"
   ],
   "nx": {
-    "sourceRoot": "libs/vite/src",
-    "name": "vite"
+    "sourceRoot": "libs/eslint-config-core/src",
+    "name": "eslint-config-core"
   },
   "exports": {
     ".": {
@@ -34,6 +34,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.0.1-alpha.77"
+    "@salty-css/core": "^0.0.1-alpha.77",
+    "eslint": ">=9.x || >=8.x || >=7.x"
   }
 }
