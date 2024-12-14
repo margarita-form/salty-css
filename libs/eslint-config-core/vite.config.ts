@@ -32,6 +32,7 @@ export default defineConfig({
       name: 'salty-css-eslint-config-core',
       entry: {
         index: 'src/index.ts',
+        flat: 'src/flat.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;

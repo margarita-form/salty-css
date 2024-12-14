@@ -31,6 +31,10 @@
     ".": {
       "import": "./index.js",
       "require": "./index.cjs"
+    },
+    "./flat": {
+      "import": "./flat.js",
+      "require": "./flat.cjs"
     }
   },
   "dependencies": {

@@ -4,14 +4,12 @@ import { ESLint } from 'eslint';
 
 const eslintConfigCore = {
   plugins: ['@salty-css/core'],
-  rules: {
-    'core/no-variants-in-base': 'error',
-  },
   overrides: [
     {
-      files: ['*.css.ts', '*.css.tsx'],
+      files: ['*.ts', '*.tsx'],
       rules: {
-        '@salty-css/core/no-variants-in-base': ['error'],
+        '@salty-css/core/no-variants-in-base': 'error',
+        '@salty-css/core/must-be-exported': 'error',
       },
     },
   ],
