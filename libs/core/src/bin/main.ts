@@ -84,7 +84,7 @@ export async function main() {
   const packages = {
     core: `@salty-css/core@${currentPackageJson.version}`,
     react: `@salty-css/react@${currentPackageJson.version}`,
-    eslintPluginCore: `@salty-css/eslint-plugin-core@${currentPackageJson.version}`,
+    eslintConfigCore: `@salty-css/eslint-config-core@${currentPackageJson.version}`,
     vite: `@salty-css/vite@${currentPackageJson.version}`,
     next: `@salty-css/next@${currentPackageJson.version}`,
   };
@@ -111,10 +111,7 @@ export async function main() {
       const { dir = _dir, cssFile, skipInstall } = this.opts<InitOptions>();
       if (!dir) return logError('Project directory must be provided. Add it as the first argument after init command or use the --dir option.');
 
-      if (!skipInstall) {
-        await npmInstall(packages.core, packages.react);
-        await npmInstall(`-D ${packages.eslintPluginCore}`);
-      }
+      if (!skipInstall) await npmInstall(packages.core, packages.react);
 
       const rootDir = process.cwd();
 
@@ -220,6 +217,33 @@ export async function main() {
       }
 
       // Framework / build tool specific files
+
+      // Detect eslint and add the config
+      const rootEslintConfigPath = join(rootDir, '.eslintrc.json');
+      const rootEslintConfigExists = existsSync(rootEslintConfigPath);
+      const projectEslintConfigPath = join(projectDir, '.eslintrc.json');
+      const projectEslintConfigExists = existsSync(projectEslintConfigPath);
+
+      if (rootEslintConfigExists || projectEslintConfigExists) {
+        if (!skipInstall) await npmInstall(packages.eslintConfigCore);
+
+        const eslintConfigToUse = projectEslintConfigExists ? projectEslintConfigPath : rootEslintConfigPath;
+        const eslintConfigContent = await readFile(eslintConfigToUse, 'utf-8').catch(() => undefined);
+        if (!eslintConfigContent) return logError('Could not read ESLint config file.');
+
+        const alreadyHasSaltyConfig = eslintConfigContent.includes('salty-css');
+        if (!alreadyHasSaltyConfig) {
+          const eslintConfigJson = JSON.parse(eslintConfigContent);
+          logger.info('Edit file: ' + eslintConfigToUse);
+
+          if (!eslintConfigJson.extends) eslintConfigJson.extends = [];
+          eslintConfigJson.extends.push('@salty-css/core');
+
+          const modifiedEslintConfigContent = JSON.stringify(eslintConfigJson, null, 2);
+          await writeFile(eslintConfigToUse, modifiedEslintConfigContent);
+          await formatWithPrettier(eslintConfigToUse);
+        }
+      }
 
       // Detect vite and add the plugin
       const viteConfigPath = join(projectDir, 'vite.config.ts');
