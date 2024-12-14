@@ -1,6 +1,6 @@
 import { getFile, setFile } from './script-helpers.mjs';
 
-const packages = ['core', 'react', 'next', 'cli', 'eslint-plugin-core', 'vite', 'webpack'];
+const packages = ['core', 'react', 'next', 'cli', 'eslint-config-core', 'eslint-plugin-core', 'vite', 'webpack'];
 
 const rootPath = '../README.md';
 const corePath = '../dist/libs/margarita-form/README.md';

@@ -1,0 +1,6 @@
+{
+  "name": "eslint-config-core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/eslint-config-core",
+  "projectType": "library"
+}

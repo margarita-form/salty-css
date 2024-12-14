@@ -13,17 +13,19 @@
     "build:vite": "nx run vite:build",
     "build:next": "nx run next:build",
     "build:webpack": "nx run webpack:build",
+    "build:eslint-config-core": "nx run eslint-config-core:build",
     "build:eslint-plugin-core": "nx run eslint-plugin-core:build",
-    "build:all": "npm run update-readmes && nx run-many --target=build --projects core react vite next webpack eslint-plugin-core",
+    "build:all": "npm run update-readmes && nx run-many --target=build --projects core react vite next webpack eslint-config-core eslint-plugin-core",
     "publish:cli": "cd libs/cli && npm publish",
     "publish:core": "cd libs/core/dist && npm publish",
     "publish:react": "cd libs/react/dist && npm publish",
     "publish:vite": "cd libs/vite/dist && npm publish",
     "publish:next": "cd libs/next/dist && npm publish",
     "publish:webpack": "cd libs/webpack/dist && npm publish",
+    "publish:eslint-config-core": "cd libs/eslint-config-core/dist && npm publish",
     "publish:eslint-plugin-core": "cd libs/eslint-plugin-core/dist && npm publish",
-    "publish:all-dev": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && npm run publish:cli --tag dev && npm run publish:core --tag dev && npm run publish:react --tag dev && npm run publish:vite --tag dev && npm run publish:next --tag dev && npm run publish:webpack --tag dev && npm run publish:eslint-plugin-core --tag dev",
-    "publish:all-latest": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && npm run publish:cli && npm run publish:core && npm run publish:react && npm run publish:vite && npm run publish:next && npm run publish:webpack && npm run publish:eslint-plugin-core"
+    "publish:all-dev": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && npm run publish:cli --tag dev && npm run publish:core --tag dev && npm run publish:react --tag dev && npm run publish:vite --tag dev && npm run publish:next --tag dev && npm run publish:webpack --tag dev && npm run publish:eslint-config-core --tag dev && npm run publish:eslint-plugin-core --tag dev",
+    "publish:all-latest": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && npm run publish:cli && npm run publish:core && npm run publish:react && npm run publish:vite && npm run publish:next && npm run publish:webpack && npm run publish:eslint-config-core && npm run publish:eslint-plugin-core"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
