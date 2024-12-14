@@ -18,8 +18,8 @@
     "esModuleInterop": true,
     "paths": {
       "@salty-css/core/*": ["libs/core/src/*"],
-      "@salty-css/react/*": ["libs/react/src/*"],
       "@salty-css/next": ["libs/next/src/index.ts"],
+      "@salty-css/react/*": ["libs/react/src/*"],
       "@salty-css/vite": ["libs/vite/src/index.ts"],
       "@salty-css/webpack": ["libs/webpack/src/index.ts"]
     }
