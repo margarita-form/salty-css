@@ -7,9 +7,13 @@ export interface GeneratorProps {
   element?: string;
   variantKeys?: string[];
   propValueKeys?: string[];
+  attr: {
+    [key: string]: any;
+  };
 }
 
 export class StyleComponentGenerator {
+  public _isProd: boolean | undefined;
   public _callerName: string | undefined;
   public _context: { name: string; config: any } | undefined;
 
@@ -76,12 +80,16 @@ export class StyleComponentGenerator {
       element,
       variantKeys,
       propValueKeys: [...propValueKeys],
+      attr: {
+        'data-component-name': !this._isProd ? this._callerName : undefined,
+      },
     };
   }
 
-  public _withBuildContext(context: { name: string; config: any }) {
+  public _withBuildContext(context: { name: string; config: any; prod: boolean }) {
     this._context = context;
-    const { name, config } = context;
+    const { name, config, prod } = context;
+    this._isProd = prod;
     this._callerName = name;
     return this;
   }

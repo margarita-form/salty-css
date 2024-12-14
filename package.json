@@ -8,6 +8,7 @@
     "pretty": "prettier --write .",
     "update-readmes": "node ./scripts/update-readmes.mjs",
     "dev:react-testing": "nx run react-testing:serve",
+    "build:react-testing": "nx run react-testing:build",
     "build:core": "nx run core:build",
     "build:react": "nx run react:build",
     "build:vite": "nx run vite:build",

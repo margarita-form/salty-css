@@ -20,6 +20,7 @@ export const elementFactory = (tagName: Tag<any>, _className: string, _generator
     elementRef: ForwardedRef<any>
   ) => {
     const passedProps = { passVariantProps } as StyledComponentProps;
+    if (_generatorProps.attr) Object.assign(passedProps, _generatorProps.attr);
     if (_additionalProps) Object.assign(passedProps, _additionalProps);
     if (props) Object.assign(passedProps, props);
 

@@ -11,6 +11,7 @@ import { parseTemplates } from '../generator/parse-templates';
 import { CssConditionalVariables, CssResponsiveVariables } from '../config';
 import { parseValueTokens } from '../generator/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
+import { logger } from '../bin/logger';
 
 const cache = {
   externalModules: [] as string[],
@@ -167,8 +168,19 @@ const getConfig = async (dirname: string) => {
   return config;
 };
 
-export const generateCss = async (dirname: string) => {
+const isProduction = () => {
   try {
+    return process.env['NODE_ENV'] === 'production';
+  } catch {
+    return false;
+  }
+};
+
+export const generateCss = async (dirname: string, prod = isProduction()) => {
+  try {
+    if (prod) logger.info('Generating CSS in production mode! 🔥');
+    else logger.info('Generating CSS in development mode! 🚀');
+
     const globalCssFiles: string[] = [];
     const cssFiles: string[][] = [];
     const destDir = getDestDir(dirname);
@@ -223,6 +235,7 @@ export const generateCss = async (dirname: string) => {
             const generator = value.generator._withBuildContext({
               name,
               config,
+              prod,
             });
 
             const fileName = `${generator.hash}-${generator.priority}.css`;
@@ -314,7 +327,7 @@ export const generateFile = async (dirname: string, file: string) => {
   }
 };
 
-export const minimizeFile = async (dirname: string, file: string) => {
+export const minimizeFile = async (dirname: string, file: string, prod = isProduction()) => {
   try {
     const destDir = join(dirname, './saltygen');
     const validFile = isSaltyFile(file);
@@ -337,6 +350,7 @@ export const minimizeFile = async (dirname: string, file: string) => {
         const generator = value.generator._withBuildContext({
           name,
           config,
+          prod,
         });
 
         const regexpResult = new RegExp(`\\s${name}[=\\s]+[^()]+styled\\(([^,]+),`, 'g').exec(original);
@@ -372,7 +386,7 @@ export const minimizeFile = async (dirname: string, file: string) => {
 
         // Replace the styled call with the client version
         const copy = current;
-        const clientVersion = ` ${name} = styled(${tagName}, "${generator.classNames}", "${generator._callerName}", ${JSON.stringify(generator.props)});`;
+        const clientVersion = ` ${name} = styled(${tagName}, "${generator.classNames}", ${JSON.stringify(generator.props)});`;
         current = current.replace(range, clientVersion);
 
         if (copy === current) console.error('Minimize file failed to change content', { name, tagName });
