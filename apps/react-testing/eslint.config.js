@@ -1,8 +1,11 @@
+/* eslint-disable @nx/enforce-module-boundaries */
 import baseConfig from '../../eslint.config.mjs';
+import saltyConfig from '../../libs/eslint-config-core/dist/flat.js';
 import jsoncEslintParser from 'jsonc-eslint-parser';
 
 export default [
   ...baseConfig,
+  saltyConfig,
   {
     files: ['**/*.json'],
     rules: {
