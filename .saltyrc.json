@@ -1,0 +1,11 @@
+{
+  "$schema": "libs/core/public/.saltyrc.schema.json",
+  "defaultProject": "apps/react-testing",
+  "projects": [
+    {
+      "dir": "apps/react-testing",
+      "framework": "react",
+      "components": "src"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Salty CSS CLI Run Configuration",
+  "description": "File .saltyrc.json is used to define projects and their configurations in json format for salty css cli.",
+  "type": "object",
+  "properties": {
+    "defaultProject": {
+      "type": "string",
+      "description": "The default project to be used."
+    },
+    "projects": {
+      "type": "array",
+      "description": "List of projects.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "dir": {
+            "type": "string",
+            "description": "The directory of the project. This is also used as the project name."
+          },
+          "framework": {
+            "type": "string",
+            "description": "The framework used by the project.",
+            "enum": ["react", "other"]
+          },
+          "components": {
+            "type": "string",
+            "description": "The directory for the components."
+          }
+        },
+        "required": ["dir", "framework"]
+      }
+    }
+  },
+  "required": ["defaultProject", "projects"]
+}

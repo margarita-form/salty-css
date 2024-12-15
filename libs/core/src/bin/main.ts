@@ -38,7 +38,7 @@ export async function main() {
   }
 
   const readRCFile = async () => {
-    const rcPath = join(process.cwd(), '.saltyrc');
+    const rcPath = join(process.cwd(), '.saltyrc.json');
     const rcContent = await readFile(rcPath, 'utf-8')
       .then(JSON.parse)
       .catch(() => ({}));
@@ -139,24 +139,32 @@ export async function main() {
 
       // Create saltyrc file
       const relativeProjectPath = relative(rootDir, projectDir) || '.';
-      const saltyrcPath = join(rootDir, '.saltyrc');
+      const saltyrcPath = join(rootDir, '.saltyrc.json');
       const existingSaltyrc = await readFile(saltyrcPath, 'utf-8').catch(() => undefined);
       if (existingSaltyrc === undefined) {
         logger.info('Creating file: ' + saltyrcPath);
         const rcContent = {
+          $schema: './node_modules/@salty-css/core/.saltyrc.schema.json',
           defaultProject: relativeProjectPath,
-          projects: [relativeProjectPath],
+          projects: [
+            {
+              dir: relativeProjectPath,
+              framework: 'react',
+            },
+          ],
         };
         const content = JSON.stringify(rcContent, null, 2);
         await writeFile(saltyrcPath, content);
       } else {
-        logger.info('Edit file: ' + saltyrcPath);
         const rcContent = JSON.parse(existingSaltyrc);
         const projects = new Set(rcContent?.projects || []);
         projects.add(relativeProjectPath);
         rcContent.projects = [...projects];
         const content = JSON.stringify(rcContent, null, 2);
-        await writeFile(saltyrcPath, content);
+        if (content !== existingSaltyrc) {
+          logger.info('Edit file: ' + saltyrcPath);
+          await writeFile(saltyrcPath, content);
+        }
       }
 
       // Edit files in the project
