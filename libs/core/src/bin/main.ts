@@ -251,13 +251,12 @@ export async function main() {
 
         const alreadyHasSaltyConfig = eslintConfigContent.includes('salty-css');
         if (!alreadyHasSaltyConfig) {
-          const eslintConfigJson = JSON.parse(eslintConfigContent);
           logger.info('Edit file: ' + eslintConfigToUse);
 
           // Same check for both .js and .mjs files
           if (eslintConfigToUse.endsWith('js')) {
             const importStatement = 'import saltyCss from "@salty-css/eslint-config-core/flat";';
-            let newContent = `${importStatement}\n${eslintConfigJson}`;
+            let newContent = `${importStatement}\n${eslintConfigContent}`;
             const isTsEslint = eslintConfigContent.includes('typescript-eslint');
             if (isTsEslint) {
               if (newContent.includes('.config(')) newContent = newContent.replace('.config(', '.config(saltyCss,');
@@ -270,6 +269,7 @@ export async function main() {
             await writeFile(eslintConfigToUse, newContent);
             await formatWithPrettier(eslintConfigToUse);
           } else {
+            const eslintConfigJson = JSON.parse(eslintConfigContent);
             if (!eslintConfigJson.extends) eslintConfigJson.extends = [];
             eslintConfigJson.extends.push('@salty-css/core');
 
