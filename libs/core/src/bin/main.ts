@@ -233,15 +233,19 @@ export async function main() {
       // Framework / build tool specific files
 
       // Detect eslint and add the config
-      const rootEslintConfigPath = join(rootDir, '.eslintrc.json');
-      const rootEslintConfigExists = existsSync(rootEslintConfigPath);
-      const projectEslintConfigPath = join(projectDir, '.eslintrc.json');
-      const projectEslintConfigExists = existsSync(projectEslintConfigPath);
+      const eslintConfigs = {
+        projectJs: join(projectDir, 'eslint.config.js'),
+        rootJs: join(rootDir, 'eslint.config.js'),
+        projectMjs: join(projectDir, 'eslint.config.mjs'),
+        rootMjs: join(rootDir, 'eslint.config.mjs'),
+        projectJson: join(projectDir, '.eslintrc.json'),
+        rootJson: join(rootDir, '.eslintrc.json'),
+      };
 
-      if (rootEslintConfigExists || projectEslintConfigExists) {
+      const eslintConfigToUse = Object.values(eslintConfigs).find((path) => existsSync(path));
+      if (eslintConfigToUse) {
         if (!skipInstall) await npmInstall(packages.eslintConfigCore);
 
-        const eslintConfigToUse = projectEslintConfigExists ? projectEslintConfigPath : rootEslintConfigPath;
         const eslintConfigContent = await readFile(eslintConfigToUse, 'utf-8').catch(() => undefined);
         if (!eslintConfigContent) return logError('Could not read ESLint config file.');
 
@@ -250,12 +254,29 @@ export async function main() {
           const eslintConfigJson = JSON.parse(eslintConfigContent);
           logger.info('Edit file: ' + eslintConfigToUse);
 
-          if (!eslintConfigJson.extends) eslintConfigJson.extends = [];
-          eslintConfigJson.extends.push('@salty-css/core');
+          // Same check for both .js and .mjs files
+          if (eslintConfigToUse.endsWith('js')) {
+            const importStatement = 'import saltyCss from "@salty-css/eslint-config-core/flat";';
+            let newContent = `${importStatement}\n${eslintConfigJson}`;
+            const isTsEslint = eslintConfigContent.includes('typescript-eslint');
+            if (isTsEslint) {
+              if (newContent.includes('.config(')) newContent = newContent.replace('.config(', '.config(saltyCss,');
+              else logger.warn('Could not find the correct place to add the Salty-CSS config for ESLint. Please add it manually.');
+            } else {
+              if (newContent.includes('export default [')) newContent = newContent.replace('export default [', 'export default [ saltyCss,');
+              else if (newContent.includes('eslintConfig = [')) newContent = newContent.replace('eslintConfig = [', 'eslintConfig = [ saltyCss,');
+              else logger.warn('Could not find the correct place to add the Salty-CSS config for ESLint. Please add it manually.');
+            }
+            await writeFile(eslintConfigToUse, newContent);
+            await formatWithPrettier(eslintConfigToUse);
+          } else {
+            if (!eslintConfigJson.extends) eslintConfigJson.extends = [];
+            eslintConfigJson.extends.push('@salty-css/core');
 
-          const modifiedEslintConfigContent = JSON.stringify(eslintConfigJson, null, 2);
-          await writeFile(eslintConfigToUse, modifiedEslintConfigContent);
-          await formatWithPrettier(eslintConfigToUse);
+            const modifiedEslintConfigContent = JSON.stringify(eslintConfigJson, null, 2);
+            await writeFile(eslintConfigToUse, modifiedEslintConfigContent);
+            await formatWithPrettier(eslintConfigToUse);
+          }
         }
       }
 
