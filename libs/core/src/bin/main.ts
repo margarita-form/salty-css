@@ -156,15 +156,20 @@ export async function main() {
         };
         const content = JSON.stringify(rcContent, null, 2);
         await writeFile(saltyrcPath, content);
+        await formatWithPrettier(saltyrcPath);
       } else {
         const rcContent = JSON.parse(existingSaltyrc);
-        const projects = new Set(rcContent?.projects || []);
-        projects.add(relativeProjectPath);
-        rcContent.projects = [...projects];
-        const content = JSON.stringify(rcContent, null, 2);
-        if (content !== existingSaltyrc) {
-          logger.info('Edit file: ' + saltyrcPath);
-          await writeFile(saltyrcPath, content);
+        const projects = (rcContent?.projects || []) as { dir: string; [key: string]: unknown }[];
+        const projectIndex = projects.findIndex((p) => p.dir === relativeProjectPath);
+        if (projectIndex === -1) {
+          projects.push({ dir: relativeProjectPath, framework: 'react' });
+          rcContent.projects = [...projects];
+          const content = JSON.stringify(rcContent, null, 2);
+          if (content !== existingSaltyrc) {
+            logger.info('Edit file: ' + saltyrcPath);
+            await writeFile(saltyrcPath, content);
+            await formatWithPrettier(saltyrcPath);
+          }
         }
       }
 
