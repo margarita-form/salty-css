@@ -1,5 +1,5 @@
 {
-  "name": "salty-css",
+  "name": "create-salty-css",
   "version": "0.0.1-alpha.90",
   "type": "module",
   "license": "MIT",
@@ -8,7 +8,7 @@
     "access": "public"
   },
   "homepage": "https://salty-css.dev/",
-  "description": "NPX CLI for Salty CSS",
+  "description": "NPM create CLI package for Salty CSS",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/margarita-form/salty-css.git"
@@ -21,13 +21,13 @@
     "!**/*.tsbuildinfo"
   ],
   "nx": {
-    "sourceRoot": "libs/cli",
-    "name": "cli"
+    "sourceRoot": "libs/npm-create",
+    "name": "npm-create"
   },
   "dependencies": {
     "@salty-css/core": "^0.0.1-alpha.90"
   },
   "bin": {
-    "salty-css": "./index.js"
+    "create-salty-css": "./index.js"
   }
 }
