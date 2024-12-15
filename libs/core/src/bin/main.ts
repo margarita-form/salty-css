@@ -145,6 +145,7 @@ export async function main() {
         logger.info('Creating file: ' + saltyrcPath);
         const rcContent = {
           $schema: './node_modules/@salty-css/core/.saltyrc.schema.json',
+          info: 'This file is used to define projects and their configurations for Salty CSS cli. Do not delete, modify or add this file to .gitignore.',
           defaultProject: relativeProjectPath,
           projects: [
             {

@@ -4,6 +4,10 @@
   "description": "File .saltyrc.json is used to define projects and their configurations in json format for salty css cli.",
   "type": "object",
   "properties": {
+    "info": {
+      "type": "string",
+      "description": "Info about what the file is about."
+    },
     "defaultProject": {
       "type": "string",
       "description": "The default project to be used."
