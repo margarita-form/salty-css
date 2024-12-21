@@ -55,9 +55,15 @@ export const elementFactory = (tagName: Tag<any>, _className: string, _generator
       });
     }
 
-    const deleteVKS = !extendsComponent || (!extendsStyled && !passVariantProps);
-    if (_vks && deleteVKS) _vks.forEach((vk) => delete passedProps[vk]);
-    else if (extendsStyled) Object.assign(passedProps, { _vks });
+    const deleteVKS = !extendsComponent || !extendsStyled;
+    if (_vks && deleteVKS) {
+      _vks.forEach((vk) => {
+        if (!passVariantProps) return delete passedProps[vk];
+        if (passVariantProps === true) return;
+        if (passVariantProps.includes(vk)) return;
+        return delete passedProps[vk];
+      });
+    } else if (extendsStyled) Object.assign(passedProps, { _vks });
 
     if (!extendsStyled) _styledKeys.forEach((key) => delete passedProps[key]);
     const joinedClassNames = clsx(_className, ...additionalClasses);
