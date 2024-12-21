@@ -1,4 +1,5 @@
-import type { AllHTMLAttributes, ReactDOM, ReactNode } from 'react';
+import type * as CSS from 'csstype';
+import type { ReactNode } from 'react';
 import type { StyleComponentGenerator } from '../generator';
 import type { OrAny, OrString } from './util-types';
 
@@ -20,21 +21,18 @@ type FnComponent<PROPS extends StyledComponentProps> = {
   generator?: StyleComponentGenerator;
 };
 
-export type Tag<PROPS extends StyledComponentProps> = OrString | keyof ReactDOM | FnComponent<PROPS>;
+export type Tag<PROPS extends StyledComponentProps> = OrString | keyof HTMLElementTagNameMap | FnComponent<PROPS>;
 
-//
+type CssProperties = { [key in keyof CSS.Properties]: CSS.Properties[key] | PropertyValueToken };
+type CssPropertyKeys = keyof CssProperties;
+export type StyleValue<K extends string> = K extends CssPropertyKeys ? CssProperties[K] : never;
 
-export type CompoundVariant = { [key: PropertyKey]: any; css: CssStyles };
-
-type InvalidVariantKeys = keyof AllHTMLAttributes<HTMLElement>;
-type StyleKeys = keyof Required<AllHTMLAttributes<HTMLElement>>['style'];
-
-export type StyleValue<K extends string> = K extends StyleKeys ? Required<AllHTMLAttributes<HTMLElement>>['style'][K] : never;
-
+type InvalidVariantKeys = '';
 type VariantOptions = {
   [key in InvalidVariantKeys]?: never;
 };
 
+export type CompoundVariant = { [key: PropertyKey]: any; css: CssStyles };
 type Variants = {
   variants?: VariantOptions & { [key: PropertyKey]: { [key: string]: Styles } };
   defaultVariants?: { [key: PropertyKey]: any };
@@ -61,7 +59,7 @@ export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (props: inf
 type StylePropertyValue = Record<never, never> & unknown;
 
 export type CssStyles = {
-  [key in StyleKeys | OrString]?: StyleValue<key> | StylePropertyValue | PropertyValueToken | CssStyles;
+  [key in OrString]?: CssProperties | StylePropertyValue | PropertyValueToken | CssStyles;
 };
 
 export type Styles = CssStyles & Variants;
@@ -72,6 +70,11 @@ export interface GeneratorOptions {
   element?: string;
 }
 
+interface Base extends CssProperties, CssStyles, CssPseudos {}
+
+type Pseudos = CSS.Pseudos | `&${CSS.Pseudos}`;
+type CssPseudos = { [P in Pseudos]?: Base };
+
 export interface StyledParams extends GeneratorOptions, Variants {
-  base?: CssStyles;
+  base?: Base;
 }
