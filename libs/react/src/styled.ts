@@ -5,7 +5,7 @@ import { elementFactory } from './element-factory';
 
 export const styled = <const PROPS extends StyledComponentProps, const TAG extends Tag<Required<PROPS>>, const STYLE_PARAMS extends StyledParams>(
   tagName: TAG,
-  params: StyledParams
+  params: STYLE_PARAMS
 ) => {
   const generator = new StyleComponentGenerator(tagName, params);
 
