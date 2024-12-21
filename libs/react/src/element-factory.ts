@@ -3,6 +3,7 @@ import { createElement, ForwardedRef, forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { StyledComponentProps, Tag } from '@salty-css/core/types';
 import { dashCase } from '@salty-css/core/util';
+import { parseValueTokens } from '@salty-css/core/generator/parse-tokens';
 
 const _styledKeys = ['passVariantProps'];
 
@@ -31,14 +32,21 @@ export const elementFactory = (tagName: Tag<any>, _className: string, _generator
     const type = extendsComponent ? extend : element || extend;
     if (!type) throw new Error('No element provided');
 
+    const styles = passedProps['style'] || {};
+    if (!passedProps['style']) passedProps['style'] = styles;
+
+    Object.entries(styles).forEach(([key, value]) => {
+      const { result } = parseValueTokens(value);
+      styles[key] = result;
+    });
+
     if (_generatorProps.propValueKeys) {
-      if (!passedProps['style']) passedProps['style'] = {};
       _generatorProps.propValueKeys.forEach((key) => {
         const name = `css-${key}`;
         const value = props[name];
         if (value === undefined) return;
         const variableName = `--props-${dashCase(key)}`;
-        passedProps['style'][variableName] = value;
+        styles[variableName] = value;
         if (_vks) _vks.add(name);
       });
     }

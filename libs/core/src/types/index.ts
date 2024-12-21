@@ -9,7 +9,7 @@ export type CreateElementProps = {
   className?: string;
   element?: string;
   passVariantProps?: boolean | string | string[];
-  style?: any;
+  style?: CssProperties & { [key: string]: OrAny | PropertyValueToken };
   /** vks = Variant key set */
   _vks?: Set<string>;
 };
