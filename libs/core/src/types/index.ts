@@ -61,7 +61,7 @@ export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (props: inf
 type StylePropertyValue = Record<never, never> & unknown;
 
 export type CssStyles = {
-  [key in OrString]?: CssProperties | StylePropertyValue | PropertyValueToken | CssStyles;
+  [key in OrString]?: CssProperties | StylePropertyValue | PropertyValueToken | TemplateTokens | CssStyles;
 };
 
 export type Styles = CssStyles & Variants;
@@ -72,7 +72,7 @@ export interface GeneratorOptions {
   element?: string;
 }
 
-interface Base extends CssProperties, CssStyles, CssPseudos {}
+interface Base extends CssProperties, CssStyles, CssPseudos, TemplateTokens {}
 
 type Pseudos = CSS.Pseudos | `&${CSS.Pseudos}`;
 type CssPseudos = { [P in Pseudos]?: Base };
