@@ -96,6 +96,19 @@ export async function main() {
     return projectDir;
   };
 
+  /**
+   * Commands:
+   * - init [directory] - Initialize a new Salty CSS project.
+   * - build [directory] - Build the Salty CSS project.
+   * - generate [file] [directory] - Generate a new component file.
+   * - update [version] - Update Salty CSS packages to the latest or specified version.
+   * - version - Show the current version of Salty CSS.
+   */
+
+  /**
+   * Initialize a new Salty CSS project.
+   */
+
   program
     .command('init [directory]')
     .description('Initialize a new Salty-CSS project.')
@@ -363,6 +376,10 @@ export async function main() {
 
       await updatePackageJson(packageJsonContent);
 
+      // Run build once to generate the saltygen folder
+      logger.info('Running the build to generate initial CSS...');
+      await generateCss(projectDir);
+
       // All done & next steps
       logger.info('🎉 Salty CSS project initialized successfully!');
       logger.info('Next steps:');
@@ -372,6 +389,10 @@ export async function main() {
       logger.info('4. Read about the features in the documentation: https://salty-css.dev');
       logger.info('5. Star the project on GitHub: https://github.com/margarita-form/salty-css ⭐');
     });
+
+  /**
+   * Build the Salty CSS project.
+   */
 
   interface BuildOptions {
     dir: string;
@@ -389,6 +410,10 @@ export async function main() {
       const projectDir = resolveProjectDir(dir);
       await generateCss(projectDir);
     });
+
+  /**
+   * Generate a new component file.
+   */
 
   interface GenerateOptions {
     file: string;
@@ -458,6 +483,10 @@ export async function main() {
       await formatWithPrettier(formattedStyledFilePath);
     });
 
+  /**
+   * Update Salty CSS packages to the latest or specified version.
+   */
+
   interface UpdateOptions {
     version?: string;
     legacyPeerDeps: boolean;
@@ -496,6 +525,10 @@ export async function main() {
 
       logger.info('Salty-CSS packages updated successfully!');
     });
+
+  /**
+   * Show the current version of Salty CSS.
+   */
 
   program.option('-v, --version', 'Show the current version of Salty-CSS.').action(async function () {
     const currentPackageJson = await readThisPackageJson();
