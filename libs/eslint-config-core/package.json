@@ -38,7 +38,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.0.1-alpha.95",
+    "@salty-css/core": "^0.0.1-alpha.101",
     "@salty-css/eslint-plugin-core": "^0.0.1-alpha.101",
     "eslint": ">=9.x || >=8.x || >=7.x"
   }
