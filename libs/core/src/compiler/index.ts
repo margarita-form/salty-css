@@ -139,7 +139,7 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
   const parsed = parsePath(sourceFilePath);
   let currentFile = readFileSync(sourceFilePath, 'utf8');
 
-  currentFile = currentFile.replace(/styled\([^"'`{,]+,/g, "styled('div'");
+  currentFile = currentFile.replace(/styled\([^"'`{,]+,/g, "styled('div',");
 
   const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
   const externalModules = getExternalModules(dirname);
