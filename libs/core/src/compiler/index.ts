@@ -122,7 +122,6 @@ export const generateConfigStyles = async (dirname: string) => {
   const templateStylesPath = join(destDir, 'css/templates.css');
   const templateStylesString = parseTemplates(config.templates);
   const templateTokens = getTemplateTypes(config.templates);
-  console.log(templateTokens);
 
   writeFileSync(templateStylesPath, templateStylesString);
 
