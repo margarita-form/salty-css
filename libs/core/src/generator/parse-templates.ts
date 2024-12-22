@@ -30,3 +30,24 @@ export const parseTemplates = <T extends object>(obj: T, path: PropertyKey[] = [
 export const getTemplateKeys = <T extends object>(templates: T): string[] => {
   return Object.keys(templates);
 };
+
+export const getTemplateTypes = <T extends object>(templates: T): Record<string, string> => {
+  return Object.entries(templates).reduce((acc, [key, value]) => {
+    if (typeof value === 'object')
+      acc[key] = getTemplateTokens(value)
+        .map((val) => `"${val}"`)
+        .join(' | ');
+    return acc;
+  }, {} as Record<string, string>);
+};
+
+export const getTemplateTokens = <T extends object>(templates: T, parent = '', templateTokens = new Set<string>()): string[] => {
+  if (!templates) return [];
+  Object.entries(templates).forEach(([key, value]) => {
+    const keyValue = parent ? `${parent}.${key}` : key;
+    if (typeof value === 'object') return getTemplateTokens(value, keyValue, templateTokens);
+    return templateTokens.add(parent);
+  });
+
+  return [...templateTokens];
+};

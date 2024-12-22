@@ -7,7 +7,7 @@ import { StyleComponentGenerator } from '../generator/style-generator';
 import { dashCase } from '../util/dash-case';
 import { writeFile } from 'fs/promises';
 import { parseStyles } from '../generator/parse-styles';
-import { parseTemplates } from '../generator/parse-templates';
+import { getTemplateTypes, parseTemplates } from '../generator/parse-templates';
 import { CssConditionalVariables, CssResponsiveVariables } from '../config';
 import { parseValueTokens } from '../generator/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
@@ -112,11 +112,6 @@ export const generateConfigStyles = async (dirname: string) => {
   const variablesCss = `:root { ${variables.join('')} ${responsiveVariables.join('')} } ${conditionalVariables.join('')}`;
   writeFileSync(variablesPath, variablesCss);
 
-  const tsTokensPath = join(destDir, 'types/css-tokens.d.ts');
-  const tsTokens = [...variableTokens].join('|');
-  const tsTokensTypes = `type VariableTokens = ${tsTokens || '""'}; type PropertyValueToken = \`{\${VariableTokens}}\``;
-  writeFileSync(tsTokensPath, tsTokensTypes);
-
   // Generate global styles
   const globalStylesPath = join(destDir, 'css/global.css');
   const globalStylesString = parseStyles(config.global, '');
@@ -126,8 +121,32 @@ export const generateConfigStyles = async (dirname: string) => {
   // Generate templates
   const templateStylesPath = join(destDir, 'css/templates.css');
   const templateStylesString = parseTemplates(config.templates);
+  const templateTokens = getTemplateTypes(config.templates);
+  console.log(templateTokens);
 
   writeFileSync(templateStylesPath, templateStylesString);
+
+  // Generate types
+
+  const tsTokensPath = join(destDir, 'types/css-tokens.d.ts');
+  const tsVariableTokens = [...variableTokens].join('|');
+
+  const tsTokensTypes = `
+  // Variable types
+  type VariableTokens = ${tsVariableTokens}; 
+  type PropertyValueToken = \`{\${VariableTokens}}\`;
+
+  // Template types
+  type TemplateTokens = {
+    ${Object.entries(templateTokens)
+      .map(([key, value]) => `${key}?: ${value}`)
+      .join('\n')}
+  }
+  `;
+
+  console.log(tsTokensTypes);
+
+  writeFileSync(tsTokensPath, tsTokensTypes);
 };
 
 export const compileSaltyFile = async (dirname: string, sourceFilePath: string, outputDirectory: string) => {
