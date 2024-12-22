@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild';
 import { execSync } from 'child_process';
 import { toHash } from '../util/to-hash';
-import { join } from 'path';
+import { join, parse as parsePath } from 'path';
 import { statSync, existsSync, mkdirSync, readdirSync, writeFileSync, readFileSync } from 'fs';
 import { StyleComponentGenerator } from '../generator/style-generator';
 import { dashCase } from '../util/dash-case';
@@ -132,20 +132,35 @@ export const generateConfigStyles = async (dirname: string) => {
 
 export const compileSaltyFile = async (dirname: string, sourceFilePath: string, outputDirectory: string) => {
   const hashedName = toHash(sourceFilePath);
-  const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
+  const tempDir = join(outputDirectory, './temp');
 
-  const moduleType = await detectCurrentModuleType(dirname);
+  if (!existsSync(tempDir)) mkdirSync(tempDir);
+
+  const parsed = parsePath(sourceFilePath);
+  let currentFile = readFileSync(sourceFilePath, 'utf8');
+
+  currentFile = currentFile.replace(/styled\([^"'`{,]+,/g, "styled('div'");
+
+  const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
   const externalModules = getExternalModules(dirname);
+  const moduleType = await detectCurrentModuleType(dirname);
+
   await esbuild.build({
-    entryPoints: [sourceFilePath],
-    minify: true,
+    stdin: {
+      contents: currentFile,
+      sourcefile: parsed.base,
+      resolveDir: parsed.dir,
+      loader: 'ts',
+    },
+    minify: false,
     treeShaking: true,
     bundle: true,
     outfile: outputFilePath,
     format: moduleType,
-    target: ['es2022'],
+    target: ['node20'],
     keepNames: true,
     external: externalModules,
+    packages: 'external',
   });
 
   const now = Date.now();
