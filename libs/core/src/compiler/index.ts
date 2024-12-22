@@ -144,8 +144,6 @@ export const generateConfigStyles = async (dirname: string) => {
   }
   `;
 
-  console.log(tsTokensTypes);
-
   writeFileSync(tsTokensPath, tsTokensTypes);
 };
 
