@@ -23,7 +23,9 @@ type FnComponent<PROPS extends StyledComponentProps> = {
 
 export type Tag<PROPS extends StyledComponentProps> = OrString | keyof HTMLElementTagNameMap | FnComponent<PROPS>;
 
-type CssProperties = { [key in keyof CSS.Properties]: CSS.Properties[key] | PropertyValueToken };
+type CSSPropertyValueFunction = (params?: any) => any;
+
+type CssProperties = { [key in keyof CSS.Properties]: CSS.Properties[key] | PropertyValueToken | CSSPropertyValueFunction };
 type CssPropertyKeys = keyof CssProperties;
 export type StyleValue<K extends string> = K extends CssPropertyKeys ? CssProperties[K] : never;
 
@@ -54,7 +56,7 @@ export type ValueProps = {
   [key: CssValuePropKey]: string;
 };
 
-export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (props: infer P) => ReactNode ? P : unknown;
+export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (props: infer P) => ReactNode ? P : object;
 
 type StylePropertyValue = Record<never, never> & unknown;
 
