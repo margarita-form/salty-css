@@ -433,7 +433,7 @@ export async function main() {
     .option('-t, --tag <tag>', 'HTML tag of the component.', 'div')
     .option('-n, --name <name>', 'Name of the component.')
     .option('-c, --className <className>', 'CSS class of the component.')
-    .option('-rc, --reactComponent <rc>', 'Generate a React component as well.')
+    .option('-r, --reactComponent', 'Generate a React component as well.')
     .action(async function (this: Command, _file: string, _dir = defaultProject) {
       const { file = _file, dir = _dir, tag, name, className, reactComponent = false } = this.opts<GenerateOptions>();
       if (!file) return logError('File to generate must be provided. Add it as the first argument after generate command or use the --file option.');
