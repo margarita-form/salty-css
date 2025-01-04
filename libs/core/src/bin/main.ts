@@ -532,7 +532,6 @@ export async function main() {
 
       const updatedPackages = await getSaltyCssPackages();
       if (!updatedPackages) return logError('Something went wrong while reading the updated packages.');
-      logger.info('Salty-CSS packages updated successfully!');
 
       const mappedByVersions = updatedPackages.reduce((acc, [name, version]) => {
         if (!acc[version]) acc[version] = [];
@@ -545,7 +544,7 @@ export async function main() {
       if (versionsCount === 1) {
         const version = Object.keys(mappedByVersions)[0];
         const versionString = version.replace(/^\^/, '');
-        logger.info(`Updated to all Salty CSS packages to ${versionString}`);
+        logger.info(`🔥 Updated to all Salty CSS packages successfully to ${versionString}`);
       } else {
         for (const [version, names] of Object.entries(mappedByVersions)) {
           const versionString = version.replace(/^\^/, '');
