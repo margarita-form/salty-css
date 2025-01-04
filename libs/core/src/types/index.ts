@@ -1,7 +1,7 @@
 import type * as CSS from 'csstype';
 import type { ReactNode } from 'react';
 import type { StyleComponentGenerator } from '../generator';
-import type { OrAny, OrString } from './util-types';
+import type { NeverObj, OrAny, OrString } from './util-types';
 
 export type CreateElementProps = {
   extend?: Tag<any>;
@@ -9,7 +9,7 @@ export type CreateElementProps = {
   className?: string;
   element?: string;
   passVariantProps?: boolean | string | string[];
-  style?: CssProperties & { [key: string]: OrAny | PropertyValueToken };
+  style?: CssProperties | { [key: string]: PropertyValueToken | NeverObj };
   /** vks = Variant key set */
   _vks?: Set<string>;
 };
@@ -25,7 +25,7 @@ export type Tag<PROPS extends StyledComponentProps> = OrString | keyof HTMLEleme
 
 type CSSPropertyValueFunction = (params?: any) => any;
 
-type CssProperties = { [key in keyof CSS.Properties]: CSS.Properties[key] | PropertyValueToken | CSSPropertyValueFunction };
+type CssProperties = { [key in keyof CSS.Properties]: CSS.Properties[key] | PropertyValueToken | CSSPropertyValueFunction | NeverObj };
 type CssPropertyKeys = keyof CssProperties;
 export type StyleValue<K extends string> = K extends CssPropertyKeys ? CssProperties[K] : never;
 
