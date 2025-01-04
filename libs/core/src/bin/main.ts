@@ -544,7 +544,7 @@ export async function main() {
       if (versionsCount === 1) {
         const version = Object.keys(mappedByVersions)[0];
         const versionString = version.replace(/^\^/, '');
-        logger.info(`🔥 Updated to all Salty CSS packages successfully to ${versionString}`);
+        logger.info(`Updated to all Salty CSS packages successfully to ${versionString}`);
       } else {
         for (const [version, names] of Object.entries(mappedByVersions)) {
           const versionString = version.replace(/^\^/, '');
