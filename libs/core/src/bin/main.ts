@@ -496,7 +496,7 @@ export async function main() {
     const packageJSONPath = join(process.cwd(), 'package.json');
     const packageJson = await readPackageJson(packageJSONPath).catch((err) => logError(err));
     if (!packageJson) return logError('Could not read package.json file.');
-    const allDependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
+    const allDependencies = { ...packageJson.dependencies, ...packageJson.devDependencies } as Record<string, string>;
     const saltyCssPackages = Object.entries(allDependencies).filter(([name]) => name === 'salty-css' || name.startsWith('@salty-css/'));
     if (!saltyCssPackages.length) {
       return logError(
@@ -533,8 +533,24 @@ export async function main() {
       const updatedPackages = await getSaltyCssPackages();
       if (!updatedPackages) return logError('Something went wrong while reading the updated packages.');
       logger.info('Salty-CSS packages updated successfully!');
-      for (const [name, version] of updatedPackages) {
-        logger.info(`${name}: ${version}`);
+
+      const mappedByVersions = updatedPackages.reduce((acc, [name, version]) => {
+        if (!acc[version]) acc[version] = [];
+        acc[version].push(name);
+        return acc;
+      }, {} as Record<string, string[]>);
+
+      const versionsCount = Object.keys(mappedByVersions).length;
+
+      if (versionsCount === 1) {
+        const version = Object.keys(mappedByVersions)[0];
+        const versionString = version.replace(/^\^/, '');
+        logger.info(`Updated to all Salty CSS packages to ${versionString}`);
+      } else {
+        for (const [version, names] of Object.entries(mappedByVersions)) {
+          const versionString = version.replace(/^\^/, '');
+          logger.info(`Updated to ${versionString}: ${names.join(', ')}`);
+        }
       }
     });
 
