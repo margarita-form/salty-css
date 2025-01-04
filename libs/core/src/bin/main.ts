@@ -492,6 +492,21 @@ export async function main() {
     legacyPeerDeps: boolean;
   }
 
+  const getSaltyCssPackages = async () => {
+    const packageJSONPath = join(process.cwd(), 'package.json');
+    const packageJson = await readPackageJson(packageJSONPath).catch((err) => logError(err));
+    if (!packageJson) return logError('Could not read package.json file.');
+    const allDependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
+    const saltyCssPackages = Object.entries(allDependencies).filter(([name]) => name === 'salty-css' || name.startsWith('@salty-css/'));
+    if (!saltyCssPackages.length) {
+      return logError(
+        'No Salty-CSS packages found in package.json. Make sure you are running update command in the same directory! Used package.json path: ' +
+          packageJSONPath
+      );
+    }
+    return saltyCssPackages;
+  };
+
   program
     .command('update [version]')
     .alias('up')
@@ -500,20 +515,12 @@ export async function main() {
     .option('--legacy-peer-deps <legacyPeerDeps>', 'Use legacy peer dependencies (not recommended).', false)
     .action(async function (this: Command, _version = 'latest') {
       const { legacyPeerDeps, version = _version } = this.opts<UpdateOptions>();
-      const packageJSONPath = join(process.cwd(), 'package.json');
-      const packageJson = await readPackageJson(packageJSONPath).catch((err) => logError(err));
-      if (!packageJson) return;
-      const allDependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
-      const saltyCssPackages = Object.keys(allDependencies).filter((dep) => dep === 'salty-css' || dep.startsWith('@salty-css/'));
-      if (!saltyCssPackages.length) {
-        return logError(
-          'No Salty-CSS packages found in package.json. Make sure you are running update command in the same directory! Used package.json path: ' +
-            packageJSONPath
-        );
-      }
-      const packagesToUpdate = saltyCssPackages.map((dep) => {
-        if (version === '@') return `${dep}@${currentPackageJson.version}`;
-        return `${dep}@${version.replace(/^@/, '')}`;
+      const saltyCssPackages = await getSaltyCssPackages();
+      if (!saltyCssPackages) return logError('Could not update Salty-CSS packages as any were found in package.json.');
+
+      const packagesToUpdate = saltyCssPackages.map(([name]) => {
+        if (version === '@') return `${name}@${currentPackageJson.version}`;
+        return `${name}@${version.replace(/^@/, '')}`;
       });
 
       if (legacyPeerDeps) {
@@ -523,7 +530,12 @@ export async function main() {
         await npmInstall(...packagesToUpdate);
       }
 
+      const updatedPackages = await getSaltyCssPackages();
+      if (!updatedPackages) return logError('Something went wrong while reading the updated packages.');
       logger.info('Salty-CSS packages updated successfully!');
+      for (const [name, version] of updatedPackages) {
+        logger.info(`${name}: ${version}`);
+      }
     });
 
   /**
