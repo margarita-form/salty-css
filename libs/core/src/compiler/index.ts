@@ -12,6 +12,7 @@ import { CssConditionalVariables, CssResponsiveVariables } from '../config';
 import { parseValueTokens } from '../generator/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
+import { dotCase } from '../util/dot-case';
 
 const cache = {
   externalModules: [] as string[],
@@ -70,10 +71,13 @@ export const generateConfigStyles = async (dirname: string) => {
       if (!value) return undefined;
       if (typeof value === 'object') return parseVariables(value, [...path, key]);
 
-      const tsName = [...path, key].join('.');
+      const dottedKey = dotCase(key);
+      const dashedKey = dashCase(key);
+
+      const tsName = [...path, dottedKey].join('.');
       variableTokens.add(`"${tsName}"`);
 
-      const cssName = [...path.map(dashCase), dashCase(key)].join('-');
+      const cssName = [...path.map(dashCase), dashedKey].join('-');
       const { result } = parseValueTokens(value);
       return `--${cssName}: ${result};`;
     });
