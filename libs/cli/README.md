@@ -16,38 +16,31 @@ In the world of frontend dev is there anything saltier than CSS? Salty CSS is bu
 - Create component: `npx salty-css generate [filePath]`
 - Build: `npx salty-css build [directory]`
 
-### Packages
+### Initialize
 
-Note: Fastest way to get started with any framework is [npx salty-css init [directory]](#initialize-salty-css-for-a-project) command
+Fastest way to get started with any framework is [npx salty-css init [directory]](#initialize-salty-css-for-a-project) command
 
-- [Next.js](#nextjs) → `npm install @salty-css/next` + [Next.js install guide](#nextjs) + [Next.js example app](https://github.com/margarita-form/salty-css-website)
-- [React](#react) → `npm install @salty-css/react` + [React install guide](#react) + [React example code](#code-examples)
-- [Vite](#vite) → `npm install @salty-css/vite` + [(Vite install guide)](#vite)
-- [Webpack](https://www.npmjs.com/package/@salty-css/webpack) → `npm install @salty-css/webpack` + Guide coming soon
-- [ESLint](https://www.npmjs.com/package/@salty-css/eslint-plugin-core) → `npm install @salty-css/eslint-plugin-core` + Guide coming soon
-- [Core](https://www.npmjs.com/package/@salty-css/react) → `npm install @salty-css/core` (This package contains code for internal use)
+- Next.js → [Next.js guide](#nextjs) + [Next.js example app](https://github.com/margarita-form/salty-css-website)
+- React → [React guide](#react) + [React example code](#code-examples)
+- Vite → [Vite guide](#vite)
+- Webpack → Guide coming soon
+- ESLint → Guide coming soon
 
-### Add Salty CSS to your project with `salty-css` CLI
+### Salty CSS CLI
 
-#### Initialize Salty CSS for a project
+In your existing repository you can use `npx salty-css [command]` to initialize a project, generate components, update related packages and build required files.
 
-In your existing repository run `npx salty-css init [directory]` which installs required salty-css packages to the current directory, detects framework in use (current support for vite and next.js) and creates project files to the provided directory. Directory can be left blank if you want files to be created to the current directory. Init will also create `.saltyrc.json` which contains some metadata for future CLI commands.
+- Initialize project → `npx salty-css init [directory]` - Installs required packages, detects framework in use and creates project files to the provided directory. Directory can be left blank if you want files to be created to the current directory.
+- Generate component → `npx salty-css update [version]` - Update @salty-css packages in your repository. Default version is "latest". Additional options like `--dir`, `--tag`, `--name` and `--className` are also supported.
+- Build files → `npx salty-css build [directory]` - Compile Salty CSS related files in your project. This should not be needed if you are using tools like Next.js or Vite
 
-#### Create components
-
-Components can be created with `npx salty-css generate [filePath]` which then creates a new Salty CSS component file to the specified path. Additional options like `--dir, --tag, --name and --className` are also supported. Read more about them with `npx salty-css generate --help`
-
-#### Build / Compile Salty CSS
-
-If you want to manually build your project that can be done by running `npx salty-css build [directory]`. Directory is not required as CLI can use default directory defined in `.saltyrc.json`. Note that build generates css files but Vite / Webpack plugin is still required for full support.
-
-#### Update Salty CSS packages
-
-To ease the pain of package updates all Salty CSS packages can be updated with `npx salty-css update`
-
-### Manual work
+### Guides
 
 #### Next.js
+
+In your existing Next.js repository you can run `npx salty-css init` to automatically configure Salty CSS.
+
+##### Manual configuration
 
 1. For Next.js support install `npm i @salty-css/next @salty-css/core @salty-css/react`
 2. Create `salty.config.ts` to your app directory
@@ -62,21 +55,29 @@ To ease the pain of package updates all Salty CSS packages can be updated with `
 
 [Check out Next.js demo project](https://github.com/margarita-form/salty-css-website) or [react example code](#code-examples)
 
-#### React
-
-1. Install related dependencies: `npm i @salty-css/core @salty-css/react`
-2. Create `salty.config.ts` to your app directory
-3. Configure your build tool to support Salty CSS ([Vite](#vite) or Webpack)
-
-[Check out react example code](#code-examples)
-
 #### Vite
+
+In your existing Vite repository you can run `npx salty-css init` to automatically configure Salty CSS.
+
+##### Manual configuration
 
 1. For Vite support install `npm i @salty-css/vite @salty-css/core`
 2. In `vite.config` add import for salty plugin `import { saltyPlugin } from '@salty-css/vite';` and then add `saltyPlugin(__dirname)` to your vite configuration plugins
 3. Make sure that `salty.config.ts` and `vite.config.ts` are in the same folder!
 4. Build `saltygen` directory by running your app once or with cli `npx salty-css build [directory]`
 5. Import global styles from `saltygen/index.css` to some global css file with `@import 'insert_path_to_index_css';`.
+
+#### React
+
+In your existing React repository you can run `npx salty-css init` to automatically configure Salty CSS.
+
+##### Manual configuration
+
+1. Install related dependencies: `npm i @salty-css/core @salty-css/react`
+2. Create `salty.config.ts` to your app directory
+3. Configure your build tool to support Salty CSS ([Vite](#vite) or Webpack) or after changes run `npx salty-css build`
+
+[Check out react example code](#code-examples)
 
 ### Create components
 
@@ -106,23 +107,6 @@ export const config = defineConfig({
 });
 ```
 
-**Your React component file**
-
-```tsx
-import { Wrapper } from '../components/wrapper/wrapper.css';
-import { Button } from '../components/button/button.css';
-
-export const IndexPage = () => {
-  return (
-    <Wrapper>
-      <Button variant="solid" onClick={() => alert('It is a button.')}>
-        Outlined
-      </Button>
-    </Wrapper>
-  );
-};
-```
-
 **Wrapper** (`components/wrapper/wrapper.css.ts`)
 
 ```tsx
@@ -147,7 +131,7 @@ export const Button = styled('button', {
     padding: `0.6em 1.2em`,
     border: '1px solid currentColor',
     background: 'transparent',
-    color: 'currentColor/40',
+    color: 'currentColor',
     cursor: 'pointer',
     transition: '200ms',
     textDecoration: 'none',
@@ -181,6 +165,23 @@ export const Button = styled('button', {
     },
   },
 });
+```
+
+**Your React component file**
+
+```tsx
+import { Wrapper } from '../components/wrapper/wrapper.css';
+import { Button } from '../components/button/button.css';
+
+export const IndexPage = () => {
+  return (
+    <Wrapper>
+      <Button variant="solid" onClick={() => alert('It is a button.')}>
+        Outlined
+      </Button>
+    </Wrapper>
+  );
+};
 ```
 
 More examples coming soon
