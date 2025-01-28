@@ -57,15 +57,18 @@ export class StyleComponentGenerator {
   }
 
   get props(): GeneratorProps {
-    const { element } = this.params;
+    const { element, variants = {}, compoundVariants = [], defaultVariants = {} } = this.params;
 
-    const variantKeys = this.params.variants
-      ? Object.keys(this.params.variants).map((name) => {
-          const defaultVariant = this.params.defaultVariants?.[name];
-          if (defaultVariant !== undefined) return `${name}=${String(defaultVariant)}`;
-          return name;
-        })
-      : undefined;
+    const variantKeys = new Set<string>([]);
+
+    const addVariantKey = (name: string) => {
+      const defaultVariant = defaultVariants[name];
+      if (defaultVariant !== undefined) variantKeys.add(`${name}=${String(defaultVariant)}`);
+      else variantKeys.add(name);
+    };
+
+    Object.keys(variants).forEach(addVariantKey);
+    compoundVariants.map((cv) => Object.keys(cv).forEach(addVariantKey));
 
     const propValueKeys = new Set<string>([]);
     const matches = /\{props\.([\w\d]+)\}/gi.exec(JSON.stringify(this.params.base));
@@ -78,7 +81,7 @@ export class StyleComponentGenerator {
 
     return {
       element,
-      variantKeys,
+      variantKeys: [...variantKeys],
       propValueKeys: [...propValueKeys],
       attr: {
         'data-component-name': !this._isProd ? this._callerName : undefined,
