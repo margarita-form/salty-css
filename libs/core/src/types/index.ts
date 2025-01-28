@@ -8,7 +8,7 @@ export type CreateElementProps = {
   children?: ReactNode;
   className?: string;
   element?: string;
-  passVariantProps?: boolean | string | string[];
+  passProps?: boolean | string | string[];
   style?: CssProperties | { [key: string]: PropertyValueToken | NeverObj };
   /** vks = Variant key set */
   _vks?: Set<string>;
@@ -81,6 +81,7 @@ export interface GeneratorOptions {
   className?: string;
   displayName?: string;
   element?: string;
+  passProps?: boolean | string | string[];
 }
 
 interface Base extends CssProperties, CssStyles, CssPseudos, TemplateTokens {}

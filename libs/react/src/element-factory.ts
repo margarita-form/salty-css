@@ -5,7 +5,7 @@ import { StyledComponentProps, Tag } from '@salty-css/core/types';
 import { dashCase } from '@salty-css/core/util';
 import { parseValueTokens } from '@salty-css/core/generator/parse-tokens';
 
-const _styledKeys = ['passVariantProps'];
+const _styledKeys = ['passProps'];
 
 export const elementFactory = (tagName: Tag<any>, _className: string, _generatorProps: GeneratorProps, _additionalProps?: Record<PropertyKey, any>) => {
   const fn = (
@@ -14,13 +14,13 @@ export const elementFactory = (tagName: Tag<any>, _className: string, _generator
       element = _generatorProps.element,
       className = '',
       children,
-      passVariantProps,
+      passProps = _generatorProps.passProps,
       _vks = new Set<string>(),
       ...props
     }: StyledComponentProps,
     elementRef: ForwardedRef<any>
   ) => {
-    const passedProps = { passVariantProps } as StyledComponentProps;
+    const passedProps = { passProps } as StyledComponentProps;
     if (_generatorProps.attr) Object.assign(passedProps, _generatorProps.attr);
     if (_additionalProps) Object.assign(passedProps, _additionalProps);
     if (props) Object.assign(passedProps, props);
@@ -66,9 +66,9 @@ export const elementFactory = (tagName: Tag<any>, _className: string, _generator
     const deleteVKS = !extendsComponent || !extendsStyled;
     if (_vks && deleteVKS) {
       _vks.forEach((vk) => {
-        if (!passVariantProps) return delete passedProps[vk];
-        if (passVariantProps === true) return;
-        if (passVariantProps.includes(vk)) return;
+        if (!passProps) return delete passedProps[vk];
+        if (passProps === true) return;
+        if (passProps.includes(vk)) return;
         return delete passedProps[vk];
       });
     } else if (extendsStyled) Object.assign(passedProps, { _vks });
