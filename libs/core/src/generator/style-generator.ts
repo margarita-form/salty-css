@@ -8,6 +8,7 @@ export interface GeneratorProps {
   variantKeys?: string[];
   propValueKeys?: string[];
   passProps?: boolean | string | string[];
+  defaultProps?: Record<PropertyKey, unknown>;
   attr: {
     [key: string]: any;
   };
@@ -58,7 +59,7 @@ export class StyleComponentGenerator {
   }
 
   get props(): GeneratorProps {
-    const { element, variants = {}, compoundVariants = [], defaultVariants = {}, passProps } = this.params;
+    const { element, variants = {}, compoundVariants = [], defaultVariants = {}, defaultProps = {}, passProps } = this.params;
 
     const variantKeys = new Set<string>([]);
 
@@ -85,6 +86,7 @@ export class StyleComponentGenerator {
       variantKeys: [...variantKeys],
       propValueKeys: [...propValueKeys],
       passProps,
+      defaultProps,
       attr: {
         'data-component-name': !this._isProd ? this._callerName : undefined,
       },

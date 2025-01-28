@@ -23,6 +23,7 @@ export const elementFactory = (tagName: Tag<any>, _className: string, _generator
     const passedProps = { passProps } as StyledComponentProps;
     if (_generatorProps.attr) Object.assign(passedProps, _generatorProps.attr);
     if (_additionalProps) Object.assign(passedProps, _additionalProps);
+    if (_generatorProps.defaultProps) Object.assign(props, _generatorProps.defaultProps);
     if (props) Object.assign(passedProps, props);
 
     const additionalClasses = new Set<string>(className.split(' '));

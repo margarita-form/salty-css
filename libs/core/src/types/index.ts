@@ -82,6 +82,7 @@ export interface GeneratorOptions {
   displayName?: string;
   element?: string;
   passProps?: boolean | string | string[];
+  defaultProps?: Record<PropertyKey, unknown>;
 }
 
 interface Base extends CssProperties, CssStyles, CssPseudos, TemplateTokens {}
