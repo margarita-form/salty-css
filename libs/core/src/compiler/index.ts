@@ -13,6 +13,7 @@ import { parseValueTokens } from '../generator/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
 import { dotCase } from '../util/dot-case';
+import { saltyReset } from '../templates/salty-reset';
 
 const cache = {
   externalModules: [] as string[],
@@ -120,7 +121,21 @@ export const generateConfigStyles = async (dirname: string) => {
   const globalStylesPath = join(destDir, 'css/global.css');
   const globalStylesString = parseStyles(config.global, '');
 
-  writeFileSync(globalStylesPath, globalStylesString);
+  writeFileSync(globalStylesPath, `@layer global { ${globalStylesString} }`);
+
+  // Generate reset styles
+  const resetStylesPath = join(destDir, 'css/reset.css');
+
+  const getResetStyles = () => {
+    if (config.reset === 'none') return {};
+    if (typeof config.reset === 'object') return config.reset;
+    return saltyReset;
+  };
+
+  const resetStyles = getResetStyles();
+  const resetStylesString = parseStyles(resetStyles, '');
+
+  writeFileSync(resetStylesPath, `@layer reset { ${resetStylesString} }`);
 
   // Generate templates
   const templateStylesPath = join(destDir, 'css/templates.css');
@@ -296,7 +311,7 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
 
     const otherGlobalCssFiles = globalCssFiles.map((file) => `@import url('./css/${file}');`).join('\n');
 
-    const globalCssFilenames = ['variables.css', 'global.css', 'templates.css'];
+    const globalCssFilenames = ['variables.css', 'reset.css', 'global.css', 'templates.css'];
     const importsWithData = globalCssFilenames.filter((file) => {
       try {
         const data = readFileSync(join(destDir, 'css', file), 'utf8');
@@ -306,7 +321,7 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
       }
     });
     const globalImports = importsWithData.map((file) => `@import url('./css/${file}');`);
-    let cssContent = `@layer l0, l1, l2, l3, l4, l5, l6, l7, l8;\n\n${globalImports.join('\n')}\n${otherGlobalCssFiles}`;
+    let cssContent = `@layer reset, global, l0, l1, l2, l3, l4, l5, l6, l7, l8;\n\n${globalImports.join('\n')}\n${otherGlobalCssFiles}`;
     if (config.importStrategy !== 'component') {
       const cssFileImports = cssFiles
         .flat()

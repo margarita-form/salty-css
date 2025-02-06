@@ -1,7 +1,7 @@
-import { CssStyles } from '../types';
+import { CssProperties, CssStyles } from '../types';
 import { OrString } from '../types/util-types';
 
-export type GlobalStyles = Record<string, CssStyles>;
+export type GlobalStyles = Record<string, CssProperties>;
 
 export type CssVariables = Record<string, unknown>;
 
@@ -52,6 +52,10 @@ export interface SaltyConfig {
    * Variables that are defined for different parent selectors (classes or data attributes).
    */
   conditionalVariables?: CssConditionalVariables;
+  /**
+   * The global styles that are imported in the root of the project.
+   */
+  reset?: 'default' | 'none' | GlobalStyles;
   /**
    * The global styles that are imported in the root of the project.
    */

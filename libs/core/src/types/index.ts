@@ -25,7 +25,7 @@ export type Tag<PROPS extends StyledComponentProps> = OrString | keyof HTMLEleme
 
 type CSSPropertyValueFunction = (params?: any) => any;
 
-type CssProperties = { [key in keyof CSS.Properties]: CSS.Properties[key] | PropertyValueToken | CSSPropertyValueFunction | NeverObj };
+export type CssProperties = { [key in keyof CSS.Properties]: CSS.Properties[key] | PropertyValueToken | CSSPropertyValueFunction | NeverObj };
 type CssPropertyKeys = keyof CssProperties;
 export type StyleValue<K extends string> = K extends CssPropertyKeys ? CssProperties[K] : never;
 
