@@ -27,7 +27,7 @@ const toPhash = (h: number, x: string): number => {
 /**
  * Create unique hash string from any value
  */
-export const toHash = (value: unknown, length = 3): string => {
+export const toHash = (value: unknown, length = 5): string => {
   const numericHash = toPhash(5381, JSON.stringify(value)) >>> 0;
   return toAlphabeticName(numericHash, length);
 };
