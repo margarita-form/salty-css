@@ -2,6 +2,7 @@ import { StyledParams, Styles, Tag } from '../types';
 import { toHash } from '../util/to-hash';
 import { getTemplateKeys } from './parse-templates';
 import { parseStyles } from './parse-styles';
+import { dashCase } from '../util';
 
 export interface GeneratorProps {
   element?: string;
@@ -46,6 +47,14 @@ export class StyleComponentGenerator {
 
   get cssDisplayNameVar() {
     return `--${this.hash}-display-name: ${this._callerName};`;
+  }
+
+  get cssFileName() {
+    if (this._callerName) {
+      const dasherized = dashCase(this._callerName);
+      return `c_${dasherized}-${this.hash}-${this.priority}.css`;
+    }
+    return `${this.hash}-${this.priority}.css`;
   }
 
   get templateKeys() {

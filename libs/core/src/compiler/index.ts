@@ -113,18 +113,18 @@ export const generateConfigStyles = async (dirname: string) => {
 
   const destDir = getDestDir(dirname);
 
-  const variablesPath = join(destDir, 'css/variables.css');
+  const variablesPath = join(destDir, 'css/_variables.css');
   const variablesCss = `:root { ${variables.join('')} ${responsiveVariables.join('')} } ${conditionalVariables.join('')}`;
   writeFileSync(variablesPath, variablesCss);
 
   // Generate global styles
-  const globalStylesPath = join(destDir, 'css/global.css');
+  const globalStylesPath = join(destDir, 'css/_global.css');
   const globalStylesString = parseStyles(config.global, '');
 
   writeFileSync(globalStylesPath, `@layer global { ${globalStylesString} }`);
 
   // Generate reset styles
-  const resetStylesPath = join(destDir, 'css/reset.css');
+  const resetStylesPath = join(destDir, 'css/_reset.css');
 
   const getResetStyles = () => {
     if (config.reset === 'none') return {};
@@ -138,7 +138,7 @@ export const generateConfigStyles = async (dirname: string) => {
   writeFileSync(resetStylesPath, `@layer reset { ${resetStylesString} }`);
 
   // Generate templates
-  const templateStylesPath = join(destDir, 'css/templates.css');
+  const templateStylesPath = join(destDir, 'css/_templates.css');
   const templateStylesString = parseTemplates(config.templates);
   const templateTokens = getTemplateTypes(config.templates);
 
@@ -270,7 +270,7 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
           const localCssFiles: string[] = [];
           Object.entries(contents).forEach(([name, value]) => {
             if (value.isKeyframes && value.css) {
-              const fileName = `${value.animationName}.css`;
+              const fileName = `a_${value.animationName}.css`;
               const filePath = `css/${fileName}`;
               const cssPath = join(destDir, filePath);
               globalCssFiles.push(fileName);
@@ -288,12 +288,11 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
               prod,
             });
 
-            const fileName = `${generator.hash}-${generator.priority}.css`;
             if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
-            cssFiles[generator.priority].push(fileName);
-            localCssFiles.push(fileName);
+            cssFiles[generator.priority].push(generator.cssFileName);
+            localCssFiles.push(generator.cssFileName);
 
-            const filePath = `css/${fileName}`;
+            const filePath = `css/${generator.cssFileName}`;
             const cssPath = join(destDir, filePath);
             writeFileSync(cssPath, generator.css);
           });
@@ -301,7 +300,10 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
           const cssContent = localCssFiles.map((file) => `@import url('./${file}');`).join('\n');
 
           const hashName = toHash(src, 6);
-          const cssFile = join(destDir, `css/${hashName}.css`);
+          const parsedPath = parsePath(src);
+          const dasherized = dashCase(parsedPath.name);
+
+          const cssFile = join(destDir, `css/f_${dasherized}-${hashName}.css`);
           writeFileSync(cssFile, cssContent);
         }
       }
@@ -311,7 +313,7 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
 
     const otherGlobalCssFiles = globalCssFiles.map((file) => `@import url('./css/${file}');`).join('\n');
 
-    const globalCssFilenames = ['variables.css', 'reset.css', 'global.css', 'templates.css'];
+    const globalCssFilenames = ['_variables.css', '_reset.css', '_global.css', '_templates.css'];
     const importsWithData = globalCssFilenames.filter((file) => {
       try {
         const data = readFileSync(join(destDir, 'css', file), 'utf8');
@@ -356,10 +358,9 @@ export const generateFile = async (dirname: string, file: string) => {
           config,
         });
 
-        const fileName = `${generator.hash}-${generator.priority}.css`;
-        const filePath = `css/${fileName}`;
+        const filePath = `css/${generator.cssFileName}`;
         const cssPath = join(destDir, filePath);
-        cssFiles.push(fileName);
+        cssFiles.push(generator.cssFileName);
         writeFileSync(cssPath, generator.css);
       });
 
@@ -442,9 +443,12 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
         if (copy === current) console.error('Minimize file failed to change content', { name, tagName });
       });
 
-      const fileHash = toHash(file, 6);
       if (config.importStrategy === 'component') {
-        current = `import '../../saltygen/css/${fileHash}.css';\n${current}`;
+        const fileHash = toHash(file, 6);
+        const parsed = parsePath(file);
+        const dasherized = dashCase(parsed.name);
+        const cssFileName = `f_${dasherized}-${fileHash}.css`;
+        current = `import '../../saltygen/css/${cssFileName}';\n${current}`;
       }
       current = current.replace(`{ styled }`, `{ styledClient as styled }`);
       current = current.replace(`@salty-css/react/styled`, `@salty-css/react/styled-client`);
