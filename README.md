@@ -38,7 +38,15 @@ In your existing repository you can use `npx salty-css [command]` to initialize 
 
 #### Next.js
 
-In your existing Next.js repository you can run `npx salty-css init` to automatically configure Salty CSS.
+Salty CSS provides Next.js App & Pages router support with full React Server Components support.
+
+##### Add Salty CSS to Next.js
+
+1. In your existing Next.js repository you can run `npx salty-css init` to automatically configure Salty CSS.
+2. Create your first Salty CSS component with `npx salty-css generate [filePath]` (e.g. src/custom-wrapper)
+3. Import your component for example to `page.tsx` and see it working!
+
+And note: steps 2 & 3 are just to show how get things up and running, step 1 does all of the important stuff 🤯
 
 ##### Manual configuration
 
