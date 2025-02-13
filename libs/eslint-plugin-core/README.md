@@ -1,4 +1,4 @@
-![Bannter](https://raw.githubusercontent.com/gist/tremppu/ef2b867907cbf262ab7373f41558a403/raw/a2137de136ee2296e386682beb4487bba0f58a2f/salty-logo-svg-dvd.svg)
+![Salty CSS Banner](https://raw.githubusercontent.com/gist/tremppu/ef2b867907cbf262ab7373f41558a403/raw/a2137de136ee2296e386682beb4487bba0f58a2f/salty-logo-svg-dvd.svg)
 
 # Salty CSS - CSS-in-JS library that is kinda sweet
 
@@ -19,7 +19,9 @@ Fastest way to get started with any framework is `npx salty-css init [directory]
 - Next.js → [Next.js guide](#nextjs) + [Next.js example app](https://github.com/margarita-form/salty-css-website)
 - React + Vite → [React + Vite guide](#react--vite) + [React example code](#code-examples)
 - React + Webpack → Guide coming soon
- ## Useful commands
+
+## Useful commands
+
 - Create component: `npx salty-css generate [filePath]`
 - Build: `npx salty-css build [directory]`
 - Update Salty CSS packages: `npx salty-css up`
@@ -60,8 +62,6 @@ In your existing repository you can use `npx salty-css [command]` to initialize 
 - Initialize project → `npx salty-css init [directory]` - Installs required packages, detects framework in use and creates project files to the provided directory. Directory can be left blank if you want files to be created to the current directory.
 - Generate component → `npx salty-css update [version]` - Update @salty-css packages in your repository. Default version is "latest". Additional options like `--dir`, `--tag`, `--name` and `--className` are also supported.
 - Build files → `npx salty-css build [directory]` - Compile Salty CSS related files in your project. This should not be needed if you are using tools like Next.js or Vite
-
-
 
 ## Usage
 
@@ -118,7 +118,7 @@ And note: steps 2 & 3 are just to show how get new components up and running, st
 
 [Check out react example code](#code-examples)
 
-----
+---
 
 ### Create components
 
