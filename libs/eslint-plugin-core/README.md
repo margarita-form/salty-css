@@ -14,19 +14,46 @@ Is there anything saltier than CSS in frontend web development? Salty CSS is bui
 
 ## Get started
 
-- Initialize: `npx salty-css init [directory]`
-- Create component: `npx salty-css generate [filePath]`
-- Build: `npx salty-css build [directory]`
-
-### Initialize
-
-Fastest way to get started with any framework is [npx salty-css init [directory]](#initialize-salty-css-for-a-project) command
+Fastest way to get started with any framework is `npx salty-css init [directory]` command
 
 - Next.js → [Next.js guide](#nextjs) + [Next.js example app](https://github.com/margarita-form/salty-css-website)
 - React + Vite → [React + Vite guide](#react--vite) + [React example code](#code-examples)
 - React + Webpack → Guide coming soon
+ ## Useful commands
+- Create component: `npx salty-css generate [filePath]`
+- Build: `npx salty-css build [directory]`
+- Update Salty CSS packages: `npx salty-css up`
 
-### Salty CSS CLI
+## Salty CSS styled function
+
+```ts
+// components/wrapper.css.ts
+import { styled } from '@salty-css/react/styled';
+
+// Define a component with styled function. First argument is the component name or existing component to extend and second argument is the object containing the styles and other options
+export const Component = styled('div', {
+  className: 'wrapper', // Define custom class name that will be included for this component
+  element: 'section', // Define the html element that will be rendered for this component, overrides the first 'div' argument
+  base: {
+    // 👉 Add your CSS-in-JS base styles here! 👈
+  },
+  variants: {
+    // Define conditional styles that will be applied to the component based on the variant prop values
+  },
+  compoundVariants: [
+    // Define conditional styles that will be applied to the component based on the combination of variant prop values
+  ],
+  defaultVariants: {
+    // Set default variant prop values
+  },
+  defaultProps: {
+    // Add additional default props for the component (eg, id and other html element attributes)
+  },
+  passProps: true, // Pass variant props to the rendered element / parent component (default: false)
+});
+```
+
+## Salty CSS CLI
 
 In your existing repository you can use `npx salty-css [command]` to initialize a project, generate components, update related packages and build required files.
 
@@ -34,13 +61,17 @@ In your existing repository you can use `npx salty-css [command]` to initialize 
 - Generate component → `npx salty-css update [version]` - Update @salty-css packages in your repository. Default version is "latest". Additional options like `--dir`, `--tag`, `--name` and `--className` are also supported.
 - Build files → `npx salty-css build [directory]` - Compile Salty CSS related files in your project. This should not be needed if you are using tools like Next.js or Vite
 
+
+
+## Usage
+
 ### Next.js
 
 ![salty-next](https://github.com/user-attachments/assets/2cf6a93f-cdd5-4f5f-ab2e-3bc8bcfb83e8)
 
 Salty CSS provides Next.js App & Pages router support with full React Server Components support.
 
-#### Add Salty CSS to Next.js
+### Add Salty CSS to Next.js
 
 1. In your existing Next.js repository you can run `npx salty-css init` to automatically configure Salty CSS.
 2. Create your first Salty CSS component with `npx salty-css generate [filePath]` (e.g. src/custom-wrapper)
@@ -69,7 +100,7 @@ And note: steps 2 & 3 are just to show how get new components up and running, st
 
 ![salty-vite-react](https://github.com/user-attachments/assets/12ec5b6a-0dcc-48fa-afc1-d337fc8f800c)
 
-#### Add Salty CSS to your React + Vite app
+### Add Salty CSS to your React + Vite app
 
 1. In your existing Vite repository you can run `npx salty-css init` to automatically configure Salty CSS.
 2. Create your first Salty CSS component with `npx salty-css generate [filePath]` (e.g. src/custom-wrapper)
@@ -86,6 +117,8 @@ And note: steps 2 & 3 are just to show how get new components up and running, st
 5. Import global styles from `saltygen/index.css` to some global css file with `@import 'insert_path_to_index_css';`.
 
 [Check out react example code](#code-examples)
+
+----
 
 ### Create components
 
