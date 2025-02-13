@@ -23,10 +23,8 @@ In the world of frontend dev is there anything saltier than CSS? Salty CSS is bu
 Fastest way to get started with any framework is [npx salty-css init [directory]](#initialize-salty-css-for-a-project) command
 
 - Next.js → [Next.js guide](#nextjs) + [Next.js example app](https://github.com/margarita-form/salty-css-website)
-- React → [React guide](#react) + [React example code](#code-examples)
-- Vite → [Vite guide](#vite)
-- Webpack → Guide coming soon
-- ESLint → Guide coming soon
+- React + Vite → [React + Vite guide](#react--vite) + [React example code](#code-examples)
+- React + Webpack → Guide coming soon
 
 ### Salty CSS CLI
 
@@ -48,7 +46,7 @@ Salty CSS provides Next.js App & Pages router support with full React Server Com
 2. Create your first Salty CSS component with `npx salty-css generate [filePath]` (e.g. src/custom-wrapper)
 3. Import your component for example to `page.tsx` and see it working!
 
-And note: steps 2 & 3 are just to show how get things up and running, step 1 does all of the important stuff 🤯
+And note: steps 2 & 3 are just to show how get new components up and running, step 1 does all of the important stuff 🤯
 
 #### Manual configuration
 
@@ -65,11 +63,19 @@ And note: steps 2 & 3 are just to show how get things up and running, step 1 doe
 
 [Check out Next.js demo project](https://github.com/margarita-form/salty-css-website) or [react example code](#code-examples)
 
+---
+
+### React + Vite
+
 ![salty-vite-react](https://github.com/user-attachments/assets/12ec5b6a-0dcc-48fa-afc1-d337fc8f800c)
 
-### Vite
+#### Add Salty CSS to your React + Vite app
 
-In your existing Vite repository you can run `npx salty-css init` to automatically configure Salty CSS.
+1. In your existing Vite repository you can run `npx salty-css init` to automatically configure Salty CSS.
+2. Create your first Salty CSS component with `npx salty-css generate [filePath]` (e.g. src/custom-wrapper)
+3. Import your component for example to `main.tsx` and see it working!
+
+And note: steps 2 & 3 are just to show how get new components up and running, step 1 does all of the important stuff 🤯
 
 #### Manual configuration
 
@@ -78,16 +84,6 @@ In your existing Vite repository you can run `npx salty-css init` to automatical
 3. Make sure that `salty.config.ts` and `vite.config.ts` are in the same folder!
 4. Build `saltygen` directory by running your app once or with cli `npx salty-css build [directory]`
 5. Import global styles from `saltygen/index.css` to some global css file with `@import 'insert_path_to_index_css';`.
-
-### React
-
-In your existing React repository you can run `npx salty-css init` to automatically configure Salty CSS.
-
-#### Manual configuration
-
-1. Install related dependencies: `npm i @salty-css/core @salty-css/react`
-2. Create `salty.config.ts` to your app directory
-3. Configure your build tool to support Salty CSS ([Vite](#vite) or Webpack) or after changes run `npx salty-css build`
 
 [Check out react example code](#code-examples)
 
