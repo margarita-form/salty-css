@@ -82,13 +82,15 @@ export class StyleComponentGenerator {
     compoundVariants.map((cv) => Object.keys(cv).forEach(addVariantKey));
 
     const propValueKeys = new Set<string>([]);
-    const matches = JSON.stringify(this.params.base).match(/\{props\.([\w\d]+)\}/gi);
 
-    if (matches) {
-      matches.forEach((match) => {
-        const value = match.replace(/\{props\.([\w\d]+)\}/gi, '$1');
-        if (value) propValueKeys.add(value);
-      });
+    if (this.params.base) {
+      const matches = JSON.stringify(this.params.base).match(/\{props\.([\w\d]+)\}/gi);
+      if (matches) {
+        matches.forEach((match) => {
+          const value = match.replace(/\{props\.([\w\d]+)\}/gi, '$1');
+          if (value) propValueKeys.add(value);
+        });
+      }
     }
 
     return {
