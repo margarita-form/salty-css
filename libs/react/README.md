@@ -1,3 +1,5 @@
+![Bannter](https://raw.githubusercontent.com/gist/tremppu/ef2b867907cbf262ab7373f41558a403/raw/7cc7dc697eb34342dc685d814eff6bc4d62796d2/salty-logo-svg-dvd.svg)
+
 # Salty CSS - Kinda sweet but yet spicy CSS-in-JS library
 
 In the world of frontend dev is there anything saltier than CSS? Salty CSS is built to provide better developer experience for developers looking for performant and feature rich CSS-in-JS solutions.
@@ -38,7 +40,15 @@ In your existing repository you can use `npx salty-css [command]` to initialize 
 
 #### Next.js
 
-In your existing Next.js repository you can run `npx salty-css init` to automatically configure Salty CSS.
+Salty CSS provides Next.js App & Pages router support with full React Server Components support.
+
+##### Add Salty CSS to Next.js
+
+1. In your existing Next.js repository you can run `npx salty-css init` to automatically configure Salty CSS.
+2. Create your first Salty CSS component with `npx salty-css generate [filePath]` (e.g. src/custom-wrapper)
+3. Import your component for example to `page.tsx` and see it working!
+
+And note: steps 2 & 3 are just to show how get things up and running, step 1 does all of the important stuff 🤯
 
 ##### Manual configuration
 
