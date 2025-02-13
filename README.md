@@ -1,8 +1,8 @@
 ![Bannter](https://raw.githubusercontent.com/gist/tremppu/ef2b867907cbf262ab7373f41558a403/raw/a2137de136ee2296e386682beb4487bba0f58a2f/salty-logo-svg-dvd.svg)
 
-# Salty CSS - Kinda sweet but yet spicy CSS-in-JS library
+# Salty CSS - CSS-in-JS library that is kinda sweet
 
-In the world of frontend dev is there anything saltier than CSS? Salty CSS is built to provide better developer experience for developers looking for performant and feature rich CSS-in-JS solutions.
+Is there anything saltier than CSS in frontend web development? Salty CSS is built to provide better developer experience for developers looking for performant and feature rich CSS-in-JS solutions.
 
 ## Features
 
