@@ -228,6 +228,7 @@ const isProduction = () => {
 
 export const generateCss = async (dirname: string, prod = isProduction()) => {
   try {
+    const start = Date.now();
     if (prod) logger.info('Generating CSS in production mode! 🔥');
     else logger.info('Generating CSS in development mode! 🚀');
 
@@ -334,6 +335,11 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
     }
 
     writeFileSync(cssFile, cssContent);
+
+    const end = Date.now();
+    const time = end - start;
+    const emoji = time < 200 ? '🔥' : time < 500 ? '🚀' : time < 1000 ? '🎉' : time < 2000 ? '🚗' : time < 5000 ? '🤔' : '🥴';
+    logger.info(`Generated CSS in ${time}ms! ${emoji}`);
   } catch (e) {
     console.error(e);
   }
