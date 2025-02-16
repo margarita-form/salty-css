@@ -21,7 +21,7 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, l
           Object.entries<any>(conditions).forEach(([val, styles]) => {
             if (!styles) return;
             const scope = `${currentClass}.${prop}-${val}`;
-            const result = parseStyles(styles, scope, layer);
+            const result = parseStyles(styles, scope, layer, config);
             classes.push(result);
           });
         });
@@ -38,14 +38,14 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, l
           const scope = Object.entries(rest).reduce((acc, [prop, val]) => {
             return `${acc}.${prop}-${val}`;
           }, currentClass);
-          const result = parseStyles(css, scope, layer);
+          const result = parseStyles(css, scope, layer, config);
           classes.push(result);
         });
         return acc;
       }
 
       if (_key.startsWith('@')) {
-        const result = parseStyles(value, currentClass, layer);
+        const result = parseStyles(value, currentClass, layer, config);
         const query = `${_key} {\n ${result.replace('\n', '\n ')}\n}`;
         classes.push(query);
         return acc;
@@ -53,7 +53,7 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, l
 
       const scope = key.includes('&') ? _key.replace('&', currentClass) : _key.startsWith(':') ? `${currentClass}${_key}` : `${currentClass} ${_key}`;
 
-      const result = parseStyles(value, scope, layer);
+      const result = parseStyles(value, scope, layer, config);
       classes.push(result);
       return acc;
     }
