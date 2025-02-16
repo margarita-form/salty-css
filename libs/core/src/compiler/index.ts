@@ -214,7 +214,8 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
 const getConfig = async (dirname: string) => {
   const destDir = getDestDir(dirname);
   const coreConfigDest = join(destDir, 'salty.config.js');
-  const { config } = await import(coreConfigDest);
+  const now = Date.now();
+  const { config } = await import(`${coreConfigDest}?t=${now}`);
   return config;
 };
 
@@ -357,6 +358,16 @@ export const generateFile = async (dirname: string, file: string) => {
       const config = await getConfig(dirname);
       const contents = await compileSaltyFile(dirname, file, destDir);
       Object.entries(contents).forEach(([name, value]: [string, any]) => {
+        if (value.isKeyframes && value.css) {
+          const fileName = `a_${value.animationName}.css`;
+          const filePath = `css/${fileName}`;
+          const cssPath = join(destDir, filePath);
+
+          writeFileSync(cssPath, value.css);
+
+          return;
+        }
+
         if (!value.generator) return;
 
         const generator = value.generator._withBuildContext({
