@@ -348,12 +348,21 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
     let cssContent = `@layer reset, global, l0, l1, l2, l3, l4, l5, l6, l7, l8;\n\n${globalImports.join('\n')}\n${otherGlobalCssFiles}`;
 
     if (config.importStrategy !== 'component') {
-      const cssFileImports = cssFiles.reduce((acc, val, layer) => {
-        const imports = val.reduce((acc, file) => acc + `@import url('./css/${file}') layer(l${layer});`, '');
-        return `${acc}\n${imports}`;
+      const mergedContent = cssFiles.reduce((acc, val, layer) => {
+        const layerContent = val.reduce((layerAcc, file) => {
+          const css = readFileSync(join(destDir, 'css', file), 'utf8');
+          return `${layerAcc}\n${css}`;
+        }, '');
+
+        const layerFileName = `l_${layer}.css`;
+        const layerFilePath = join(destDir, 'css', layerFileName);
+        const layerContentWithLayer = `@layer l${layer} { ${layerContent} }`;
+        writeFileSync(layerFilePath, layerContentWithLayer);
+
+        return `${acc}\n@import url('./css/${layerFileName}');`;
       }, '');
 
-      cssContent += cssFileImports;
+      cssContent += mergedContent;
     }
 
     writeFileSync(cssFile, cssContent);
