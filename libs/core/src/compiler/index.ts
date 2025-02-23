@@ -368,7 +368,8 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
         const layerContent = val.reduce((layerAcc, file) => {
           const filepath = join(destDir, 'css', file);
           const css = readFileSync(filepath, 'utf8');
-          const filepathHash = toHash(filepath, 6);
+          const filepathHash = /.*-([^-]+)-\d+.css/.exec(file)?.at(1) || toHash(filepath, 6);
+          if (layerAcc.includes(filepathHash)) return layerAcc;
           return `${layerAcc}\n/*start:${filepathHash}*/\n${css}\n/*end:${filepathHash}*/\n`;
         }, '');
 
@@ -449,11 +450,10 @@ export const generateFile = async (dirname: string, file: string) => {
           let currentLayerFileContent = readFileSync(layerFilePath, 'utf8');
           val.forEach((file) => {
             const filepath = join(destDir, 'css', file);
-            const filepathHash = toHash(filepath, 6);
+            const filepathHash = /.*-([^-]+)-\d+.css/.exec(file)?.at(1) || toHash(filepath, 6);
             const found = currentLayerFileContent.includes(filepathHash);
             if (!found) {
               const css = readFileSync(filepath, 'utf8');
-              const filepathHash = toHash(filepath, 6);
               const newContent = `/*start:${filepathHash}*/\n${css}\n/*end:${filepathHash}*/\n`;
               currentLayerFileContent = `${currentLayerFileContent.replace(/\}$/, '')}\n${newContent}\n}`;
             }
