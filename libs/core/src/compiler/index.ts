@@ -398,13 +398,10 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
 export const generateFile = async (dirname: string, file: string) => {
   try {
     const destDir = join(dirname, './saltygen');
-    const cssFile = join(destDir, 'index.css');
-
     const validFile = isSaltyFile(file);
 
     if (validFile) {
       const cssFiles: string[][] = [];
-
       const config = await getConfig(dirname);
       const contents = await compileSaltyFile(dirname, file, destDir);
       Object.entries(contents).forEach(([name, value]: [string, any]) => {
@@ -434,16 +431,7 @@ export const generateFile = async (dirname: string, file: string) => {
         cssFiles[generator.priority].push(generator.cssFileName);
       });
 
-      const current = readFileSync(cssFile, 'utf8').split('\n');
-
       if (config.importStrategy !== 'component') {
-        // const cssFileImports = cssFiles.map((file) => `@import url('../saltygen/css/${file}');`);
-
-        // const set = new Set([...current, ...cssFileImports]);
-        // const merged = [...set].join('\n');
-
-        // writeFileSync(cssFile, merged);
-
         cssFiles.forEach((val, layer) => {
           const layerFileName = `l_${layer}.css`;
           const layerFilePath = join(destDir, 'css', layerFileName);
