@@ -9,6 +9,7 @@ import { logError, logger } from './logger';
 import { formatWithPrettier } from './prettier';
 import { npmInstall } from './bin-util';
 import { PathLike } from 'fs';
+import { RCFile } from '../types/cli-types';
 
 export async function main() {
   const program = new Command();
@@ -31,11 +32,6 @@ export async function main() {
     const content = render(file, options);
     return { fileName, content };
   };
-
-  interface RCFile {
-    defaultProject: string;
-    projects: string[];
-  }
 
   const readRCFile = async () => {
     const rcPath = join(process.cwd(), '.saltyrc.json');

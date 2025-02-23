@@ -5,7 +5,7 @@ import { join, parse as parsePath } from 'path';
 import { statSync, existsSync, mkdirSync, readdirSync, writeFileSync, readFileSync } from 'fs';
 import { StyleComponentGenerator } from '../generator/style-generator';
 import { dashCase } from '../util/dash-case';
-import { writeFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 import { parseStyles } from '../generator/parse-styles';
 import { getTemplateTypes, parseTemplates } from '../generator/parse-templates';
 import { CssConditionalVariables, CssResponsiveVariables } from '../config';
@@ -14,14 +14,14 @@ import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
 import { dotCase } from '../util/dot-case';
 import { saltyReset } from '../templates/salty-reset';
+import { RCFile } from '../types/cli-types';
 
 const cache = {
   externalModules: [] as string[],
 };
 
-const getExternalModules = (dirname: string) => {
+const getExternalModules = (coreConfigPath: string) => {
   if (cache.externalModules.length > 0) return cache.externalModules;
-  const coreConfigPath = join(dirname, 'salty.config.ts');
   const content = readFileSync(coreConfigPath, 'utf8');
   const match = content.match(/externalModules:\s?\[(.*)\]/);
   if (!match) return [];
@@ -36,13 +36,32 @@ export const saltyFileExtensions = ['salty', 'css', 'styles', 'styled'];
 export const saltyFileRegExp = (additional: string[] = []) => new RegExp(`\\.(${[...saltyFileExtensions, ...additional].join('|')})\\.`);
 export const isSaltyFile = (file: string, additional: string[] = []) => saltyFileRegExp(additional).test(file);
 
+const readRCFile = async (currentDir: string) => {
+  if (currentDir === '/') throw new Error('Could not find .saltyrc.json file');
+  const rcPath = join(currentDir, '.saltyrc.json');
+  const rcContent = await readFile(rcPath, 'utf-8')
+    .then(JSON.parse)
+    .catch(() => undefined);
+
+  if (!rcContent) return readRCFile(join(currentDir, '..'));
+  return rcContent as RCFile;
+};
+
+const getRCProjectConfig = async (dirname: string) => {
+  const rcFile = await readRCFile(dirname);
+  const projectConfig = rcFile.projects?.find((project) => dirname.endsWith(project.dir || ''));
+  if (!projectConfig) return rcFile.projects?.find((project) => project.dir === rcFile.defaultProject);
+  return projectConfig;
+};
+
 const generateConfig = async (dirname: string) => {
+  const rcProject = await getRCProjectConfig(dirname);
   const destDir = getDestDir(dirname);
-  const coreConfigPath = join(dirname, 'salty.config.ts');
+  const coreConfigPath = join(dirname, rcProject?.configDir || '', 'salty.config.ts');
   const coreConfigDest = join(destDir, 'salty.config.js');
 
   const moduleType = await detectCurrentModuleType(dirname);
-  const externalModules = getExternalModules(dirname);
+  const externalModules = getExternalModules(coreConfigPath);
   await esbuild.build({
     entryPoints: [coreConfigPath],
     minify: true,
@@ -201,7 +220,9 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
   currentFile = replaceStyledTag(currentFile);
 
   const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
-  const externalModules = getExternalModules(dirname);
+  const rcProject = await getRCProjectConfig(dirname);
+  const coreConfigPath = join(dirname, rcProject?.configDir || '', 'salty.config.ts');
+  const externalModules = getExternalModules(coreConfigPath);
   const moduleType = await detectCurrentModuleType(dirname);
 
   await esbuild.build({

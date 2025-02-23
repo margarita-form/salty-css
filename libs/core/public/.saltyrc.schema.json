@@ -20,7 +20,7 @@
         "properties": {
           "dir": {
             "type": "string",
-            "description": "The directory of the project. This is also used as the project name."
+            "description": "The root directory of the project. This is also used as the project name."
           },
           "framework": {
             "type": "string",
@@ -29,7 +29,11 @@
           },
           "components": {
             "type": "string",
-            "description": "The directory for the components."
+            "description": "The directory for the components, relative to the project root."
+          },
+          "configDir": {
+            "type": "string",
+            "description": "Dir3ectorywhere the project configuration file is located, relative to the project root."
           }
         },
         "required": ["dir", "framework"]
