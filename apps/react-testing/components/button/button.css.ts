@@ -4,28 +4,23 @@ import { DynamicLink } from '../dynamic-link/dynamic-link';
 
 export const ButtonsWrapper = styled('div', {
   base: {
-    margin: '5vw 0',
     display: 'flex',
-    gap: '2.5vw',
+    gap: '{spacings.large}',
+    marginBlock: '{spacings.large}',
   },
 });
 
 export const Button = styled(DynamicLink, {
   element: 'button',
+  className: 'button',
   base: {
     display: 'block',
-    padding: `${token('spacings.emRegular')} ${token('spacings.emLarge')}`,
-    border: '1px solid currentColor',
-    background: 'transparent',
-    color: 'currentColor/40',
+    padding: `${token('spacings.em.small')} ${token('spacings.em.large')}`,
+    border: '1px solid transparent',
     cursor: 'pointer',
     transition: '200ms',
     textDecoration: 'none',
-    '&:hover': {
-      background: 'black',
-      borderColor: 'black',
-      color: 'white',
-    },
+    textStyle: 'body.small',
     '&:disabled': {
       opacity: 0.25,
       pointerEvents: 'none',
@@ -34,7 +29,13 @@ export const Button = styled(DynamicLink, {
   variants: {
     variant: {
       outlined: {
-        //
+        borderColor: 'currentColor',
+        background: 'transparent',
+        '&:hover': {
+          background: 'black',
+          borderColor: 'black',
+          color: 'white',
+        },
       },
       solid: {
         '&:not(:hover)': {
@@ -46,6 +47,15 @@ export const Button = styled(DynamicLink, {
           background: 'transparent',
           borderColor: 'currentColor',
           color: 'currentColor',
+        },
+      },
+      underLined: {
+        textDecoration: 'underline 1px solid currentColor',
+        background: 'transparent',
+        padding: 0,
+        textUnderlineOffset: '0.25em',
+        '&:hover': {
+          textDecorationColor: 'currentColor/20',
         },
       },
     },
@@ -81,35 +91,6 @@ export const Button = styled(DynamicLink, {
       borderRadius: 'circular',
       css: {
         paddingInline: '{spacings.emExtraLarge}',
-      },
-    },
-  ],
-});
-
-export const LargeButton = styled(Button, {
-  base: {
-    fontSize: '24px',
-  },
-  variants: {
-    warning: {
-      true: {
-        background: 'red',
-        borderColor: 'red',
-        color: '#000',
-        '&:hover': {
-          opacity: 0.5,
-        },
-      },
-    },
-  },
-  compoundVariants: [
-    {
-      warning: true,
-      variant: 'solid',
-      css: {
-        borderColor: '#000',
-        borderWidth: '2px',
-        fontWeight: '700',
       },
     },
   ],

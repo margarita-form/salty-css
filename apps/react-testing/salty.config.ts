@@ -4,26 +4,51 @@ import { largeMobileDown } from './styles/media.css';
 
 export const config = defineConfig({
   externalModules: ['react', 'react-router-dom'],
-  importStrategy: 'component',
+  importStrategy: 'root',
   variables: {
     colors: {
-      brand: '#111',
-      highlight: 'yellow',
+      brand: '#ff00a2',
+      highlight: '#ffe400',
+      dark: '#111',
+      darkAlt: '#222',
+      light: '#fefefe',
+      lightAlt: '#f0f0f0',
+      black: '#000',
+      white: '#fff',
     },
     fontSize: {
       heading: {
-        regular: '2.5vw',
+        small: 'clamp(20px, 1.5vw, 32px)',
+        regular: 'clamp(32px, 2.5vw, 48px)',
+        large: 'clamp(48px, 4vw, 64px)',
       },
-    },
-    custom: {
-      variables: {
-        thatCanGoDeep: 'blue',
+      body: {
+        small: 'clamp(14px, 1vw, 16px)',
+        regular: 'clamp(16px, 1.25vw, 20px)',
+        large: 'clamp(20px, 1.5vw, 24px)',
       },
     },
     spacings: {
-      emExtraLarge: '1.8em',
-      emLarge: '1.2em',
-      emRegular: '0.6em',
+      small: '8px',
+      medium: '16px',
+      large: '32px',
+      screen: {
+        small: 'clamp(24px, 5vw, 120px)',
+        medium: 'clamp(32px, 6.25vw, 160px)',
+        large: 'clamp(48px, 7.5vw, 240px)',
+      },
+      em: {
+        small: '0.6em',
+        medium: '1.2em',
+        large: '1.8em',
+      },
+    },
+    sizes: {
+      width: {
+        small: '320px',
+        medium: '960px',
+        large: '1280px',
+      },
     },
   },
   responsiveVariables: {
@@ -45,29 +70,49 @@ export const config = defineConfig({
   conditionalVariables: {
     theme: {
       dark: {
-        backgroundColor: '{colors.brand}',
-        textColor: 'white',
+        backgroundColor: '{colors.dark}',
+        textColor: '{colors.white}',
       },
       light: {
-        backgroundColor: 'white',
+        backgroundColor: '{colors.light}',
         textColor: '{colors.brand}',
+      },
+      darkAlt: {
+        backgroundColor: '{colors.darkAlt}',
+        textColor: '{colors.white}',
       },
     },
   },
   global: {
     html: {
-      backgroundColor: '#f8f8f8',
+      fontFamily: 'Arial, sans-serif',
+    },
+    body: {
+      backgroundColor: '{theme.background.color}',
+      color: '{theme.textColor}',
     },
   },
   templates: {
     textStyle: {
       headline: {
-        large: {
-          fontSize: '60px',
+        small: {
+          fontSize: '{fontSize.heading.small}',
         },
         regular: {
           fontSize: '{fontSize.heading.regular}',
-          color: 'blue',
+        },
+        large: {
+          fontSize: '{fontSize.heading.large}',
+        },
+      },
+      body: {
+        small: {
+          fontSize: '{fontSize.body.small}',
+          lineHeight: '1.5em',
+        },
+        regular: {
+          fontSize: '{fontSize.body.regular}',
+          lineHeight: '1.33em',
         },
       },
     },
