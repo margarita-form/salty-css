@@ -451,7 +451,6 @@ export const generateFile = async (dirname: string, file: string) => {
             const filepath = join(destDir, 'css', file);
             const filepathHash = toHash(filepath, 6);
             const found = currentLayerFileContent.includes(filepathHash);
-            console.log({ layer, filepath, filepathHash, found });
             if (!found) {
               const css = readFileSync(filepath, 'utf8');
               const filepathHash = toHash(filepath, 6);
