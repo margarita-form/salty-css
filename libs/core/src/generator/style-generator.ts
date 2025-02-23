@@ -64,7 +64,8 @@ export class StyleComponentGenerator {
   get css() {
     const { base = {}, variants = {}, compoundVariants = [] } = this.params;
     const combinedStyles: Styles = { ...base, variants, compoundVariants };
-    return parseStyles(combinedStyles, `.${this.cssClassName}`, this.priority, this._context?.config);
+    const css = parseStyles(combinedStyles, `.${this.cssClassName}`, this._context?.config);
+    return css;
   }
 
   get props(): GeneratorProps {

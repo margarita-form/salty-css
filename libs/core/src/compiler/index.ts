@@ -326,11 +326,12 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
     });
     const globalImports = importsWithData.map((file) => `@import url('./css/${file}');`);
     let cssContent = `@layer reset, global, l0, l1, l2, l3, l4, l5, l6, l7, l8;\n\n${globalImports.join('\n')}\n${otherGlobalCssFiles}`;
+
     if (config.importStrategy !== 'component') {
-      const cssFileImports = cssFiles
-        .flat()
-        .map((file) => `@import url('./css/${file}');`)
-        .join('\n');
+      const cssFileImports = cssFiles.reduce((acc, val, layer) => {
+        const imports = val.reduce((acc, file) => acc + `@import url('./css/${file}') layer(l${layer});`, '');
+        return `${acc}\n${imports}`;
+      }, '');
 
       cssContent += cssFileImports;
     }

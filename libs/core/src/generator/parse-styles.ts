@@ -4,7 +4,7 @@ import { dashCase } from '../util';
 import { parseValueModifiers } from './parse-modifiers';
 import { parseValueTokens } from './parse-tokens';
 
-export const parseStyles = <T extends object>(styles: T, currentClass: string, layer?: number, config?: SaltyConfig | undefined): string => {
+export const parseStyles = <T extends object>(styles: T, currentClass: string, config?: SaltyConfig | undefined): string => {
   if (!styles) return '';
   const classes: string[] = [];
   const current = Object.entries(styles).reduce((acc, [key, value]) => {
@@ -21,7 +21,7 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, l
           Object.entries<any>(conditions).forEach(([val, styles]) => {
             if (!styles) return;
             const scope = `${currentClass}.${prop}-${val}`;
-            const result = parseStyles(styles, scope, layer, config);
+            const result = parseStyles(styles, scope, config);
             classes.push(result);
           });
         });
@@ -38,14 +38,14 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, l
           const scope = Object.entries(rest).reduce((acc, [prop, val]) => {
             return `${acc}.${prop}-${val}`;
           }, currentClass);
-          const result = parseStyles(css, scope, layer, config);
+          const result = parseStyles(css as T, scope, config);
           classes.push(result);
         });
         return acc;
       }
 
       if (_key.startsWith('@')) {
-        const result = parseStyles(value, currentClass, layer, config);
+        const result = parseStyles(value, currentClass, config);
         const query = `${_key} {\n ${result.replace('\n', '\n ')}\n}`;
         classes.push(query);
         return acc;
@@ -53,7 +53,7 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, l
 
       const scope = key.includes('&') ? _key.replace('&', currentClass) : _key.startsWith(':') ? `${currentClass}${_key}` : `${currentClass} ${_key}`;
 
-      const result = parseStyles(value, scope, layer, config);
+      const result = parseStyles(value, scope, config);
       classes.push(result);
       return acc;
     }
@@ -101,9 +101,6 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, l
   if (!current) return classes.join('\n');
   if (!currentClass) return current;
 
-  let css = '';
-  if (layer !== undefined) css = `@layer l${layer} { ${currentClass} { ${current} } }`;
-  else css = `${currentClass} { ${current} }`;
-
+  const css = `${currentClass} { ${current} }`;
   return [css, ...classes].join('\n');
 };
