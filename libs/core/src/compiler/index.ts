@@ -366,13 +366,15 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
     if (config.importStrategy !== 'component') {
       const mergedContent = cssFiles.reduce((acc, val, layer) => {
         const layerContent = val.reduce((layerAcc, file) => {
-          const css = readFileSync(join(destDir, 'css', file), 'utf8');
-          return `${layerAcc}\n${css}`;
+          const filepath = join(destDir, 'css', file);
+          const css = readFileSync(filepath, 'utf8');
+          const filepathHash = toHash(filepath, 6);
+          return `${layerAcc}\n/*start:${filepathHash}*/\n${css}\n/*end:${filepathHash}*/\n`;
         }, '');
 
         const layerFileName = `l_${layer}.css`;
         const layerFilePath = join(destDir, 'css', layerFileName);
-        const layerContentWithLayer = `@layer l${layer} { ${layerContent} }`;
+        const layerContentWithLayer = `@layer l${layer} { ${layerContent}\n }`;
         writeFileSync(layerFilePath, layerContentWithLayer);
 
         return `${acc}\n@import url('./css/${layerFileName}');`;
@@ -394,13 +396,14 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
 
 export const generateFile = async (dirname: string, file: string) => {
   try {
-    const cssFiles: string[] = [];
     const destDir = join(dirname, './saltygen');
     const cssFile = join(destDir, 'index.css');
 
     const validFile = isSaltyFile(file);
 
     if (validFile) {
+      const cssFiles: string[][] = [];
+
       const config = await getConfig(dirname);
       const contents = await compileSaltyFile(dirname, file, destDir);
       Object.entries(contents).forEach(([name, value]: [string, any]) => {
@@ -423,18 +426,42 @@ export const generateFile = async (dirname: string, file: string) => {
 
         const filePath = `css/${generator.cssFileName}`;
         const cssPath = join(destDir, filePath);
-        cssFiles.push(generator.cssFileName);
+
         writeFileSync(cssPath, generator.css);
+
+        if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
+        cssFiles[generator.priority].push(generator.cssFileName);
       });
 
       const current = readFileSync(cssFile, 'utf8').split('\n');
 
-      const cssFileImports = cssFiles.map((file) => `@import url('../saltygen/css/${file}');`);
+      if (config.importStrategy !== 'component') {
+        // const cssFileImports = cssFiles.map((file) => `@import url('../saltygen/css/${file}');`);
 
-      const set = new Set([...current, ...cssFileImports]);
-      const merged = [...set].join('\n');
+        // const set = new Set([...current, ...cssFileImports]);
+        // const merged = [...set].join('\n');
 
-      writeFileSync(cssFile, merged);
+        // writeFileSync(cssFile, merged);
+
+        cssFiles.forEach((val, layer) => {
+          const layerFileName = `l_${layer}.css`;
+          const layerFilePath = join(destDir, 'css', layerFileName);
+          let currentLayerFileContent = readFileSync(layerFilePath, 'utf8');
+          val.forEach((file) => {
+            const filepath = join(destDir, 'css', file);
+            const filepathHash = toHash(filepath, 6);
+            const found = currentLayerFileContent.includes(filepathHash);
+            console.log({ layer, filepath, filepathHash, found });
+            if (!found) {
+              const css = readFileSync(filepath, 'utf8');
+              const filepathHash = toHash(filepath, 6);
+              const newContent = `/*start:${filepathHash}*/\n${css}\n/*end:${filepathHash}*/\n`;
+              currentLayerFileContent = `${currentLayerFileContent.replace(/\}$/, '')}\n${newContent}\n}`;
+            }
+          });
+          writeFileSync(layerFilePath, currentLayerFileContent);
+        });
+      }
     }
   } catch (e) {
     console.error(e);
