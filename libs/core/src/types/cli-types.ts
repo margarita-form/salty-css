@@ -5,5 +5,6 @@ export interface RCFile {
     framework?: string;
     components?: string;
     configDir?: string;
+    saltygenDir?: string;
   }[];
 }

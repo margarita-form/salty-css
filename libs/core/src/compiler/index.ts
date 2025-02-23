@@ -16,8 +16,16 @@ import { dotCase } from '../util/dot-case';
 import { saltyReset } from '../templates/salty-reset';
 import { RCFile } from '../types/cli-types';
 
-const cache = {
-  externalModules: [] as string[],
+interface Cache {
+  externalModules: string[];
+  rcFile?: RCFile;
+  destDir?: string;
+}
+
+const cache: Cache = {
+  externalModules: [],
+  rcFile: undefined,
+  destDir: undefined,
 };
 
 const getExternalModules = (coreConfigPath: string) => {
@@ -30,13 +38,20 @@ const getExternalModules = (coreConfigPath: string) => {
   return externalModules;
 };
 
-const getDestDir = (dirname: string) => join(dirname, './saltygen');
+const getDestDir = async (dirname: string) => {
+  if (cache.destDir) return cache.destDir;
+  const projectConfig = await getRCProjectConfig(dirname);
+  const destDir = join(dirname, projectConfig?.saltygenDir || 'saltygen');
+  cache.destDir = destDir;
+  return destDir;
+};
 
 export const saltyFileExtensions = ['salty', 'css', 'styles', 'styled'];
 export const saltyFileRegExp = (additional: string[] = []) => new RegExp(`\\.(${[...saltyFileExtensions, ...additional].join('|')})\\.`);
 export const isSaltyFile = (file: string, additional: string[] = []) => saltyFileRegExp(additional).test(file);
 
 const readRCFile = async (currentDir: string) => {
+  if (cache.rcFile) return cache.rcFile;
   if (currentDir === '/') throw new Error('Could not find .saltyrc.json file');
   const rcPath = join(currentDir, '.saltyrc.json');
   const rcContent = await readFile(rcPath, 'utf-8')
@@ -44,6 +59,7 @@ const readRCFile = async (currentDir: string) => {
     .catch(() => undefined);
 
   if (!rcContent) return readRCFile(join(currentDir, '..'));
+  cache.rcFile = rcContent;
   return rcContent as RCFile;
 };
 
@@ -56,7 +72,7 @@ const getRCProjectConfig = async (dirname: string) => {
 
 const generateConfig = async (dirname: string) => {
   const rcProject = await getRCProjectConfig(dirname);
-  const destDir = getDestDir(dirname);
+  const destDir = await getDestDir(dirname);
   const coreConfigPath = join(dirname, rcProject?.configDir || '', 'salty.config.ts');
   const coreConfigDest = join(destDir, 'salty.config.js');
 
@@ -130,7 +146,7 @@ export const generateConfigStyles = async (dirname: string) => {
   const responsiveVariables = parseResponsiveVariables(config.responsiveVariables);
   const conditionalVariables = parseConditionalVariables(config.conditionalVariables);
 
-  const destDir = getDestDir(dirname);
+  const destDir = await getDestDir(dirname);
 
   const variablesPath = join(destDir, 'css/_variables.css');
   const variablesCss = `:root { ${variables.join('')} ${responsiveVariables.join('')} } ${conditionalVariables.join('')}`;
@@ -269,7 +285,7 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
 };
 
 const getConfig = async (dirname: string) => {
-  const destDir = getDestDir(dirname);
+  const destDir = await getDestDir(dirname);
   const coreConfigDest = join(destDir, 'salty.config.js');
   const now = Date.now();
   const { config } = await import(`${coreConfigDest}?t=${now}`);
@@ -292,12 +308,12 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
 
     const globalCssFiles: string[] = [];
     const cssFiles: string[][] = [];
-    const destDir = getDestDir(dirname);
+    const destDir = await getDestDir(dirname);
     const cssFile = join(destDir, 'index.css');
 
     const clearDistDir = () => {
       if (existsSync(destDir)) execSync('rm -rf ' + destDir);
-      mkdirSync(destDir);
+      mkdirSync(destDir, { recursive: true });
       mkdirSync(join(destDir, 'css'));
       mkdirSync(join(destDir, 'types'));
     };
@@ -418,7 +434,7 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
 
 export const generateFile = async (dirname: string, file: string) => {
   try {
-    const destDir = join(dirname, './saltygen');
+    const destDir = await getDestDir(dirname);
     const validFile = isSaltyFile(file);
 
     if (validFile) {
@@ -478,7 +494,7 @@ export const generateFile = async (dirname: string, file: string) => {
 
 export const minimizeFile = async (dirname: string, file: string, prod = isProduction()) => {
   try {
-    const destDir = join(dirname, './saltygen');
+    const destDir = await getDestDir(dirname);
     const validFile = isSaltyFile(file);
 
     if (validFile) {

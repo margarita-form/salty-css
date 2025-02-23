@@ -34,6 +34,10 @@
           "configDir": {
             "type": "string",
             "description": "Dir3ectorywhere the project configuration file is located, relative to the project root."
+          },
+          "saltygenDir": {
+            "type": "string",
+            "description": "Directory where the salty css files will be generated to, relative to the project root."
           }
         },
         "required": ["dir", "framework"]
