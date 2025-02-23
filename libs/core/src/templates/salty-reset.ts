@@ -31,6 +31,10 @@ export const saltyReset: GlobalStyles = {
   'h1, h2, h3, h4, h5, h6': {
     textWrap: 'balance',
   },
+  /** Improve link color */
+  a: {
+    color: 'currentColor',
+  },
   /** Improve button line height */
   button: {
     lineHeight: '1em',
