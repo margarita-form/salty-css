@@ -180,7 +180,7 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
     if (isString) return match;
 
     // Check if the tag is imported from somewhere else
-    const isImportedRegExp = new RegExp(`import\\s?\\{[^{}]*${tag}[^{}]*\\}\\s?from\\s?([^{};]+);`);
+    const isImportedRegExp = new RegExp(`import[^;]*${tag}[,\\s{][^;]*from\\s?([^{};]+);`);
     const isImported = isImportedRegExp.test(currentFile);
     if (!isImported) return match;
 
