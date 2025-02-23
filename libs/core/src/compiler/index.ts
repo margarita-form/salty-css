@@ -165,16 +165,8 @@ export const generateConfigStyles = async (dirname: string) => {
   writeFileSync(tsTokensPath, tsTokensTypes);
 };
 
-export const compileSaltyFile = async (dirname: string, sourceFilePath: string, outputDirectory: string) => {
-  const hashedName = toHash(sourceFilePath);
-  const tempDir = join(outputDirectory, './temp');
-
-  if (!existsSync(tempDir)) mkdirSync(tempDir);
-
-  const parsed = parsePath(sourceFilePath);
-  let currentFile = readFileSync(sourceFilePath, 'utf8');
-
-  currentFile = currentFile.replace(/styled\(([^"'`{,]+),/g, (match, tag) => {
+const replaceStyledTag = (currentFile: string) => {
+  return currentFile.replace(/styled\(([^"'`{,]+),/g, (match, tag) => {
     // Check if the tag is a string
     const isString = /^['"`]/.test(tag);
     if (isString) return match;
@@ -195,6 +187,18 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
     // To avoid unnecessary imports, we will replace the styled call with a string when import is not a salty file
     return "styled('div',";
   });
+};
+
+export const compileSaltyFile = async (dirname: string, sourceFilePath: string, outputDirectory: string) => {
+  const hashedName = toHash(sourceFilePath);
+  const tempDir = join(outputDirectory, './temp');
+
+  if (!existsSync(tempDir)) mkdirSync(tempDir);
+
+  const parsed = parsePath(sourceFilePath);
+  let currentFile = readFileSync(sourceFilePath, 'utf8');
+
+  currentFile = replaceStyledTag(currentFile);
 
   const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
   const externalModules = getExternalModules(dirname);
@@ -216,6 +220,18 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
     keepNames: true,
     external: externalModules,
     packages: 'external',
+    plugins: [
+      {
+        name: 'test',
+        setup: (build) => {
+          build.onLoad({ filter: /.*\.css|salty|styles|styled\.ts/ }, (args) => {
+            const original = readFileSync(args.path, 'utf8');
+            const modified = replaceStyledTag(original);
+            return { contents: modified, loader: 'ts' };
+          });
+        },
+      },
+    ],
   });
 
   const now = Date.now();
