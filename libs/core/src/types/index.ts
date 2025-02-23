@@ -34,9 +34,9 @@ type VariantOptions = {
   [key in InvalidVariantKeys]?: never;
 };
 
-export type CompoundVariant = { [key: PropertyKey]: string | boolean | undefined } | { css: CssStyles };
+export type CompoundVariant = { [key: PropertyKey]: string | boolean | undefined } | { css: CSSinJS };
 type Variants = {
-  variants?: VariantOptions & { [key: PropertyKey]: { [key: string]: Styles } };
+  variants?: VariantOptions & { [key: PropertyKey]: { [key: PropertyKey]: CSSinJS } };
   defaultVariants?: { [key: PropertyKey]: any };
   compoundVariants?: CompoundVariant[];
 };
@@ -71,8 +71,10 @@ export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (props: inf
 
 type StylePropertyValue = Record<never, never> & unknown;
 
+type CSSinJS = CssProperties | StylePropertyValue | PropertyValueToken | TemplateTokens | CssPseudos;
+
 export type CssStyles = {
-  [key in OrString]?: CssProperties | StylePropertyValue | PropertyValueToken | TemplateTokens | CssStyles;
+  [key in OrString]?: CSSinJS;
 };
 
 export type Styles = CssStyles & Variants;
@@ -88,7 +90,7 @@ export interface GeneratorOptions {
 interface Base extends CssProperties, CssStyles, CssPseudos, TemplateTokens {}
 
 type Pseudos = CSS.Pseudos | `&${CSS.Pseudos}`;
-type CssPseudos = { [P in Pseudos]?: Base };
+type CssPseudos = { [P in Pseudos]?: CssStyles };
 
 export interface StyledParams extends GeneratorOptions, Variants {
   base?: Base;
