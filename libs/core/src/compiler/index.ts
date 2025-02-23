@@ -174,7 +174,27 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
   const parsed = parsePath(sourceFilePath);
   let currentFile = readFileSync(sourceFilePath, 'utf8');
 
-  currentFile = currentFile.replace(/styled\([^"'`{,]+,/g, "styled('div',");
+  currentFile = currentFile.replace(/styled\(([^"'`{,]+),/g, (match, tag) => {
+    // Check if the tag is a string
+    const isString = /^['"`]/.test(tag);
+    if (isString) return match;
+
+    // Check if the tag is imported from somewhere else
+    const isImportedRegExp = new RegExp(`import\\s?\\{[^{}]*${tag}[^{}]*\\}\\s?from\\s?([^{};]+);`);
+    const isImported = isImportedRegExp.test(currentFile);
+    if (!isImported) return match;
+
+    // Check if the import is a salty file
+    const importResult = isImportedRegExp.exec(currentFile);
+    if (importResult) {
+      const importPath = importResult.at(1);
+      const isSaltyImport = saltyFileExtensions.some((ext) => importPath?.includes(ext));
+      if (isSaltyImport) return match;
+    }
+
+    // To avoid unnecessary imports, we will replace the styled call with a string when import is not a salty file
+    return "styled('div',";
+  });
 
   const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
   const externalModules = getExternalModules(dirname);
