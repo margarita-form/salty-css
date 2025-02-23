@@ -34,6 +34,7 @@ export const saltyReset: GlobalStyles = {
   /** Improve button line height */
   button: {
     lineHeight: '1em',
+    color: 'currentColor',
   },
   /** Improve form elements */
   'input, optgroup, select, textarea': {
