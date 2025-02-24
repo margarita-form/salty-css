@@ -1,4 +1,4 @@
-import { GlobalStyles } from '../config/config-types';
+import { GlobalStyles } from '../types/config-types';
 
 export const saltyReset: GlobalStyles = {
   /** Set box model to border-box */

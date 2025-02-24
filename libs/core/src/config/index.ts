@@ -1,2 +1,2 @@
-export * from './config-types';
+export * from '../types/config-types';
 export * from './define-config';

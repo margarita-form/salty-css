@@ -1,4 +1,4 @@
-import { CssModifiers } from '../config/config-types';
+import { CssModifiers } from '../types/config-types';
 import { ValueParserReturnValue } from './parser-types';
 
 export const parseValueModifiers = (value: string, modifiers?: CssModifiers): ValueParserReturnValue => {

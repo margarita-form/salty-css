@@ -1,4 +1,4 @@
-import { SaltyConfig } from '../config/config-types';
+import { SaltyConfig } from '../types/config-types';
 import { CompoundVariant } from '../types';
 import { dashCase } from '../util';
 import { parseValueModifiers } from './parse-modifiers';
