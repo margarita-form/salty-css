@@ -18,11 +18,12 @@ export const saltyPlugin = (config: Configuration, dir: string, isServer = false
     config.plugins?.push({
       apply: (compiler) => {
         compiler.hooks.watchRun.tapPromise({ name: 'generateCss' }, async () => {
+          console.log('generateCss');
           await generateCss(dir);
         });
 
-        compiler.hooks.emit.tapPromise({ name: 'generateCss' }, async (compilation) => {
-          Object.keys(compilation.assets).forEach(async (file) => {
+        compiler.hooks.done.tapPromise({ name: 'generateCss' }, async (compilation) => {
+          Object.keys(compilation.compilation.assets).forEach(async (file) => {
             if (!file) return;
             const shouldRestart = await checkShouldRestart(file);
             console.log('shouldRestart', { shouldRestart, file });
