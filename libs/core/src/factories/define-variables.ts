@@ -1,4 +1,4 @@
-import { CssConditionalVariables, CssResponsiveVariables, CssVariables, GlobalStyles } from '../types/config-types';
+import { CssConditionalVariables, CssResponsiveVariables, CssVariables } from '../types/config-types';
 
 export interface VariablesFactoryParams {
   variables?: CssVariables;
@@ -14,7 +14,7 @@ export class VariablesFactory {
   }
 }
 
-export const defineVariables = (variables: GlobalStyles) => {
+export const defineVariables = (variables: VariablesFactoryParams) => {
   return new VariablesFactory(variables);
 };
 
