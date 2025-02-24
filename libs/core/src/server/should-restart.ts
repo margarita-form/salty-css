@@ -2,6 +2,10 @@ import { readFile } from 'fs/promises';
 import { isSaltyFile } from '../compiler';
 
 export const checkShouldRestart = async (filename: string): Promise<boolean> => {
+  if (!filename) return false;
+  if (filename.includes('node_modules')) return false;
+  if (filename.includes('saltygen')) return false;
+
   const isConfig = filename.includes('salty.config');
   if (isConfig) return true;
   const isSalty = isSaltyFile(filename);
