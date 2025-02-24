@@ -47,9 +47,11 @@ export default defineConfig({
         'compiler/index': 'src/compiler/index.ts',
         'css/index': 'src/css/index.ts',
         'generator/index': 'src/generator/index.ts',
+        'factories/index': 'src/factories/index.ts',
         'config/index': 'src/config/index.ts',
         'types/index': 'src/types/index.ts',
         'util/index': 'src/util/index.ts',
+        'server/index': 'src/server/index.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;

@@ -71,7 +71,7 @@ export type ParentComponentProps<TAG extends Tag<any>> = TAG extends (props: inf
 
 type StylePropertyValue = Record<never, never> & unknown;
 
-type CSSinJS = CssProperties | StylePropertyValue | PropertyValueToken | TemplateTokens | CssPseudos;
+export type CSSinJS = CssProperties | StylePropertyValue | TemplateTokens | CssPseudos;
 
 export type CssStyles = {
   [key in OrString]?: CSSinJS;

@@ -19,6 +19,7 @@ export class MediaQueryFactory {
     });
 
     return str as typeof value & {
+      isMedia: boolean;
       and: MediaQueryFactory;
       or: MediaQueryFactory;
     };

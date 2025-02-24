@@ -14,7 +14,24 @@ import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
 import { dotCase } from '../util/dot-case';
 import { saltyReset } from '../templates/salty-reset';
+import { MediaQueryFactory } from '../css/media';
 import { RCFile } from '../types/cli-types';
+import { mergeStyles } from '../css';
+import { GlobalStylesFactory, VariablesFactory } from '../factories';
+
+interface GeneratorResult<V extends object> {
+  value: V;
+  src: string;
+  name: string;
+}
+
+interface GenerationResults {
+  components: GeneratorResult<StyleComponentGenerator>[];
+  keyframes: GeneratorResult<{ animationName: string; css: string }>[];
+  mediaQueries: MediaQueryFactory[];
+  globalStyles: GlobalStylesFactory[];
+  variables: VariablesFactory[];
+}
 
 interface Cache {
   externalModules: string[];
@@ -93,7 +110,7 @@ const generateConfig = async (dirname: string) => {
   return config;
 };
 
-export const generateConfigStyles = async (dirname: string) => {
+export const generateConfigStyles = async (dirname: string, generationResults: GenerationResults) => {
   // Generate the config files
   const config = await generateConfig(dirname);
 
@@ -142,9 +159,13 @@ export const generateConfigStyles = async (dirname: string) => {
     });
   };
 
-  const variables = parseVariables(config.variables);
-  const responsiveVariables = parseResponsiveVariables(config.responsiveVariables);
-  const conditionalVariables = parseConditionalVariables(config.conditionalVariables);
+  const getGeneratedVariables = (type: 'variables' | 'responsiveVariables' | 'conditionalVariables') => {
+    return generationResults.variables.map((factory) => factory._current[type]);
+  };
+
+  const variables = parseVariables(mergeStyles(config.variables, getGeneratedVariables('variables')));
+  const responsiveVariables = parseResponsiveVariables(mergeStyles(config.responsiveVariables, getGeneratedVariables('responsiveVariables')));
+  const conditionalVariables = parseConditionalVariables(mergeStyles(config.conditionalVariables, getGeneratedVariables('conditionalVariables')));
 
   const destDir = await getDestDir(dirname);
 
@@ -154,7 +175,8 @@ export const generateConfigStyles = async (dirname: string) => {
 
   // Generate global styles
   const globalStylesPath = join(destDir, 'css/_global.css');
-  const globalStylesString = parseStyles(config.global, '');
+  const mergedGlobalStyles = mergeStyles(config.global, generationResults.globalStyles);
+  const globalStylesString = parseStyles(mergedGlobalStyles, '');
 
   writeFileSync(globalStylesPath, `@layer global { ${globalStylesString} }`);
 
@@ -277,9 +299,13 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
   return contents as {
     [key: string]: {
       generator: StyleComponentGenerator;
+      isMedia?: boolean;
+      isGlobalDefine?: boolean;
+      isDefineVariables?: boolean;
       isKeyframes?: boolean;
       animationName?: string;
       css?: string;
+      styles?: any;
     };
   };
 };
@@ -321,14 +347,17 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
     // Clear the dist directory
     clearDistDir();
 
-    // Generate variables
-    await generateConfigStyles(dirname);
+    // Testing
 
-    // Get config
-    const config = await getConfig(dirname);
+    const generationResults: GenerationResults = {
+      keyframes: [],
+      mediaQueries: [],
+      globalStyles: [],
+      variables: [],
+      components: [],
+    };
 
-    // Function to copy files/directories recursively
-    async function copyRecursively(src: string, dest: string) {
+    async function generate(src: string) {
       const foldersToSkip = ['node_modules', 'saltygen'];
       const stats = statSync(src);
 
@@ -336,55 +365,91 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
         const files = readdirSync(src);
         const shouldSkip = foldersToSkip.some((folder) => src.includes(folder));
         if (shouldSkip) return;
-        await Promise.all(files.map((file) => copyRecursively(join(src, file), join(dest, file))));
+        await Promise.all(files.map((file) => generate(join(src, file))));
       } else if (stats.isFile()) {
         const validFile = isSaltyFile(src);
 
         if (validFile) {
           const contents = await compileSaltyFile(dirname, src, destDir);
-          const localCssFiles: string[] = [];
           Object.entries(contents).forEach(([name, value]) => {
-            if (value.isKeyframes && value.css) {
-              const fileName = `a_${value.animationName}.css`;
-              const filePath = `css/${fileName}`;
-              const cssPath = join(destDir, filePath);
-              globalCssFiles.push(fileName);
-
-              writeFileSync(cssPath, value.css);
-
-              return;
+            if (value.isKeyframes) {
+              generationResults.keyframes.push({
+                value: value as any,
+                src,
+                name,
+              });
+            } else if (value.isMedia) {
+              generationResults.mediaQueries.push(value as any);
+            } else if (value.isGlobalDefine) {
+              generationResults.globalStyles.push(value as any);
+            } else if (value.isDefineVariables) {
+              generationResults.variables.push(value as any);
+            } else if (value.generator) {
+              generationResults.components.push({
+                value: value.generator,
+                src,
+                name,
+              });
             }
-
-            if (!value.generator) return;
-
-            const generator = value.generator._withBuildContext({
-              name,
-              config,
-              prod,
-            });
-
-            if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
-            cssFiles[generator.priority].push(generator.cssFileName);
-            localCssFiles.push(generator.cssFileName);
-
-            const filePath = `css/${generator.cssFileName}`;
-            const cssPath = join(destDir, filePath);
-            writeFileSync(cssPath, generator.css);
           });
-
-          const cssContent = localCssFiles.map((file) => `@import url('./${file}');`).join('\n');
-
-          const hashName = toHash(src, 6);
-          const parsedPath = parsePath(src);
-          const dasherized = dashCase(parsedPath.name);
-
-          const cssFile = join(destDir, `css/f_${dasherized}-${hashName}.css`);
-          writeFileSync(cssFile, cssContent);
         }
       }
     }
     // Start the copying process
-    await copyRecursively(dirname, destDir);
+    await generate(dirname);
+
+    // Generate variables
+    await generateConfigStyles(dirname, generationResults);
+
+    // Get config
+    const config = await getConfig(dirname);
+
+    // Generate CSS for keyframe animations
+    for (const keyframes of generationResults.keyframes) {
+      const { value } = keyframes;
+      const fileName = `a_${value.animationName}.css`;
+      const filePath = `css/${fileName}`;
+      const cssPath = join(destDir, filePath);
+      globalCssFiles.push(fileName);
+
+      writeFileSync(cssPath, value.css);
+    }
+
+    // Generate CSS for components
+    const localCssFiles: Record<string, string[]> = {};
+    for (const component of generationResults.components) {
+      const { value, name, src } = component;
+      const generator = value._withBuildContext({
+        name,
+        config,
+        prod,
+      });
+
+      if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
+      cssFiles[generator.priority].push(generator.cssFileName);
+
+      if (config.importStrategy === 'component') {
+        if (!localCssFiles[src]) localCssFiles[src] = [generator.cssFileName];
+        else localCssFiles[src].push(generator.cssFileName);
+      }
+
+      const filePath = `css/${generator.cssFileName}`;
+      const cssPath = join(destDir, filePath);
+      writeFileSync(cssPath, generator.css);
+    }
+
+    if (config.importStrategy === 'component') {
+      Object.entries(localCssFiles).forEach(([src, localCssFile]) => {
+        const cssContent = localCssFile.map((file) => `@import url('./${file}');`).join('\n');
+
+        const hashName = toHash(src, 6);
+        const parsedPath = parsePath(src);
+        const dasherized = dashCase(parsedPath.name);
+
+        const cssFile = join(destDir, `css/f_${dasherized}-${hashName}.css`);
+        writeFileSync(cssFile, cssContent);
+      });
+    }
 
     const otherGlobalCssFiles = globalCssFiles.map((file) => `@import url('./css/${file}');`).join('\n');
 
