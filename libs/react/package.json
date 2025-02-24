@@ -45,8 +45,8 @@
       "require": "./media.cjs"
     },
     "./config": {
-      "import": "./config/index.js",
-      "require": "./config/index.cjs"
+      "import": "./config.js",
+      "require": "./config.cjs"
     }
   },
   "dependencies": {
