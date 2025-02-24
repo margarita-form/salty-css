@@ -1,7 +1,8 @@
 import type { Configuration } from 'webpack';
 import { resolve } from 'path';
-import { generateCss, saltyFileRegExp } from '@salty-css/core/compiler';
+import { generateCss, generateFile, isSaltyFile, saltyFileRegExp } from '@salty-css/core/compiler';
 import { checkShouldRestart } from '@salty-css/core/server';
+import { watch } from 'fs';
 
 export const saltyPlugin = (config: Configuration, dir: string, isServer = false, cjs = false) => {
   config.module?.rules?.push({
@@ -17,23 +18,21 @@ export const saltyPlugin = (config: Configuration, dir: string, isServer = false
   if (!isServer) {
     config.plugins?.push({
       apply: (compiler) => {
+        let started = false;
         compiler.hooks.watchRun.tapPromise({ name: 'generateCss' }, async () => {
-          console.log('generateCss');
+          if (started) return;
+          started = true;
+
           await generateCss(dir);
-        });
 
-        compiler.hooks.done.tapPromise({ name: 'generateCss' }, async (compilation) => {
-          Object.keys(compilation.compilation.assets).forEach(async (file) => {
-            if (!file) return;
-            const shouldRestart = await checkShouldRestart(file);
-            console.log('shouldRestart', { shouldRestart, file });
-
-            const restart = () => {
-              console.log('restarting');
-              compiler.watching?.invalidate();
-            };
-
-            if (shouldRestart) restart();
+          watch(dir, { recursive: true }, async (event, filePath) => {
+            const shouldRestart = await checkShouldRestart(filePath);
+            if (shouldRestart) {
+              await generateCss(dir);
+            } else {
+              const saltyFile = isSaltyFile(filePath);
+              if (saltyFile) await generateFile(dir, filePath);
+            }
           });
         });
       },
