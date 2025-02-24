@@ -1,6 +1,7 @@
 import type { Configuration } from 'webpack';
 import { resolve } from 'path';
 import { generateCss, saltyFileRegExp } from '@salty-css/core/compiler';
+import { checkShouldRestart } from '@salty-css/core/server';
 
 export const saltyPlugin = (config: Configuration, dir: string, isServer = false, cjs = false) => {
   config.module?.rules?.push({
@@ -16,8 +17,23 @@ export const saltyPlugin = (config: Configuration, dir: string, isServer = false
   if (!isServer) {
     config.plugins?.push({
       apply: (compiler) => {
-        compiler.hooks.afterPlugins.tap({ name: 'generateCss' }, async () => {
+        compiler.hooks.watchRun.tapPromise({ name: 'generateCss' }, async () => {
           await generateCss(dir);
+        });
+
+        compiler.hooks.emit.tapPromise({ name: 'generateCss' }, async (compilation) => {
+          Object.keys(compilation.assets).forEach(async (file) => {
+            if (!file) return;
+            const shouldRestart = await checkShouldRestart(file);
+            console.log('shouldRestart', { shouldRestart, file });
+
+            const restart = () => {
+              console.log('restarting');
+              compiler.watching?.invalidate();
+            };
+
+            if (shouldRestart) restart();
+          });
         });
       },
     });
