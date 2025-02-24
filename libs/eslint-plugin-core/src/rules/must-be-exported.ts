@@ -32,6 +32,11 @@ export const mustBeExported: Rule.RuleModule = {
         if (callExpression.callee.type === 'Identifier' && saltyFunctionNames.includes(callExpression.callee.name)) {
           return true;
         }
+
+        const defineFunctionRegex = /^define[A-Z]/;
+        if (callExpression.callee.type === 'Identifier' && defineFunctionRegex.test(callExpression.callee.name)) {
+          return true;
+        }
       }
       return false;
     }
