@@ -1,36 +1,39 @@
 /// <reference types='vitest' />
-import { defineConfig } from 'vite';
+import { defineConfig, PluginOption } from 'vite';
 import dts from 'vite-plugin-dts';
 import * as path from 'path';
 import react from '@vitejs/plugin-react-swc';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { generateCss, generateFile, isSaltyFile, minimizeFile } from '../../libs/core/src/compiler';
+import { checkShouldRestart } from '../../libs/core/src/server';
 
 // Copy of the Vite config from the React Testing app.
-export const saltyPlugin = (dir: string) => ({
-  name: 'stylegen',
-  buildStart: () => generateCss(dir),
-  load: async (filePath: string) => {
-    const saltyFile = isSaltyFile(filePath);
-    if (saltyFile) {
-      return await minimizeFile(dir, filePath);
-    }
-    return undefined;
-  },
-  handleHotUpdate: async ({ file, server }) => {
-    if (file.includes('salty.config')) {
-      await server.restart();
-    }
-  },
-  watchChange: {
-    handler: async (filePath: string) => {
+export const saltyPlugin = (dir: string): PluginOption => {
+  return {
+    name: 'stylegen',
+    buildStart: () => generateCss(dir),
+    load: async (filePath: string) => {
       const saltyFile = isSaltyFile(filePath);
       if (saltyFile) {
-        await generateFile(dir, filePath);
+        return await minimizeFile(dir, filePath);
       }
+      return undefined;
     },
-  },
-});
+    handleHotUpdate: async ({ file, server }) => {
+      const shouldRestart = await checkShouldRestart(file);
+      if (shouldRestart) await server.restart();
+    },
+    watchChange: {
+      handler: async (filePath: string) => {
+        const saltyFile = isSaltyFile(filePath);
+        if (saltyFile) {
+          const shouldRestart = await checkShouldRestart(filePath);
+          if (!shouldRestart) await generateFile(dir, filePath);
+        }
+      },
+    },
+  };
+};
 
 export default defineConfig({
   root: __dirname,

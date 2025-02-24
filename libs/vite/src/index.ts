@@ -1,4 +1,5 @@
 import { generateCss, generateFile, isSaltyFile, minimizeFile } from '@salty-css/core/compiler';
+import { checkShouldRestart } from '@salty-css/core/server';
 import { PluginOption } from 'vite';
 
 export const saltyPlugin = (dir: string): PluginOption => ({
@@ -12,15 +13,15 @@ export const saltyPlugin = (dir: string): PluginOption => ({
     return undefined;
   },
   handleHotUpdate: async ({ file, server }) => {
-    if (file.includes('salty.config')) {
-      await server.restart();
-    }
+    const shouldRestart = await checkShouldRestart(file);
+    if (shouldRestart) await server.restart();
   },
   watchChange: {
     handler: async (filePath: string) => {
       const saltyFile = isSaltyFile(filePath);
       if (saltyFile) {
-        await generateFile(dir, filePath);
+        const shouldRestart = await checkShouldRestart(filePath);
+        if (!shouldRestart) await generateFile(dir, filePath);
       }
     },
   },
