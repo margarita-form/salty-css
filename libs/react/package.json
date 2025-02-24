@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/react",
-  "version": "0.0.1-alpha.163",
+  "version": "0.0.1-alpha.164",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -50,7 +50,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.0.1-alpha.163",
+    "@salty-css/core": "^0.0.1-alpha.164",
     "clsx": ">=2.x",
     "react": ">=19.x || >=18.3.x"
   }
