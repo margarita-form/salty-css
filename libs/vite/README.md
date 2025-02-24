@@ -1,4 +1,4 @@
-![Salty CSS Banner](https://raw.githubusercontent.com/gist/tremppu/ef2b867907cbf262ab7373f41558a403/raw/a2137de136ee2296e386682beb4487bba0f58a2f/salty-logo-svg-dvd.svg)
+![Salty CSS Banner](https://salty-css.dev/assets/banners/dvd.svg)
 
 # Salty CSS - CSS-in-JS library that is kinda sweet
 
