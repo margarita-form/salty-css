@@ -32,6 +32,7 @@ export const getTemplateKeys = <T extends object>(templates: T): string[] => {
 };
 
 export const getTemplateTypes = <T extends object>(templates: T): Record<string, string> => {
+  if (!templates) return {};
   return Object.entries(templates).reduce((acc, [key, value]) => {
     if (typeof value === 'object')
       acc[key] = getTemplateTokens(value)
