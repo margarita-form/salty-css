@@ -5,31 +5,6 @@ import { largeMobileDown } from './styles/media.css';
 export const config = defineConfig({
   externalModules: ['react', 'react-router-dom'],
   importStrategy: 'component',
-  templates: {
-    textStyle: {
-      headline: {
-        small: {
-          fontSize: '{fontSize.heading.small}',
-        },
-        regular: {
-          fontSize: '{fontSize.heading.regular}',
-        },
-        large: {
-          fontSize: '{fontSize.heading.large}',
-        },
-      },
-      body: {
-        small: {
-          fontSize: '{fontSize.body.small}',
-          lineHeight: '1.5em',
-        },
-        regular: {
-          fontSize: '{fontSize.body.regular}',
-          lineHeight: '1.33em',
-        },
-      },
-    },
-  },
   modifiers: {
     colorMix: {
       pattern: new RegExp('[^\\s/:]+/\\d\\d'),
