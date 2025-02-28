@@ -8,7 +8,7 @@ import { dashCase } from '../util/dash-case';
 import { readFile, writeFile } from 'fs/promises';
 import { parseStyles } from '../generator/parse-styles';
 import { getTemplateTypes, parseTemplates } from '../generator/parse-templates';
-import { CssConditionalVariables, CssResponsiveVariables } from '../config';
+import { CssConditionalVariables, CssResponsiveVariables, SaltyConfig } from '../config';
 import { parseValueTokens } from '../generator/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
@@ -202,8 +202,6 @@ export const generateConfigStyles = async (dirname: string, generationResults: G
   const templateStylesPath = join(destDir, 'css/_templates.css');
   const templates = mergeStyles(config.templates, generationResults.templates);
 
-  console.log('all', templates);
-
   const templateStylesString = parseTemplates(templates);
   const templateTokens = getTemplateTypes(templates);
 
@@ -324,20 +322,21 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
   };
 };
 
-const getConfig = async (dirname: string) => {
-  const destDir = await getDestDir(dirname);
-  const coreConfigDest = join(destDir, 'salty.config.js');
-  const now = Date.now();
-  const { config } = await import(`${coreConfigDest}?t=${now}`);
-  return config;
-};
-
 const getConfigCache = async (dirname: string) => {
   const destDir = await getDestDir(dirname);
   const coreConfigDest = join(destDir, 'cache/config-cache.json');
   const contents = readFileSync(coreConfigDest, 'utf8');
   if (!contents) throw new Error('Could not find config cache file');
   return JSON.parse(contents);
+};
+
+const getConfig = async (dirname: string) => {
+  const cached = await getConfigCache(dirname);
+  const destDir = await getDestDir(dirname);
+  const coreConfigDest = join(destDir, 'salty.config.js');
+  const now = Date.now();
+  const { config } = await import(`${coreConfigDest}?t=${now}`);
+  return mergeStyles<SaltyConfig>(config, cached);
 };
 
 const isProduction = () => {
@@ -370,8 +369,6 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
 
     // Clear the dist directory
     if (clean) clearDistDir();
-
-    // Testing
 
     const generationResults: GenerationResults = {
       keyframes: [],
@@ -429,7 +426,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
     await generateConfigStyles(dirname, generationResults);
 
     // Get config
-    const config = await getConfigCache(dirname);
+    const config = await getConfig(dirname);
 
     // Generate CSS for keyframe animations
     for (const keyframes of generationResults.keyframes) {
@@ -531,7 +528,7 @@ export const generateFile = async (dirname: string, file: string) => {
 
     if (validFile) {
       const cssFiles: string[][] = [];
-      const config = await getConfigCache(dirname);
+      const config = await getConfig(dirname);
       const contents = await compileSaltyFile(dirname, file, destDir);
       Object.entries(contents).forEach(([name, value]: [string, any]) => {
         if (value.isKeyframes && value.css) {
@@ -596,7 +593,7 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
 
       if (copy !== original) await writeFile(file, original);
 
-      const config = await getConfigCache(dirname);
+      const config = await getConfig(dirname);
       const contents = await compileSaltyFile(dirname, file, destDir);
 
       let current = original;
