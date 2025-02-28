@@ -348,7 +348,7 @@ const isProduction = () => {
   }
 };
 
-export const generateCss = async (dirname: string, prod = isProduction()) => {
+export const generateCss = async (dirname: string, prod = isProduction(), clean = true) => {
   try {
     const start = Date.now();
     if (prod) logger.info('Generating CSS in production mode! 🔥');
@@ -369,7 +369,7 @@ export const generateCss = async (dirname: string, prod = isProduction()) => {
     };
 
     // Clear the dist directory
-    clearDistDir();
+    if (clean) clearDistDir();
 
     // Testing
 
