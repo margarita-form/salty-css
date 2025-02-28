@@ -28,7 +28,6 @@ export const saltyPlugin = (config: Configuration, dir: string, isServer = false
           watch(dir, { recursive: true }, async (event, filePath) => {
             const shouldRestart = await checkShouldRestart(filePath);
             if (shouldRestart) {
-              console.log('Regenerating css...');
               await generateCss(dir, false, false);
             } else {
               const saltyFile = isSaltyFile(filePath);
