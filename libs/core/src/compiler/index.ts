@@ -16,7 +16,7 @@ import { dotCase } from '../util/dot-case';
 import { saltyReset } from '../templates/salty-reset';
 import { MediaQueryFactory } from '../css/media';
 import { RCFile } from '../types/cli-types';
-import { mergeStyles } from '../css';
+import { ClassNameFactory, mergeStyles } from '../css';
 import { GlobalStylesFactory, TemplatesFactory, VariablesFactory } from '../factories';
 
 interface GeneratorResult<V extends object> {
@@ -27,6 +27,7 @@ interface GeneratorResult<V extends object> {
 
 interface GenerationResults {
   components: GeneratorResult<StyleComponentGenerator>[];
+  classNames: GeneratorResult<ClassNameFactory>[];
   keyframes: GeneratorResult<{ animationName: string; css: string }>[];
   mediaQueries: MediaQueryFactory[];
   globalStyles: GlobalStylesFactory[];
@@ -310,6 +311,7 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
   return contents as {
     [key: string]: {
       generator: StyleComponentGenerator;
+      isClassName?: boolean;
       isMedia?: boolean;
       isGlobalDefine?: boolean;
       isDefineVariables?: boolean;
@@ -375,8 +377,9 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       mediaQueries: [],
       globalStyles: [],
       variables: [],
-      components: [],
       templates: [],
+      components: [],
+      classNames: [],
     };
 
     async function generate(src: string) {
@@ -408,6 +411,12 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
               generationResults.variables.push(value as any);
             } else if (value.isDefineTemplates) {
               generationResults.templates.push(value as any);
+            } else if (value.isClassName) {
+              generationResults.classNames.push({
+                value: value.factory,
+                src,
+                name,
+              });
             } else if (value.generator) {
               generationResults.components.push({
                 value: value.generator,
@@ -439,8 +448,10 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       writeFileSync(cssPath, value.css);
     }
 
-    // Generate CSS for components
+    // Start gathering CSS files for components
     const localCssFiles: Record<string, string[]> = {};
+
+    // Generate CSS for components
     for (const component of generationResults.components) {
       const { value, name, src } = component;
       const generator = value._withBuildContext({
@@ -452,16 +463,37 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
       cssFiles[generator.priority].push(generator.cssFileName);
 
+      const filePath = `css/${generator.cssFileName}`;
+      const cssPath = join(destDir, filePath);
+      writeFileSync(cssPath, generator.css);
+
       if (config.importStrategy === 'component') {
         if (!localCssFiles[src]) localCssFiles[src] = [generator.cssFileName];
         else localCssFiles[src].push(generator.cssFileName);
       }
+    }
+
+    // Generate CSS for class names
+    for (const classNameResult of generationResults.classNames) {
+      const { value, src, name } = classNameResult;
+      const generator = value._withBuildContext({
+        name,
+        prod,
+      });
+
+      cssFiles[0].push(generator.cssFileName);
 
       const filePath = `css/${generator.cssFileName}`;
       const cssPath = join(destDir, filePath);
       writeFileSync(cssPath, generator.css);
+
+      if (config.importStrategy === 'component') {
+        if (!localCssFiles[src]) localCssFiles[src] = [generator.cssFileName];
+        else localCssFiles[src].push(generator.cssFileName);
+      }
     }
 
+    // Generate CSS files for component import
     if (config.importStrategy === 'component') {
       Object.entries(localCssFiles).forEach(([src, localCssFile]) => {
         const cssContent = localCssFile.map((file) => `@import url('./${file}');`).join('\n');
@@ -541,6 +573,22 @@ export const generateFile = async (dirname: string, file: string) => {
           return;
         }
 
+        if (value.isClassName) {
+          console.log('found className value', value);
+
+          const generator = value.factory._withBuildContext({
+            name,
+          });
+
+          cssFiles[0].push(generator.cssFileName);
+
+          const filePath = `css/${generator.cssFileName}`;
+          const cssPath = join(destDir, filePath);
+          writeFileSync(cssPath, generator.css);
+
+          console.log(cssPath, generator.css);
+        }
+
         if (!value.generator) return;
 
         const generator = value.generator._withBuildContext({
@@ -556,6 +604,8 @@ export const generateFile = async (dirname: string, file: string) => {
         if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
         cssFiles[generator.priority].push(generator.cssFileName);
       });
+
+      console.log(cssFiles);
 
       if (config.importStrategy !== 'component') {
         cssFiles.forEach((val, layer) => {
@@ -574,6 +624,19 @@ export const generateFile = async (dirname: string, file: string) => {
           });
           writeFileSync(layerFilePath, currentLayerFileContent);
         });
+      } else {
+        const cssContent = cssFiles
+          .flat()
+          .map((file) => `@import url('./${file}');`)
+          .join('\n');
+
+        const hashName = toHash(file, 6);
+        const parsedPath = parsePath(file);
+        const dasherized = dashCase(parsedPath.name);
+
+        const cssFile = join(destDir, `css/f_${dasherized}-${hashName}.css`);
+
+        writeFileSync(cssFile, cssContent);
       }
     }
   } catch (e) {
