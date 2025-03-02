@@ -3,16 +3,22 @@ import { OrString } from '../types/util-types';
 
 export type GlobalStyles = Record<string, CssProperties>;
 
-export type CssVariables = Record<string, unknown>;
+export type CssVariableTokensObject = Record<string, unknown>;
 
 export interface CssResponsiveVariables {
-  [key: string]: CssVariables;
+  [key: string]: CssVariableTokensObject;
 }
 
 export interface CssConditionalVariables {
   [key: PropertyKey]: {
-    [key: PropertyKey]: CssVariables;
+    [key: PropertyKey]: CssVariableTokensObject;
   };
+}
+
+export interface SaltyVariables {
+  responsive?: CssResponsiveVariables;
+  conditional?: CssConditionalVariables;
+  [key: string]: undefined | string | number | CssVariableTokensObject;
 }
 
 type CssTemplate = CssStyles | { [key: PropertyKey]: CssTemplate };
@@ -40,34 +46,34 @@ export interface SaltyConfig {
    * - `component` will import the css file from the component's directory.
    */
   importStrategy?: 'root' | 'component';
+
   /**
-   * Base variables that can be used in all styles as they are applied globally to :root.
+   * Base level variables that can be used in all styles as they are applied globally to :root.
+   @param responsive Variables that are defined for different media queries.
+   @param conditional Variables that are defined for different parent selectors (classes or data attributes).
    */
-  variables?: CssVariables;
-  /**
-   * Variables that are defined for different media queries.
-   */
-  responsiveVariables?: CssResponsiveVariables;
-  /**
-   * Variables that are defined for different parent selectors (classes or data attributes).
-   */
-  conditionalVariables?: CssConditionalVariables;
+  variables?: SaltyVariables;
+
   /**
    * The global styles that are imported in the root of the project.
    */
   reset?: 'default' | 'none' | GlobalStyles;
+
   /**
    * The global styles that are imported in the root of the project.
    */
   global?: GlobalStyles;
+
   /**
    * The templates that can be used in styles to create reusable css.
    */
   templates?: CssTemplates;
+
   /**
    * The modifiers that can transform css values.
    */
   modifiers?: CssModifiers;
+
   /**
    * Define modules that should not be bundled when generating the css file. This improves the performance of the css generation and can help with issues relared to external packages being imported in an environment that does not support them.
    */

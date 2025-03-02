@@ -8,7 +8,7 @@ import { dashCase } from '../util/dash-case';
 import { readFile, writeFile } from 'fs/promises';
 import { parseStyles } from '../generator/parse-styles';
 import { getTemplateTypes, parseTemplates } from '../generator/parse-templates';
-import { CssConditionalVariables, CssResponsiveVariables, SaltyConfig } from '../config';
+import { CssConditionalVariables, CssResponsiveVariables, SaltyConfig, SaltyVariables } from '../config';
 import { parseValueTokens } from '../generator/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
@@ -164,18 +164,25 @@ export const generateConfigStyles = async (dirname: string, generationResults: G
     });
   };
 
-  const getGeneratedVariables = (type: 'variables' | 'responsiveVariables' | 'conditionalVariables') => {
-    return generationResults.variables.map((factory) => factory._current[type]);
+  const getStaticVariables = (variables: SaltyVariables): Record<string, any> => {
+    return { ...variables, responsive: undefined, conditional: undefined };
   };
 
-  const variables = parseVariables(mergeStyles(config.variables, getGeneratedVariables('variables')));
-  const responsiveVariables = parseResponsiveVariables(mergeStyles(config.responsiveVariables, getGeneratedVariables('responsiveVariables')));
-  const conditionalVariables = parseConditionalVariables(mergeStyles(config.conditionalVariables, getGeneratedVariables('conditionalVariables')));
+  const getGeneratedVariables = (type: 'static' | 'responsive' | 'conditional') => {
+    return generationResults.variables.map((factory) => {
+      if (type === 'static') return getStaticVariables(factory._current);
+      return factory._current[type];
+    });
+  };
+
+  const staticVariables = parseVariables(mergeStyles(getStaticVariables(config.variables), getGeneratedVariables('static')));
+  const responsiveVariables = parseResponsiveVariables(mergeStyles(config.variables?.responsive, getGeneratedVariables('responsive')));
+  const conditionalVariables = parseConditionalVariables(mergeStyles(config.variables?.conditional, getGeneratedVariables('conditional')));
 
   const destDir = await getDestDir(dirname);
 
   const variablesPath = join(destDir, 'css/_variables.css');
-  const variablesCss = `:root { ${variables.join('')} ${responsiveVariables.join('')} } ${conditionalVariables.join('')}`;
+  const variablesCss = `:root { ${staticVariables.join('')} ${responsiveVariables.join('')} } ${conditionalVariables.join('')}`;
   writeFileSync(variablesPath, variablesCss);
 
   // Generate global styles

@@ -2,53 +2,51 @@ import { defineVariables } from '@salty-css/core/factories';
 import { largeMobileDown } from './media.css';
 
 export const variables = defineVariables({
-  variables: {
-    colors: {
-      brand: '#ff00a2',
-      highlight: '#ffe400',
-      dark: '#111',
-      darkAlt: '#222',
-      light: '#fefefe',
-      lightAlt: '#f0f0f0',
-      black: '#000',
-      white: '#fff',
+  colors: {
+    brand: '#ff00a2',
+    highlight: '#ffe400',
+    dark: '#111',
+    darkAlt: '#222',
+    light: '#fefefe',
+    lightAlt: '#f0f0f0',
+    black: '#000',
+    white: '#fff',
+  },
+  fontSize: {
+    heading: {
+      small: 'clamp(20px, 1.5vw, 32px)',
+      regular: 'clamp(32px, 2.5vw, 48px)',
+      large: 'clamp(48px, 4vw, 64px)',
     },
-    fontSize: {
-      heading: {
-        small: 'clamp(20px, 1.5vw, 32px)',
-        regular: 'clamp(32px, 2.5vw, 48px)',
-        large: 'clamp(48px, 4vw, 64px)',
-      },
-      body: {
-        small: 'clamp(14px, 1vw, 16px)',
-        regular: 'clamp(16px, 1.25vw, 20px)',
-        large: 'clamp(20px, 1.5vw, 24px)',
-      },
-    },
-    spacings: {
-      small: '8px',
-      medium: '16px',
-      large: '32px',
-      screen: {
-        small: 'clamp(24px, 5vw, 120px)',
-        medium: 'clamp(32px, 6.25vw, 160px)',
-        large: 'clamp(48px, 7.5vw, 240px)',
-      },
-      em: {
-        small: '0.6em',
-        medium: '1.2em',
-        large: '1.8em',
-      },
-    },
-    sizes: {
-      width: {
-        small: '320px',
-        medium: '960px',
-        large: '1280px',
-      },
+    body: {
+      small: 'clamp(14px, 1vw, 16px)',
+      regular: 'clamp(16px, 1.25vw, 20px)',
+      large: 'clamp(20px, 1.5vw, 24px)',
     },
   },
-  responsiveVariables: {
+  spacings: {
+    small: '8px',
+    medium: '16px',
+    large: '32px',
+    screen: {
+      small: 'clamp(24px, 5vw, 120px)',
+      medium: 'clamp(32px, 6.25vw, 160px)',
+      large: 'clamp(48px, 7.5vw, 240px)',
+    },
+    em: {
+      small: '0.6em',
+      medium: '1.2em',
+      large: '1.8em',
+    },
+  },
+  sizes: {
+    width: {
+      small: '320px',
+      medium: '960px',
+      large: '1280px',
+    },
+  },
+  responsive: {
     base: {
       fontSize: {
         heading: {
@@ -64,7 +62,7 @@ export const variables = defineVariables({
       },
     },
   },
-  conditionalVariables: {
+  conditional: {
     theme: {
       dark: {
         backgroundColor: '{colors.dark}',

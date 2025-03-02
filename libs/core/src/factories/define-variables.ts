@@ -1,31 +1,18 @@
-import { CssConditionalVariables, CssResponsiveVariables, CssVariables } from '../types/config-types';
-
-export interface VariablesFactoryParams {
-  variables?: CssVariables;
-  responsiveVariables?: CssResponsiveVariables;
-  conditionalVariables?: CssConditionalVariables;
-}
+import { SaltyVariables } from '../types/config-types';
 
 export class VariablesFactory {
-  constructor(public _current: VariablesFactoryParams) {}
+  constructor(public _current: SaltyVariables) {}
 
   get isDefineVariables() {
     return true;
   }
 }
 
-export const defineVariables = (variables: VariablesFactoryParams) => {
+/**
+   * Base level variables that can be used in all styles as they are applied globally to :root.
+   @param responsive Variables that are defined for different media queries.
+   @param conditional Variables that are defined for different parent selectors (classes or data attributes).
+   */
+export const defineVariables = (variables: SaltyVariables) => {
   return new VariablesFactory(variables);
-};
-
-export const defineStaticVariables = (variables: CssVariables) => {
-  return new VariablesFactory({ variables });
-};
-
-export const defineResponsiveVariables = (responsiveVariables: CssResponsiveVariables) => {
-  return new VariablesFactory({ responsiveVariables });
-};
-
-export const defineConditionalVariables = (conditionalVariables: CssConditionalVariables) => {
-  return new VariablesFactory({ conditionalVariables });
 };
