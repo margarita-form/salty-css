@@ -31,6 +31,7 @@ export default defineConfig({
       // Could also be a dictionary or array of multiple entry points.
       name: 'salty-css-react',
       entry: {
+        index: 'src/index.ts',
         styled: 'src/styled.ts',
         'styled-client': 'src/styled-client.ts',
         keyframes: 'src/keyframes.ts',

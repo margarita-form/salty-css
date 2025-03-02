@@ -28,6 +28,10 @@
     "name": "react"
   },
   "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.cjs"
+    },
     "./styled": {
       "import": "./styled.js",
       "require": "./styled.cjs"
