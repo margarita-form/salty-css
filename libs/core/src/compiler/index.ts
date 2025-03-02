@@ -581,8 +581,6 @@ export const generateFile = async (dirname: string, file: string) => {
         }
 
         if (value.isClassName) {
-          console.log('found className value', value);
-
           const generator = value.factory._withBuildContext({
             name,
           });
@@ -592,8 +590,6 @@ export const generateFile = async (dirname: string, file: string) => {
           const filePath = `css/${generator.cssFileName}`;
           const cssPath = join(destDir, filePath);
           writeFileSync(cssPath, generator.css);
-
-          console.log(cssPath, generator.css);
         }
 
         if (!value.generator) return;
@@ -611,8 +607,6 @@ export const generateFile = async (dirname: string, file: string) => {
         if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
         cssFiles[generator.priority].push(generator.cssFileName);
       });
-
-      console.log(cssFiles);
 
       if (config.importStrategy !== 'component') {
         cssFiles.forEach((val, layer) => {
