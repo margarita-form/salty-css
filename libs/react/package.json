@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/react",
-  "version": "0.0.1-alpha.179",
+  "version": "0.0.1-alpha.188",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -40,6 +40,10 @@
       "import": "./styled-client.js",
       "require": "./styled-client.cjs"
     },
+    "./class-name": {
+      "import": "./class-name.js",
+      "require": "./class-name.cjs"
+    },
     "./keyframes": {
       "import": "./keyframes.js",
       "require": "./keyframes.cjs"
@@ -54,7 +58,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.0.1-alpha.179",
+    "@salty-css/core": "^0.0.1-alpha.188",
     "clsx": ">=2.x",
     "react": ">=19.x || >=18.3.x"
   }
