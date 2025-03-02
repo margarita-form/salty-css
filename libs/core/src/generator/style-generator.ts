@@ -37,7 +37,8 @@ export class StyleComponentGenerator {
   get classNames() {
     const classNames: string[] = [this.hash];
     const { className } = this.params;
-    if (className) classNames.push(className);
+    if (typeof className == 'string') classNames.push(className);
+    if (typeof className == 'object') classNames.push(...className);
     return classNames.join(' ');
   }
 

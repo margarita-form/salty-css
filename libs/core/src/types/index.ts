@@ -80,7 +80,7 @@ export type CssStyles = {
 export type Styles = CssStyles & Variants;
 
 export interface GeneratorOptions {
-  className?: string;
+  className?: string | string[];
   displayName?: string;
   element?: string;
   passProps?: boolean | string | string[];
