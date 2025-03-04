@@ -1,13 +1,18 @@
-import type { GeneratorProps } from '@salty-css/core/generator';
 import { createElement, ForwardedRef, forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { StyledComponentProps, Tag } from '@salty-css/core/types';
 import { dashCase } from '@salty-css/core/util';
-import { parseValueTokens } from '@salty-css/core/generator/parse-tokens';
+import { parseValueTokens } from '@salty-css/core/parsers/parse-tokens';
+import { StyledGeneratorClientProps } from '@salty-css/core/generators';
 
 const _styledKeys = ['passProps'];
 
-export const elementFactory = (tagName: Tag<any>, _className: string, _generatorProps: GeneratorProps, _additionalProps?: Record<PropertyKey, any>) => {
+export const elementFactory = (
+  tagName: Tag<any>,
+  _className: string,
+  _generatorProps: StyledGeneratorClientProps,
+  _additionalProps?: Record<PropertyKey, any>
+) => {
   const fn = (
     {
       extend = tagName,

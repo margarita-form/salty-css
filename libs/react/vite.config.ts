@@ -34,7 +34,7 @@ export default defineConfig({
         index: 'src/index.ts',
         styled: 'src/styled.ts',
         'styled-client': 'src/styled-client.ts',
-        className: 'src/class-name.ts',
+        'class-name': 'src/class-name.ts',
         keyframes: 'src/keyframes.ts',
         media: 'src/media.ts',
         config: 'src/config.ts',

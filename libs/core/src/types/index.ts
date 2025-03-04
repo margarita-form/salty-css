@@ -1,7 +1,7 @@
 import type * as CSS from 'csstype';
 import type { ReactNode } from 'react';
-import type { StyleComponentGenerator } from '../generator';
 import type { NeverObj, OrAny, OrString } from './util-types';
+import type { StyledGenerator } from '../generators';
 
 export type CreateElementProps = {
   extend?: Tag<any>;
@@ -18,7 +18,7 @@ export type StyledComponentProps = Record<string, unknown> & CreateElementProps;
 
 type FnComponent<PROPS extends StyledComponentProps> = {
   (props: OrAny | PROPS): ReactNode;
-  generator?: StyleComponentGenerator;
+  generator?: StyledGenerator;
 };
 
 export type Tag<PROPS extends StyledComponentProps> = OrString | keyof HTMLElementTagNameMap | FnComponent<PROPS>;

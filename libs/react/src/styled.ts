@@ -1,15 +1,15 @@
 import { AllHTMLAttributes, JSX, ReactNode } from 'react';
 import { Tag, StyledComponentProps, CreateElementProps, VariantProps, ParentComponentProps, StyledParams, ValueProps, Merge } from '@salty-css/core/types';
-import { StyleComponentGenerator } from '@salty-css/core/generator';
+import { StyledGenerator } from '@salty-css/core/generators';
 import { elementFactory } from './element-factory';
 
 export const styled = <const PROPS extends StyledComponentProps, const TAG extends Tag<Required<PROPS>>, const STYLE_PARAMS extends StyledParams>(
   tagName: TAG,
   params: STYLE_PARAMS
 ) => {
-  const generator = new StyleComponentGenerator(tagName, params);
+  const generator = new StyledGenerator(tagName, params);
 
-  const fn = elementFactory(tagName, generator.cssClassName, generator.props, {
+  const fn = elementFactory(tagName, generator.cssClassName, generator.clientProps, {
     'data-unoptimized-client-component': true,
   });
 

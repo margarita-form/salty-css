@@ -1,19 +1,19 @@
 import { StyledParams } from '@salty-css/core/types';
-import { ClassNameFactory } from '@salty-css/core/css';
+import { ClassNameGenerator } from '@salty-css/core/generators';
 
 export const className = <const STYLE_PARAMS extends StyledParams>(params: STYLE_PARAMS) => {
-  const factory = new ClassNameFactory(params);
-  const str = new String(factory.cssClassName);
+  const generator = new ClassNameGenerator(params);
+  const str = new String(generator.cssClassName);
 
   Object.assign(str, {
     get isClassName() {
       return true;
     },
-    factory,
+    factory: generator,
   });
 
   return str as string & {
     isClassName: boolean;
-    factory: ClassNameFactory<STYLE_PARAMS>;
+    factory: ClassNameGenerator<STYLE_PARAMS>;
   };
 };

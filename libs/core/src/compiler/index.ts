@@ -1,34 +1,42 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as esbuild from 'esbuild';
 import { execSync } from 'child_process';
 import { toHash } from '../util/to-hash';
 import { join, parse as parsePath } from 'path';
 import { statSync, existsSync, mkdirSync, readdirSync, writeFileSync, readFileSync } from 'fs';
-import { StyleComponentGenerator } from '../generator/style-generator';
 import { dashCase } from '../util/dash-case';
 import { readFile, writeFile } from 'fs/promises';
-import { parseStyles } from '../generator/parse-styles';
-import { getTemplateTypes, parseTemplates } from '../generator/parse-templates';
+import { parseStyles } from '../parsers/parse-styles';
+import { getTemplateTypes, parseTemplates } from '../parsers/parse-templates';
 import { CssConditionalVariables, CssResponsiveVariables, SaltyConfig, SaltyVariables } from '../config';
-import { parseValueTokens } from '../generator/parse-tokens';
+import { parseValueTokens } from '../parsers/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
 import { dotCase } from '../util/dot-case';
 import { saltyReset } from '../templates/salty-reset';
 import { MediaQueryFactory } from '../css/media';
 import { RCFile } from '../types/cli-types';
-import { ClassNameFactory, mergeStyles } from '../css';
+import { mergeStyles } from '../css';
 import { GlobalStylesFactory, TemplatesFactory, VariablesFactory } from '../factories';
+import { StyledGenerator, ClassNameGenerator } from '../generators';
+import { StylesGenerator } from '../generators/styles-generator';
 
-interface GeneratorResult<V extends object> {
+interface GeneratorResult<V extends StylesGenerator> {
+  generator: V;
+  src: string;
+  name: string;
+}
+
+interface FunctionResult<V extends object> {
   value: V;
   src: string;
   name: string;
 }
 
 interface GenerationResults {
-  components: GeneratorResult<StyleComponentGenerator>[];
-  classNames: GeneratorResult<ClassNameFactory>[];
-  keyframes: GeneratorResult<{ animationName: string; css: string }>[];
+  components: GeneratorResult<StyledGenerator>[];
+  classNames: GeneratorResult<ClassNameGenerator>[];
+  keyframes: FunctionResult<{ animationName: string; css: string }>[];
   mediaQueries: MediaQueryFactory[];
   globalStyles: GlobalStylesFactory[];
   variables: VariablesFactory[];
@@ -317,7 +325,7 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
 
   return contents as {
     [key: string]: {
-      generator: StyleComponentGenerator;
+      generator: any;
       isClassName?: boolean;
       isMedia?: boolean;
       isGlobalDefine?: boolean;
@@ -420,13 +428,13 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
               generationResults.templates.push(value as any);
             } else if (value.isClassName) {
               generationResults.classNames.push({
-                value: value.factory,
+                ...value,
                 src,
                 name,
               });
             } else if (value.generator) {
               generationResults.components.push({
-                value: value.generator,
+                ...value,
                 src,
                 name,
               });
@@ -459,12 +467,12 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
     const localCssFiles: Record<string, string[]> = {};
 
     // Generate CSS for components
-    for (const component of generationResults.components) {
-      const { value, name, src } = component;
-      const generator = value._withBuildContext({
-        name,
+    for (const componentResult of generationResults.components) {
+      const { src, name } = componentResult;
+      const generator = componentResult.generator._withBuildContext({
+        callerName: name,
+        isProduction: prod,
         config,
-        prod,
       });
 
       if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
@@ -482,10 +490,11 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
 
     // Generate CSS for class names
     for (const classNameResult of generationResults.classNames) {
-      const { value, src, name } = classNameResult;
-      const generator = value._withBuildContext({
-        name,
-        prod,
+      const { src, name } = classNameResult;
+      const generator = classNameResult.generator._withBuildContext({
+        callerName: name,
+        isProduction: prod,
+        config,
       });
 
       cssFiles[0].push(generator.cssFileName);
@@ -704,7 +713,7 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
 
         // Replace the styled call with the client version
         const copy = current;
-        const clientVersion = ` ${name} = styled(${tagName}, "${generator.classNames}", ${JSON.stringify(generator.props)});`;
+        const clientVersion = ` ${name} = styled(${tagName}, "${generator.classNames}", ${JSON.stringify(generator.clientProps)});`;
         current = current.replace(range, clientVersion);
 
         if (copy === current) console.error('Minimize file failed to change content', { name, tagName });

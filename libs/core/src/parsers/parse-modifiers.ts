@@ -5,7 +5,7 @@ export const parseValueModifiers = (value: string, modifiers?: CssModifiers): Va
   if (typeof value !== 'string') return { result: value };
   if (!modifiers) return { result: value };
 
-  const additionalCss = [] as Object[];
+  const additionalCss = [] as object[];
   Object.values(modifiers).forEach((modifier) => {
     const { pattern, transform } = modifier;
     value = value.replace(pattern, (match) => {

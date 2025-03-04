@@ -1,4 +1,4 @@
-import { parseStyles } from '../generator/parse-styles';
+import { parseStyles } from '../parsers/parse-styles';
 import { CssStyles, StyleValue } from '../types';
 import { toHash } from '../util';
 
