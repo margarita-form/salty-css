@@ -56,7 +56,7 @@
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "5.0.0",
     "jsdom": "~22.1.0",
-    "lerna": "^8.1.9",
+    "lerna": "^8.2.1",
     "nx": "20.4.6",
     "prettier": "^2.6.2",
     "tslib": "^2.3.0",
@@ -72,7 +72,6 @@
   ],
   "dependencies": {
     "@types/child-process-promise": "^2.2.6",
-    "child-process-promise": "^2.2.1",
     "clsx": "^2.1.1",
     "commander": "^13.1.0",
     "csstype": "^3.1.3",
