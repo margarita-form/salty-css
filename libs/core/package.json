@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/core",
-  "version": "0.0.1-alpha.192",
+  "version": "0.0.1-alpha.193",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -28,14 +28,14 @@
     "name": "core"
   },
   "peerDependencies": {
+    "color": ">=5.x",
     "commander": ">=12.x",
+    "csstype": "^3.1.x",
     "ejs": ">=3.x",
     "esbuild": ">=0.21.x",
     "ora": ">=8.x",
     "react": ">=18.x || >=19.x",
-    "winston": ">=3.x",
-    "color": ">=5.x",
-    "csstype": "^3.1.x"
+    "winston": ">=3.x"
   },
   "exports": {
     "./bin/main": {
