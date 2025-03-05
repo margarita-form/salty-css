@@ -10,6 +10,7 @@ class Color {
 
     return new Proxy(this, {
       get(target: any, prop: any) {
+        if (prop in target) return target[prop];
         if (prop in target.currentColor) return target._handleColorMethod(prop);
         return target[prop];
       },
