@@ -55,6 +55,10 @@
     "./config": {
       "import": "./config.js",
       "require": "./config.cjs"
+    },
+    "./helpers": {
+      "import": "./helpers.js",
+      "require": "./helpers.cjs"
     }
   },
   "dependencies": {

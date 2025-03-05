@@ -38,6 +38,7 @@ export default defineConfig({
         keyframes: 'src/keyframes.ts',
         media: 'src/media.ts',
         config: 'src/config.ts',
+        helpers: 'src/helpers.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;

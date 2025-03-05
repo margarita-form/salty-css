@@ -79,6 +79,10 @@
     "./util": {
       "import": "./util/index.js",
       "require": "./util/index.cjs"
+    },
+    "./helpers": {
+      "import": "./helpers/index.js",
+      "require": "./helpers/index.cjs"
     }
   },
   "bin": {

@@ -10,10 +10,19 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, c
   const current = Object.entries(styles).reduce((acc, [key, value]) => {
     const _key = key.trim();
 
+    const propertyName = _key.startsWith('-') ? _key : dashCase(_key);
+    const appendString = (val: string, eol = ';') => (acc = `${acc}${val}${eol}`);
+    const appendValue = (val: unknown) => appendString(`${propertyName}:${val}`);
+
     if (typeof value === 'function') value = value();
 
     if (typeof value === 'object') {
       if (!value) return acc;
+
+      if (value.isColor) {
+        appendValue(value.toString());
+        return acc;
+      }
 
       if (_key === 'variants') {
         Object.entries<any>(value).forEach(([prop, conditions]) => {
@@ -68,10 +77,6 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, c
       console.warn(`Template "${_key}" with path of "${value}" was not found in config!`);
       return acc;
     }
-
-    const propertyName = _key.startsWith('-') ? _key : dashCase(_key);
-    const appendString = (val: string, eol = ';') => (acc = `${acc}${val}${eol}`);
-    const appendValue = (val: unknown) => appendString(`${propertyName}:${val}`);
 
     if (typeof value === 'number') return appendValue(value);
     if (typeof value !== 'string') {
