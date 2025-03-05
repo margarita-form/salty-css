@@ -33,7 +33,9 @@
     "esbuild": ">=0.21.x",
     "ora": ">=8.x",
     "react": ">=18.x || >=19.x",
-    "winston": ">=3.x"
+    "winston": ">=3.x",
+    "color": ">=5.x",
+    "csstype": "^3.1.x"
   },
   "exports": {
     "./bin/main": {
