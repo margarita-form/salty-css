@@ -125,7 +125,7 @@ export const generateConfigStyles = async (dirname: string, generationResults: G
   const config = await generateConfig(dirname);
 
   // Cache the config content
-  const configCacheContent = { ...config } as Record<'templates', any>;
+  const configCacheContent = { ...config } as Record<PropertyKey, any>;
 
   // Generate variables css file
   const variableTokens = new Set<string>();
@@ -183,15 +183,19 @@ export const generateConfigStyles = async (dirname: string, generationResults: G
     });
   };
 
-  const staticVariables = parseVariables(mergeStyles(getStaticVariables(config.variables), getGeneratedVariables('static')));
-  const responsiveVariables = parseResponsiveVariables(mergeStyles(config.variables?.responsive, getGeneratedVariables('responsive')));
-  const conditionalVariables = parseConditionalVariables(mergeStyles(config.variables?.conditional, getGeneratedVariables('conditional')));
+  const _staticVariables = mergeStyles(getStaticVariables(config.variables), getGeneratedVariables('static'));
+  const staticVariables = parseVariables(_staticVariables);
+  const _responsiveVariables = mergeStyles(config.variables?.responsive, getGeneratedVariables('responsive'));
+  const responsiveVariables = parseResponsiveVariables(_responsiveVariables);
+  const _conditionalVariables = mergeStyles(config.variables?.conditional, getGeneratedVariables('conditional'));
+  const conditionalVariables = parseConditionalVariables(_conditionalVariables);
 
   const destDir = await getDestDir(dirname);
 
   const variablesPath = join(destDir, 'css/_variables.css');
   const variablesCss = `:root { ${staticVariables.join('')} ${responsiveVariables.join('')} } ${conditionalVariables.join('')}`;
   writeFileSync(variablesPath, variablesCss);
+  configCacheContent['staticVariables'] = _staticVariables;
 
   // Generate global styles
   const globalStylesPath = join(destDir, 'css/_global.css');
@@ -222,7 +226,7 @@ export const generateConfigStyles = async (dirname: string, generationResults: G
   const templateTokens = getTemplateTypes(templates);
 
   writeFileSync(templateStylesPath, templateStylesString);
-  configCacheContent.templates = templates;
+  configCacheContent['templates'] = templates;
 
   // Generate types
 
