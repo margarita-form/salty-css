@@ -18,12 +18,12 @@
     "esModuleInterop": true,
     "paths": {
       "@salty-css/core/*": ["libs/core/src/*"],
+      "@salty-css/eslint-config-core": ["libs/eslint-config-core/src/index.ts"],
+      "@salty-css/eslint-plugin-core": ["libs/eslint-plugin-core/src/index.ts"],
       "@salty-css/next": ["libs/next/src/index.ts"],
       "@salty-css/react/*": ["libs/react/src/*"],
       "@salty-css/vite": ["libs/vite/src/index.ts"],
-      "@salty-css/webpack": ["libs/webpack/src/index.ts"],
-      "@salty-css/eslint-config-core": ["libs/eslint-config-core/src/index.ts"],
-      "@salty-css/eslint-plugin-core": ["libs/eslint-plugin-core/src/index.ts"]
+      "@salty-css/webpack": ["libs/webpack/src/index.ts"]
     }
   }
 }
