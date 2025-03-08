@@ -8,7 +8,7 @@ import { dashCase } from '../util/dash-case';
 import { readFile, writeFile } from 'fs/promises';
 import { parseStyles } from '../parsers/parse-styles';
 import { getTemplateTypes, parseTemplates } from '../parsers/parse-templates';
-import { CssConditionalVariables, CssResponsiveVariables, SaltyConfig, SaltyVariables } from '../config';
+import { CachedConfig, CssConditionalVariables, CssResponsiveVariables, SaltyConfig, SaltyVariables } from '../config';
 import { parseValueTokens } from '../parsers/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
@@ -125,7 +125,7 @@ export const generateConfigStyles = async (dirname: string, generationResults: G
   const config = await generateConfig(dirname);
 
   // Cache the config content
-  const configCacheContent = { ...config } as Record<PropertyKey, any>;
+  const configCacheContent = { ...config } as CachedConfig;
 
   // Generate variables css file
   const variableTokens = new Set<string>();
@@ -195,7 +195,7 @@ export const generateConfigStyles = async (dirname: string, generationResults: G
   const variablesPath = join(destDir, 'css/_variables.css');
   const variablesCss = `:root { ${staticVariables.join('')} ${responsiveVariables.join('')} } ${conditionalVariables.join('')}`;
   writeFileSync(variablesPath, variablesCss);
-  configCacheContent['staticVariables'] = _staticVariables;
+  configCacheContent.staticVariables = _staticVariables;
 
   // Generate global styles
   const globalStylesPath = join(destDir, 'css/_global.css');
@@ -226,7 +226,7 @@ export const generateConfigStyles = async (dirname: string, generationResults: G
   const templateTokens = getTemplateTypes(templates);
 
   writeFileSync(templateStylesPath, templateStylesString);
-  configCacheContent['templates'] = templates;
+  configCacheContent.templates = templates;
 
   // Generate types
 
@@ -277,6 +277,16 @@ const replaceStyledTag = (currentFile: string) => {
   });
 };
 
+const addConfigCache = (currentFile: string, dirname: string) => {
+  try {
+    const saltyCachedConfig = readFileSync(join(dirname, 'saltygen/cache/config-cache.json'), 'utf8');
+    if (!saltyCachedConfig) return `globalThis.saltyConfig = {};\n\n${currentFile}`;
+    return `globalThis.saltyConfig = ${saltyCachedConfig};\n\n${currentFile}`;
+  } catch {
+    return currentFile;
+  }
+};
+
 export const compileSaltyFile = async (dirname: string, sourceFilePath: string, outputDirectory: string) => {
   const hashedName = toHash(sourceFilePath);
   const tempDir = join(outputDirectory, './temp');
@@ -287,6 +297,7 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
   let currentFile = readFileSync(sourceFilePath, 'utf8');
 
   currentFile = replaceStyledTag(currentFile);
+  currentFile = addConfigCache(currentFile, dirname);
 
   const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
   const rcProject = await getRCProjectConfig(dirname);

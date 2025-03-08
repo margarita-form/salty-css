@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CssProperties, CssStyles } from '../types';
 import { OrString } from '../types/util-types';
 
@@ -78,4 +79,10 @@ export interface SaltyConfig {
    * Define modules that should not be bundled when generating the css file. This improves the performance of the css generation and can help with issues relared to external packages being imported in an environment that does not support them.
    */
   externalModules?: ('react' | 'react-dom' | OrString)[];
+}
+
+// Config file that has only computed, cached values gathered from the Salty config and define function files.
+export interface CachedConfig {
+  templates: CssTemplates;
+  staticVariables: Record<string, any>;
 }

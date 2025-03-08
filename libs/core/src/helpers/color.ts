@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { CachedConfig } from '../config';
 import colorFunction, { ColorInstance, ColorLike } from 'color';
+
+declare global {
+  const saltyConfig: CachedConfig;
+}
 
 type BaseColor = Omit<ColorLike, string> | PropertyValueToken;
 
@@ -27,7 +32,15 @@ class Color {
     if (typeof base !== 'string') return base;
     const isToken = /\{[^{}]+\}/g.test(base);
     if (!isToken) return base;
-    throw new Error('Token values are not yet supported, use a color string instead');
+
+    if (typeof saltyConfig === 'undefined') return 'transparent';
+
+    const { staticVariables } = saltyConfig;
+    if (!staticVariables) return 'transparent';
+
+    const tokenPath = base.replace(/^\{|\}$/g, '').split('.');
+    const value = tokenPath.reduce((acc, key) => acc[key], staticVariables);
+    return value;
   }
 
   public _handleColorMethod(method: keyof ColorInstance) {
