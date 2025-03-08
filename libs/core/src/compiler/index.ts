@@ -33,14 +33,17 @@ interface FunctionResult<V extends object> {
   name: string;
 }
 
-interface GenerationResults {
-  components: GeneratorResult<StyledGenerator>[];
-  classNames: GeneratorResult<ClassNameGenerator>[];
-  keyframes: FunctionResult<{ animationName: string; css: string }>[];
+interface ConfigGenerationResults {
   mediaQueries: MediaQueryFactory[];
   globalStyles: GlobalStylesFactory[];
   variables: VariablesFactory[];
   templates: TemplatesFactory[];
+}
+
+interface StylesGenerationResults {
+  components: GeneratorResult<StyledGenerator>[];
+  classNames: GeneratorResult<ClassNameGenerator>[];
+  keyframes: FunctionResult<{ animationName: string; css: string }>[];
 }
 
 interface Cache {
@@ -120,7 +123,28 @@ const generateConfig = async (dirname: string) => {
   return config;
 };
 
-export const generateConfigStyles = async (dirname: string, generationResults: GenerationResults) => {
+export const generateConfigStyles = async (dirname: string, configFiles: Set<string>) => {
+  const destDir = await getDestDir(dirname);
+
+  const generationResults: ConfigGenerationResults = {
+    mediaQueries: [],
+    globalStyles: [],
+    variables: [],
+    templates: [],
+  };
+
+  await Promise.all(
+    [...configFiles].map(async (src) => {
+      const contents = await compileSaltyFile(dirname, src, destDir);
+      Object.values(contents).forEach((value) => {
+        if (value.isMedia) generationResults.mediaQueries.push(value as any);
+        else if (value.isGlobalDefine) generationResults.globalStyles.push(value as any);
+        else if (value.isDefineVariables) generationResults.variables.push(value as any);
+        else if (value.isDefineTemplates) generationResults.templates.push(value as any);
+      });
+    })
+  );
+
   // Generate the config files
   const config = await generateConfig(dirname);
 
@@ -189,8 +213,6 @@ export const generateConfigStyles = async (dirname: string, generationResults: G
   const responsiveVariables = parseResponsiveVariables(_responsiveVariables);
   const _conditionalVariables = mergeStyles(config.variables?.conditional, getGeneratedVariables('conditional'));
   const conditionalVariables = parseConditionalVariables(_conditionalVariables);
-
-  const destDir = await getDestDir(dirname);
 
   const variablesPath = join(destDir, 'css/_variables.css');
   const variablesCss = `:root { ${staticVariables.join('')} ${responsiveVariables.join('')} } ${conditionalVariables.join('')}`;
@@ -400,19 +422,14 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
     };
 
     // Clear the dist directory
+
     if (clean) clearDistDir();
 
-    const generationResults: GenerationResults = {
-      keyframes: [],
-      mediaQueries: [],
-      globalStyles: [],
-      variables: [],
-      templates: [],
-      components: [],
-      classNames: [],
-    };
+    // Collect salty css files
+    const files = new Set<string>();
+    const configFiles = new Set<string>();
 
-    async function generate(src: string) {
+    async function collectFiles(src: string) {
       const foldersToSkip = ['node_modules', 'saltygen'];
       const stats = statSync(src);
 
@@ -420,49 +437,56 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
         const files = readdirSync(src);
         const shouldSkip = foldersToSkip.some((folder) => src.includes(folder));
         if (shouldSkip) return;
-        await Promise.all(files.map((file) => generate(join(src, file))));
+        await Promise.all(files.map((file) => collectFiles(join(src, file))));
       } else if (stats.isFile()) {
         const validFile = isSaltyFile(src);
 
         if (validFile) {
-          const contents = await compileSaltyFile(dirname, src, destDir);
-          Object.entries(contents).forEach(([name, value]) => {
-            if (value.isKeyframes) {
-              generationResults.keyframes.push({
-                value: value as any,
-                src,
-                name,
-              });
-            } else if (value.isMedia) {
-              generationResults.mediaQueries.push(value as any);
-            } else if (value.isGlobalDefine) {
-              generationResults.globalStyles.push(value as any);
-            } else if (value.isDefineVariables) {
-              generationResults.variables.push(value as any);
-            } else if (value.isDefineTemplates) {
-              generationResults.templates.push(value as any);
-            } else if (value.isClassName) {
-              generationResults.classNames.push({
-                ...value,
-                src,
-                name,
-              });
-            } else if (value.generator) {
-              generationResults.components.push({
-                ...value,
-                src,
-                name,
-              });
-            }
-          });
+          files.add(src);
+          const contents = readFileSync(src, 'utf8');
+          const hasDefineFunction = /define[\w\d]+\(/.test(contents);
+          if (hasDefineFunction) configFiles.add(src);
         }
       }
     }
     // Start the copying process
-    await generate(dirname);
+    await collectFiles(dirname);
 
     // Generate variables
-    await generateConfigStyles(dirname, generationResults);
+    await generateConfigStyles(dirname, configFiles);
+
+    const generationResults: StylesGenerationResults = {
+      keyframes: [],
+      components: [],
+      classNames: [],
+    };
+
+    await Promise.all(
+      [...files].map(async (src) => {
+        const contents = await compileSaltyFile(dirname, src, destDir);
+        Object.entries(contents).forEach(([name, value]) => {
+          if (value.isKeyframes) {
+            generationResults.keyframes.push({
+              value: value as any,
+              src,
+              name,
+            });
+          } else if (value.isClassName) {
+            generationResults.classNames.push({
+              ...value,
+              src,
+              name,
+            });
+          } else if (value.generator) {
+            generationResults.components.push({
+              ...value,
+              src,
+              name,
+            });
+          }
+        });
+      })
+    );
 
     // Get config
     const config = await getConfig(dirname);
