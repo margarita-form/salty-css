@@ -79,6 +79,11 @@ export interface SaltyConfig {
    * Define modules that should not be bundled when generating the css file. This improves the performance of the css generation and can help with issues relared to external packages being imported in an environment that does not support them.
    */
   externalModules?: ('react' | 'react-dom' | OrString)[];
+
+  /**
+   * default unit for px based properties when providing a number value. Default is 'px'.
+   */
+  defaultUnit?: 'px' | 'rem' | 'em' | 'vh' | 'vw' | 'vmin' | 'vmax' | 'cm' | 'mm' | 'in' | 'pt' | 'pc' | 'ch' | 'ex' | 'fr' | 'percent' | OrString;
 }
 
 // Config file that has only computed, cached values gathered from the Salty config and define function files.

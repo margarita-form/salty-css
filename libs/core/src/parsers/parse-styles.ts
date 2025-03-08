@@ -3,6 +3,7 @@ import { CompoundVariant } from '../types';
 import { dashCase } from '../util';
 import { parseValueModifiers } from './parse-modifiers';
 import { parseValueTokens } from './parse-tokens';
+import { addUnit } from './unit-check';
 
 export const parseStyles = <T extends object>(styles: T, currentClass: string, config?: SaltyConfig | undefined): string => {
   if (!styles) return '';
@@ -78,7 +79,10 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, c
       return acc;
     }
 
-    if (typeof value === 'number') return appendValue(value);
+    if (typeof value === 'number') {
+      const withUnit = addUnit(propertyName, value, config);
+      return appendValue(withUnit);
+    }
     if (typeof value !== 'string') {
       if ('toString' in value) value = value.toString();
       else return acc;
