@@ -272,7 +272,7 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
   }
 
   // Media query types
-  type MediaQueryKeys = ${mediaQueryKeys};
+  type MediaQueryKeys = ${mediaQueryKeys || `''`};
   `;
 
   writeFileSync(tsTokensPath, tsTokensTypes);
