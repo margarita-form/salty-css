@@ -1,9 +1,9 @@
 import { SaltyConfig } from '../types/config-types';
 import { CompoundVariant } from '../types';
-import { dashCase } from '../util';
 import { parseValueModifiers } from './parse-modifiers';
 import { parseValueTokens } from './parse-tokens';
 import { addUnit } from './unit-check';
+import { propertyNameCheck } from './property-name-check';
 
 export const parseStyles = <T extends object>(styles: T, currentClass: string, config?: SaltyConfig | undefined): string => {
   if (!styles) return '';
@@ -11,7 +11,7 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, c
   const current = Object.entries(styles).reduce((acc, [key, value]) => {
     const _key = key.trim();
 
-    const propertyName = _key.startsWith('-') ? _key : dashCase(_key);
+    const propertyName = propertyNameCheck(_key);
     const appendString = (val: string, eol = ';') => (acc = `${acc}${val}${eol}`);
     const appendValue = (val: unknown) => appendString(`${propertyName}:${val}`);
 
