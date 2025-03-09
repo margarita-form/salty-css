@@ -1,4 +1,4 @@
-import { media } from '@salty-css/react/media';
+import { defineMediaQuery } from '@salty-css/react/config';
 
-export const largePortrait = media.portrait.and.minWidth(600);
-export const largeMobileDown = media.maxWidth(600);
+export const largePortrait = defineMediaQuery((media) => media.portrait.and.minWidth(600));
+export const largeMobileDown = defineMediaQuery((media) => media.maxWidth(600));
