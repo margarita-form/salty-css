@@ -1,11 +1,11 @@
-import { SaltyConfig } from '../types/config-types';
+import { CachedConfig, SaltyConfig } from '../types/config-types';
 import { CompoundVariant } from '../types';
 import { parseValueModifiers } from './parse-modifiers';
 import { parseValueTokens } from './parse-tokens';
 import { addUnit } from './unit-check';
 import { propertyNameCheck } from './property-name-check';
 
-export const parseStyles = <T extends object>(styles: T, currentClass: string, config?: SaltyConfig | undefined): string => {
+export const parseStyles = <T extends object>(styles: T, currentClass: string, config?: (SaltyConfig & CachedConfig) | undefined): string => {
   if (!styles) return '';
   const classes: string[] = [];
   const current = Object.entries(styles).reduce((acc, [key, value]) => {
@@ -55,8 +55,9 @@ export const parseStyles = <T extends object>(styles: T, currentClass: string, c
       }
 
       if (_key.startsWith('@')) {
+        const mediaQuery = config?.mediaQueries?.[_key] || _key;
         const result = parseStyles(value, currentClass, config);
-        const query = `${_key} {\n ${result.replace('\n', '\n ')}\n}`;
+        const query = `${mediaQuery} {\n ${result.replace('\n', '\n ')}\n}`;
         classes.push(query);
         return acc;
       }

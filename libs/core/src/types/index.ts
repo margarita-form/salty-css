@@ -74,10 +74,12 @@ type StylePropertyValue = Record<never, never> & unknown;
 export type CSSinJS = CssProperties | StylePropertyValue | TemplateTokens | CssPseudos;
 
 export type CssStyles = {
-  [key in OrString]?: CSSinJS;
+  [key in OrString]?: CSSinJS | CssStyles;
 };
 
 export type Styles = CssStyles & Variants;
+
+export type MediaQueryStyles = { [key in MediaQueryKeys]?: CssProperties | CssStyles | CssPseudos | TemplateTokens | MediaQueryStyles };
 
 export interface GeneratorOptions {
   className?: string | string[];
@@ -87,7 +89,7 @@ export interface GeneratorOptions {
   defaultProps?: Record<PropertyKey, unknown>;
 }
 
-interface Base extends CssProperties, CssStyles, CssPseudos, TemplateTokens {}
+interface Base extends CssProperties, CssStyles, CssPseudos, TemplateTokens, MediaQueryStyles {}
 
 type Pseudos = CSS.Pseudos | `&${CSS.Pseudos}`;
 type CssPseudos = { [P in Pseudos]?: CssStyles };

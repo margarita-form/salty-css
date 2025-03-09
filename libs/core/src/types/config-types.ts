@@ -90,4 +90,5 @@ export interface SaltyConfig {
 export interface CachedConfig {
   templates: CssTemplates;
   staticVariables: Record<string, any>;
+  mediaQueries: Record<string, string>;
 }

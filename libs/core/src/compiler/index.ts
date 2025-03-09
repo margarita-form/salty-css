@@ -14,7 +14,6 @@ import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
 import { dotCase } from '../util/dot-case';
 import { saltyReset } from '../templates/salty-reset';
-import { MediaQueryFactory } from '../css/media';
 import { RCFile } from '../types/cli-types';
 import { mergeStyles } from '../css';
 import { GlobalStylesFactory, TemplatesFactory, VariablesFactory } from '../factories';
@@ -34,7 +33,7 @@ interface FunctionResult<V extends object> {
 }
 
 interface ConfigGenerationResults {
-  mediaQueries: MediaQueryFactory[];
+  mediaQueries: [string, string][];
   globalStyles: GlobalStylesFactory[];
   variables: VariablesFactory[];
   templates: TemplatesFactory[];
@@ -136,8 +135,8 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
   await Promise.all(
     [...configFiles].map(async (src) => {
       const contents = await compileSaltyFile(dirname, src, destDir);
-      Object.values(contents).forEach((value) => {
-        if (value.isMedia) generationResults.mediaQueries.push(value as any);
+      Object.entries(contents).forEach(([name, value]) => {
+        if (value.isMedia) generationResults.mediaQueries.push([name, value as any]);
         else if (value.isGlobalDefine) generationResults.globalStyles.push(value as any);
         else if (value.isDefineVariables) generationResults.variables.push(value as any);
         else if (value.isDefineTemplates) generationResults.templates.push(value as any);
@@ -250,6 +249,11 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
   writeFileSync(templateStylesPath, templateStylesString);
   configCacheContent.templates = templates;
 
+  // Generate media query helpers
+  const { mediaQueries } = generationResults;
+  configCacheContent.mediaQueries = Object.fromEntries(mediaQueries.map(([name, value]) => [`@${name}`, value]));
+  const mediaQueryKeys = mediaQueries.map(([name]) => `'@${name}'`).join(' | ');
+
   // Generate types
 
   const tsTokensPath = join(destDir, 'types/css-tokens.d.ts');
@@ -266,6 +270,9 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
       .map(([key, value]) => `${key}?: ${value}`)
       .join('\n')}
   }
+
+  // Media query types
+  type MediaQueryKeys = ${mediaQueryKeys};
   `;
 
   writeFileSync(tsTokensPath, tsTokensTypes);
