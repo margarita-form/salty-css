@@ -9,7 +9,7 @@ import { readFile, writeFile } from 'fs/promises';
 import { parseAndJoinStyles } from '../parsers/parse-styles';
 import { getTemplateTypes, parseTemplates } from '../parsers/parse-templates';
 import { CachedConfig, CssConditionalVariables, CssResponsiveVariables, SaltyConfig, SaltyVariables } from '../config';
-import { parseValueTokens } from '../parsers/parse-tokens';
+import { parseVariableTokens } from '../parsers/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
 import { dotCase } from '../util/dot-case';
@@ -167,8 +167,9 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
       variableTokens.add(`"${tsName}"`);
 
       const cssName = [...path.map(dashCase), dashedKey].join('-');
-      const { result } = parseValueTokens(value);
-      return `--${cssName}: ${result};`;
+      const result = parseVariableTokens(value);
+      if (!result) return `--${cssName}: ${value};`;
+      return `--${cssName}: ${result.transformed};`;
     });
   };
 
@@ -382,7 +383,7 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
       isDefineTemplates?: boolean;
       isKeyframes?: boolean;
       animationName?: string;
-      css?: string;
+      css?: Promise<string>;
       styles?: any;
     };
   };
@@ -635,13 +636,14 @@ export const generateFile = async (dirname: string, file: string) => {
       const cssFiles: string[][] = [];
       const config = await getConfig(dirname);
       const { contents } = await compileSaltyFile(dirname, file, destDir);
-      Object.entries(contents).forEach(([name, value]: [string, any]) => {
+      for (const [name, value] of Object.entries(contents)) {
+        // Object.entries(contents).forEach(([name, value]: [string, any]) => {
         if (value.isKeyframes && value.css) {
           const fileName = `a_${value.animationName}.css`;
           const filePath = `css/${fileName}`;
           const cssPath = join(destDir, filePath);
 
-          writeFileSync(cssPath, value.css);
+          writeFileSync(cssPath, await value.css);
 
           return;
         }
@@ -655,7 +657,7 @@ export const generateFile = async (dirname: string, file: string) => {
 
           const filePath = `css/${generator.cssFileName}`;
           const cssPath = join(destDir, filePath);
-          writeFileSync(cssPath, generator.css);
+          writeFileSync(cssPath, await generator.css);
         }
 
         if (!value.generator) return;
@@ -668,11 +670,11 @@ export const generateFile = async (dirname: string, file: string) => {
         const filePath = `css/${generator.cssFileName}`;
         const cssPath = join(destDir, filePath);
 
-        writeFileSync(cssPath, generator.css);
+        writeFileSync(cssPath, await generator.css);
 
         if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
         cssFiles[generator.priority].push(generator.cssFileName);
-      });
+      }
 
       if (config.importStrategy !== 'component') {
         cssFiles.forEach((val, layer) => {

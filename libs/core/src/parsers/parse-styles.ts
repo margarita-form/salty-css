@@ -4,34 +4,7 @@ import { parseValueModifiers } from './parse-modifiers';
 import { parseValueTokens } from './parse-tokens';
 import { addUnit } from './unit-check';
 import { propertyNameCheck } from './property-name-check';
-import { compileSaltyFile } from '../compiler';
-import { readFileSync } from 'fs';
-
-//     const { modifiers } = config || {};
-//     const runParsers = function* () {
-//       yield parseValueTokens(value);
-//       yield parseValueModifiers(value, modifiers);
-//     };
-
-//     const generator = runParsers();
-
-//     for (const { result, additionalCss = [] } of generator) {
-//       value = result;
-//       additionalCss.forEach((css) => {
-//         const result = parseStyles(css, '');
-//         appendString(result, '');
-//       });
-//     }
-
-//     return appendValue(value);
-//   }, '');
-
-//   if (!current) return classes.join('\n');
-//   if (!currentClass) return current;
-
-//   const css = `${currentClass} { ${current} }`;
-//   return [css, ...classes].join('\n');
-// };
+import { StyleValueModifierFunction } from './parser-types';
 
 /**
  * Transform styles object to css string with or without scope
@@ -69,11 +42,10 @@ export const parseStyles = async <T extends object>(styles?: T, currentScope = '
       const templateStyles = path.reduce((acc: Record<string, any>, key: string) => acc[key], config.templates[_key]);
       if (templateStyles) {
         const [result] = await parseStyles(templateStyles, '');
-        // return `${acc}${result}`;
         return result;
       }
       console.warn(`Template "${_key}" with path of "${value}" was not found in config!`);
-      return [propertyName, undefined];
+      return undefined;
     }
 
     if (typeof value === 'object') {
@@ -83,46 +55,29 @@ export const parseStyles = async <T extends object>(styles?: T, currentScope = '
       if (_key === 'defaultVariants') return undefined;
 
       if (_key === 'variants') {
-        //         Object.entries<any>(value).forEach(([prop, conditions]) => {
-        //           if (!conditions) return;
-        //           Object.entries<any>(conditions).forEach(([val, styles]) => {
-        //             if (!styles) return;
-        //             const scope = `${currentClass}.${prop}-${val}`;
-        //             const result = await parseStyles(styles, scope, config);
-        //             classes.push(result);
-        //           });
-        //         });
-        //         return acc;
-        Object.entries<any>(value).forEach(async ([prop, conditions]) => {
+        const variantEntries = Object.entries(value);
+        for (const [prop, conditions] of variantEntries) {
           if (!conditions) return;
-          Object.entries<any>(conditions).forEach(async ([val, styles]) => {
+          const entries = Object.entries(conditions);
+          for (const [val, styles] of entries) {
             if (!styles) return;
             const scope = `${currentScope}.${prop}-${val}`;
             const results = await parseStyles(styles, scope, config);
             results.forEach((res) => cssStyles.add(res));
-          });
-        });
+          }
+        }
         return undefined;
       }
 
       if (_key === 'compoundVariants') {
-        //         value.forEach((variant: CompoundVariant) => {
-        //           const { css, ...rest } = variant;
-        //           const scope = Object.entries(rest).reduce((acc, [prop, val]) => {
-        //             return `${acc}.${prop}-${val}`;
-        //           }, currentClass);
-        //           const result = await parseStyles(css as T, scope, config);
-        //           classes.push(result);
-        //         });
-        //         return acc;
-        value.forEach(async (variant: CompoundVariant) => {
+        for (const variant of value as CompoundVariant[]) {
           const { css, ...rest } = variant;
           const scope = Object.entries(rest).reduce((acc, [prop, val]) => {
             return `${acc}.${prop}-${val}`;
           }, currentScope);
           const results = await parseStyles(css as T, scope, config);
           results.forEach((res) => cssStyles.add(res));
-        });
+        }
         return undefined;
       }
 
@@ -152,19 +107,38 @@ export const parseStyles = async <T extends object>(styles?: T, currentScope = '
     return toString(value);
   });
 
-  // const { modifiers } = config || {};
+  const { modifiers } = config || {};
 
-  // const afterFunctions: [(current: string) => Promise<string> | string] = [parseValueTokens, parseValueModifiers];
+  const afterFunctions: StyleValueModifierFunction[] = [parseValueTokens(), parseValueModifiers(modifiers)];
 
-  const resolved = await Promise.all(promises);
-  const mapped = resolved.flatMap((val) => val).join('\n');
+  const resolved = await Promise.all(promises).then((styles) => {
+    return Promise.all(
+      styles.map((str) => {
+        return afterFunctions.reduce(async (acc, fn) => {
+          const current = await acc;
+          if (!current) return current;
 
+          const result = await fn(current);
+          if (!result) return current;
+
+          const { transformed, additionalCss } = result;
+          let before = '';
+          if (additionalCss) {
+            for (const css of additionalCss) {
+              before += await parseAndJoinStyles(css, '');
+            }
+          }
+          return `${before}${transformed}`;
+        }, Promise.resolve(str));
+      })
+    );
+  });
+
+  const mapped = resolved.join('\n');
   if (!mapped.trim()) return cssStyles;
 
   const css = currentScope ? `${currentScope} { ${mapped} }` : mapped;
-
   cssStyles.add(css);
-
   return cssStyles;
 };
 

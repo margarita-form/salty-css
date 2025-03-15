@@ -19,7 +19,6 @@ export const MainHeading = styled(LargeHeading, {
   element: 'h1',
   base: {
     marginBottom: '{spacings.em.small}',
-    epicCard: 20,
   },
 });
 

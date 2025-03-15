@@ -44,10 +44,7 @@ export class StylesGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
     const { config } = this.buildContext;
 
     const combinedStyles: Styles = { ...base, variants, compoundVariants };
-
     const css = parseAndJoinStyles(combinedStyles, `.${this.cssClassName}`, config);
-    if (compoundVariants?.length) css.then((styles) => console.log({ combinedStyles, styles }));
-
     return css;
   }
 
