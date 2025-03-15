@@ -1,4 +1,4 @@
 export interface ValueParserReturnValue {
-  result: string;
+  transformed: string;
   additionalCss?: object[];
 }

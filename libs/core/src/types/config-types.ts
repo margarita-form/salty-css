@@ -24,10 +24,16 @@ export interface SaltyVariables {
 
 type CssTemplate = CssStyles | { [key: PropertyKey]: CssTemplate };
 
+export interface CssTemplateObject {
+  [key: PropertyKey]: CssTemplate;
+}
+
+export interface CssTemplateFunction {
+  (value: unknown): CssTemplate;
+}
+
 export interface CssTemplates {
-  [key: PropertyKey]: {
-    [key: PropertyKey]: CssTemplate;
-  };
+  [key: PropertyKey]: CssTemplateObject | CssTemplateFunction;
 }
 
 export interface CssModifier {
@@ -91,4 +97,7 @@ export interface CachedConfig {
   templates: CssTemplates;
   staticVariables: Record<string, any>;
   mediaQueries: Record<string, string>;
+
+  // Testing
+  templatePaths: { [key: string]: string };
 }

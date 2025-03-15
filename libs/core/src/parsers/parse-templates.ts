@@ -1,17 +1,18 @@
 import { dashCase } from '../util';
-import { parseStyles } from './parse-styles';
+import { parseAndJoinStyles } from './parse-styles';
 
-export const parseTemplates = <T extends object>(obj: T, path: PropertyKey[] = []): string => {
+export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey[] = []): Promise<string> => {
   if (!obj) return '';
   const classes: string[] = [];
 
   const levelStyles = {} as Record<PropertyKey, any>;
 
-  Object.entries(obj).forEach(([key, value]) => {
-    if (typeof value === 'object') {
+  Object.entries(obj).forEach(async ([key, value]) => {
+    if (typeof value === 'function') return console.log('Function found', key);
+    else if (typeof value === 'object') {
       if (!value) return;
       const _key = key.trim();
-      const result = parseTemplates(value, [...path, _key]);
+      const result = await parseTemplates(value, [...path, _key]);
       classes.push(result);
     } else {
       levelStyles[key] = value;
@@ -20,7 +21,7 @@ export const parseTemplates = <T extends object>(obj: T, path: PropertyKey[] = [
 
   if (Object.keys(levelStyles).length) {
     const className = path.map(dashCase).join('-');
-    const result = parseStyles(levelStyles, `.${className}`);
+    const result = await parseAndJoinStyles(levelStyles, `.${className}`);
     classes.push(result);
   }
 

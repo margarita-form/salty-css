@@ -1,4 +1,4 @@
-import { parseStyles } from '../parsers/parse-styles';
+import { parseAndJoinStyles } from '../parsers/parse-styles';
 import { StyledParams, Styles } from '../types';
 import { SaltyConfig } from '../types/config-types';
 import { dashCase, toHash } from '../util';
@@ -44,7 +44,10 @@ export class StylesGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
     const { config } = this.buildContext;
 
     const combinedStyles: Styles = { ...base, variants, compoundVariants };
-    const css = parseStyles(combinedStyles, `.${this.cssClassName}`, config);
+
+    const css = parseAndJoinStyles(combinedStyles, `.${this.cssClassName}`, config);
+    if (compoundVariants?.length) css.then((styles) => console.log({ combinedStyles, styles }));
+
     return css;
   }
 
