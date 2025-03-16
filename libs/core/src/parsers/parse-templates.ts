@@ -8,8 +8,9 @@ export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey
   const levelStyles = {} as Record<PropertyKey, any>;
 
   for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'function') console.log('Function found', key);
-    else if (value && typeof value === 'object') {
+    if (typeof value === 'function') {
+      // Skip functions
+    } else if (value && typeof value === 'object') {
       const _key = key.trim();
       const result = await parseTemplates(value, [...path, _key]);
       classes.push(result);
