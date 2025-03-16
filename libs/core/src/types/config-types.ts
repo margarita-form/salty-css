@@ -29,7 +29,7 @@ export interface CssTemplateObject {
 }
 
 export interface CssTemplateFunction {
-  (value: unknown): CssTemplate;
+  (value: any): CssTemplate;
 }
 
 export interface CssTemplates {
