@@ -7,17 +7,16 @@ export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey
 
   const levelStyles = {} as Record<PropertyKey, any>;
 
-  Object.entries(obj).forEach(async ([key, value]) => {
-    if (typeof value === 'function') return console.log('Function found', key);
-    else if (typeof value === 'object') {
-      if (!value) return;
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === 'function') console.log('Function found', key);
+    else if (value && typeof value === 'object') {
       const _key = key.trim();
       const result = await parseTemplates(value, [...path, _key]);
       classes.push(result);
     } else {
       levelStyles[key] = value;
     }
-  });
+  }
 
   if (Object.keys(levelStyles).length) {
     const className = path.map(dashCase).join('-');
