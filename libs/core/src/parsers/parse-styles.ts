@@ -30,12 +30,14 @@ export const parseStyles = async <T extends object>(styles?: T, currentScope = '
     if (typeof value === 'function') value = value(context);
     if (value instanceof Promise) value = await value;
 
-    //   if (config?.templates && config.templatePaths[_key]) {
-    //     console.log('Template path:', _key, config.templatePaths[_key]);
-    //     const maybe = await import(config.templatePaths[_key]);
-    //     console.log(maybe);
-    //     return [propertyName, undefined];
-    //   }
+    if (config?.templates && config.templatePaths[_key]) {
+      const { default: values } = await import(config.templatePaths[_key]);
+      if (typeof values.params[_key] === 'function') {
+        const templateStyles = await values.params[_key](value);
+        const [result] = await parseStyles(templateStyles, '');
+        return result;
+      }
+    }
 
     if (config?.templates && config.templates[_key]) {
       const path = value.split('.');
