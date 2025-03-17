@@ -11,11 +11,17 @@ import { StyleValueModifierFunction } from './parser-types';
  * @param styles CSS as JS object
  * @param currentScope Scope of the styles, for class names full path with dot separator is required
  * @param config Salty config object to allow use of templates and media queries etc.
+ * @param omitTemplates If true, static templates will be ignored
  * @returns CSS strings that can be injected to the .css file or used inside of styles tag
  * - First item is the main class with all the styles
  * - Rest of the items are child selectors or media queries etc.
  */
-export const parseStyles = async <T extends object>(styles?: T, currentScope = '', config?: (SaltyConfig & CachedConfig) | undefined): Promise<Set<string>> => {
+export const parseStyles = async <T extends object>(
+  styles?: T,
+  currentScope = '',
+  config?: (SaltyConfig & CachedConfig) | undefined,
+  omitTemplates = false
+): Promise<Set<string>> => {
   if (!styles) throw new Error('No styles provided to parseStyles function!');
   const cssStyles = new Set<string>();
   const entries = Object.entries(styles);
@@ -40,6 +46,7 @@ export const parseStyles = async <T extends object>(styles?: T, currentScope = '
     }
 
     if (config?.templates && config.templates[_key]) {
+      if (omitTemplates) return undefined;
       const path = value.split('.');
       const templateStyles = path.reduce((acc: Record<string, any>, key: string) => acc[key], config.templates[_key]);
       if (templateStyles) {
@@ -147,8 +154,9 @@ export const parseStyles = async <T extends object>(styles?: T, currentScope = '
 export const parseAndJoinStyles = async <T extends object>(
   styles: T,
   currentClass: string,
-  config?: (SaltyConfig & CachedConfig) | undefined
+  config?: (SaltyConfig & CachedConfig) | undefined,
+  omitTemplates = false
 ): Promise<string> => {
-  const css = await parseStyles(styles, currentClass, config);
+  const css = await parseStyles(styles, currentClass, config, omitTemplates);
   return [...css].join('\n');
 };

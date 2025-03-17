@@ -5,6 +5,6 @@ export interface ValueParserReturnValue {
 
 type StyleValueModifierFunctionReturnValue = undefined | ValueParserReturnValue;
 
-export type SyncronousStyleValueModifierFunction = (current: string) => StyleValueModifierFunctionReturnValue;
+export type SyncronousStyleValueModifierFunction = (current: unknown) => StyleValueModifierFunctionReturnValue;
 
 export type StyleValueModifierFunction = (current: string) => Promise<StyleValueModifierFunctionReturnValue> | StyleValueModifierFunctionReturnValue;

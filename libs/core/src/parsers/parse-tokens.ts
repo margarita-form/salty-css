@@ -3,7 +3,7 @@ import { SyncronousStyleValueModifierFunction } from './parser-types';
 
 export const parseValueTokens =
   (tokenNames?: string[]): SyncronousStyleValueModifierFunction =>
-  (value: string) => {
+  (value: unknown) => {
     if (typeof value !== 'string') return undefined;
     const hasToken = /\{[^{}]+\}/g.test(value);
     if (!hasToken) return undefined;

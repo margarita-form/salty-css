@@ -8,14 +8,14 @@ import { dashCase } from '../util/dash-case';
 import { readFile, writeFile } from 'fs/promises';
 import { parseAndJoinStyles } from '../parsers/parse-styles';
 import { getTemplateTypes, parseTemplates } from '../parsers/parse-templates';
-import { CachedConfig, CssConditionalVariables, CssResponsiveVariables, SaltyConfig, SaltyVariables } from '../config';
+import { CachedConfig, CssConditionalVariables, CssResponsiveVariables, CssTemplates, SaltyConfig, SaltyVariables } from '../config';
 import { parseVariableTokens } from '../parsers/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
 import { dotCase } from '../util/dot-case';
 import { saltyReset } from '../templates/salty-reset';
 import { RCFile } from '../types/cli-types';
-import { mergeFactories, mergeStyles } from '../css';
+import { mergeFactories, mergeObjects } from '../css';
 import { GlobalStylesFactory, TemplatesFactory, VariablesFactory } from '../factories';
 import { StyledGenerator, ClassNameGenerator } from '../generators';
 import { StylesGenerator } from '../generators/styles-generator';
@@ -207,11 +207,11 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
     });
   };
 
-  const _staticVariables = mergeStyles(getStaticVariables(config.variables), getGeneratedVariables('static'));
+  const _staticVariables = mergeObjects(getStaticVariables(config.variables), getGeneratedVariables('static'));
   const staticVariables = parseVariables(_staticVariables);
-  const _responsiveVariables = mergeStyles(config.variables?.responsive, getGeneratedVariables('responsive'));
+  const _responsiveVariables = mergeObjects<CssResponsiveVariables>(config.variables?.responsive, getGeneratedVariables('responsive'));
   const responsiveVariables = parseResponsiveVariables(_responsiveVariables);
-  const _conditionalVariables = mergeStyles(config.variables?.conditional, getGeneratedVariables('conditional'));
+  const _conditionalVariables = mergeObjects(config.variables?.conditional, getGeneratedVariables('conditional'));
   const conditionalVariables = parseConditionalVariables(_conditionalVariables);
 
   const variablesPath = join(destDir, 'css/_variables.css');
@@ -221,7 +221,7 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
 
   // Generate global styles
   const globalStylesPath = join(destDir, 'css/_global.css');
-  const mergedGlobalStyles = mergeStyles(config.global, generationResults.globalStyles);
+  const mergedGlobalStyles = mergeObjects(config.global, generationResults.globalStyles);
   const globalStylesString = await parseAndJoinStyles(mergedGlobalStyles, '');
 
   writeFileSync(globalStylesPath, `@layer global { ${globalStylesString} }`);
@@ -242,21 +242,17 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
 
   // Generate templates
   const templateStylesPath = join(destDir, 'css/_templates.css');
-  const templates = mergeStyles<TemplatesFactory[]>(config.templates, generationResults.templates);
+  const templates = mergeObjects<CssTemplates>(config.templates, generationResults.templates);
 
   const templateStylesString = await parseTemplates(templates);
   const templateTokens = getTemplateTypes(templates);
 
-  writeFileSync(templateStylesPath, templateStylesString);
+  writeFileSync(templateStylesPath, `@layer templates { ${templateStylesString} }`);
   configCacheContent.templates = templates;
 
-  const asd = mergeFactories(generationResults.templates);
+  const templateFactories = mergeFactories(generationResults.templates);
 
-  configCacheContent.templatePaths = Object.fromEntries(
-    Object.entries(asd).map(([key, fak]) => {
-      return [key, fak._path || 'nope'];
-    })
-  );
+  configCacheContent.templatePaths = Object.fromEntries(Object.entries(templateFactories).map(([key, faktory]) => [key, faktory._path]));
 
   // Generate media query helpers
   const { mediaQueries } = generationResults;
@@ -408,7 +404,7 @@ const getConfig = async (dirname: string) => {
   const coreConfigDest = join(destDir, 'salty.config.js');
   const now = Date.now();
   const { config } = await import(`${coreConfigDest}?t=${now}`);
-  return mergeStyles<SaltyConfig>(config, cached);
+  return mergeObjects<SaltyConfig>(config, cached);
 };
 
 const isProduction = () => {
@@ -533,11 +529,15 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       });
 
       if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
+      const styles = await generator.css;
+      if (!styles) continue;
+
       cssFiles[generator.priority].push(generator.cssFileName);
 
       const filePath = `css/${generator.cssFileName}`;
       const cssPath = join(destDir, filePath);
-      writeFileSync(cssPath, await generator.css);
+
+      writeFileSync(cssPath, styles);
 
       if (config.importStrategy === 'component') {
         if (!localCssFiles[src]) localCssFiles[src] = [generator.cssFileName];
@@ -554,12 +554,15 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
         config,
       });
 
+      const styles = await generator.css;
+      if (!styles) continue;
+
       cssFiles[0].push(generator.cssFileName);
 
       const filePath = `css/${generator.cssFileName}`;
       const cssPath = join(destDir, filePath);
 
-      writeFileSync(cssPath, await generator.css);
+      writeFileSync(cssPath, styles);
 
       if (config.importStrategy === 'component') {
         if (!localCssFiles[src]) localCssFiles[src] = [generator.cssFileName];
@@ -593,7 +596,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       }
     });
     const globalImports = importsWithData.map((file) => `@import url('./css/${file}');`);
-    let cssContent = `@layer reset, global, l0, l1, l2, l3, l4, l5, l6, l7, l8;\n\n${globalImports.join('\n')}\n${otherGlobalCssFiles}`;
+    let cssContent = `@layer reset, global, templates, l0, l1, l2, l3, l4, l5, l6, l7, l8;\n\n${globalImports.join('\n')}\n${otherGlobalCssFiles}`;
 
     if (config.importStrategy !== 'component') {
       const mergedContent = cssFiles.reduce((acc, val, layer) => {
@@ -649,15 +652,18 @@ export const generateFile = async (dirname: string, file: string) => {
         }
 
         if (value.isClassName) {
-          const generator = value.factory._withBuildContext({
+          const generator = value.generator._withBuildContext({
             name,
           });
+
+          const styles = await generator.css;
+          if (!styles) continue;
 
           cssFiles[0].push(generator.cssFileName);
 
           const filePath = `css/${generator.cssFileName}`;
           const cssPath = join(destDir, filePath);
-          writeFileSync(cssPath, await generator.css);
+          writeFileSync(cssPath, styles);
         }
 
         if (!value.generator) return;
@@ -667,10 +673,13 @@ export const generateFile = async (dirname: string, file: string) => {
           config,
         });
 
+        const styles = await generator.css;
+        if (!styles) continue;
+
         const filePath = `css/${generator.cssFileName}`;
         const cssPath = join(destDir, filePath);
 
-        writeFileSync(cssPath, await generator.css);
+        writeFileSync(cssPath, styles);
 
         if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
         cssFiles[generator.priority].push(generator.cssFileName);

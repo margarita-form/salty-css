@@ -8,7 +8,7 @@ export interface StyledGeneratorClientProps {
   propValueKeys?: string[];
   passProps?: boolean | string | string[];
   defaultProps?: Record<PropertyKey, unknown>;
-  attr: {
+  attr?: {
     [key: string]: any;
   };
 }
@@ -18,7 +18,7 @@ export class StyledGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
     super(_params);
   }
 
-  get priority(): number {
+  override get priority(): number {
     if (typeof this.tagName === 'function' || typeof this.tagName === 'object') {
       const prev = this.tagName.generator?.priority || 0;
       return prev + 1;

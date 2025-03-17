@@ -9,11 +9,11 @@ export const className = <const STYLE_PARAMS extends StyledParams>(params: STYLE
     get isClassName() {
       return true;
     },
-    factory: generator,
+    generator,
   });
 
   return str as string & {
     isClassName: boolean;
-    factory: ClassNameGenerator<STYLE_PARAMS>;
+    generator: ClassNameGenerator<STYLE_PARAMS>;
   };
 };

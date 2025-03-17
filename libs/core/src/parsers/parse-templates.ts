@@ -1,4 +1,4 @@
-import { dashCase } from '../util';
+import { dashCase, toHash } from '../util';
 import { parseAndJoinStyles } from './parse-styles';
 
 export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey[] = []): Promise<string> => {
@@ -21,7 +21,8 @@ export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey
 
   if (Object.keys(levelStyles).length) {
     const className = path.map(dashCase).join('-');
-    const result = await parseAndJoinStyles(levelStyles, `.${className}`);
+    const hashClass = 't_' + toHash(className, 4);
+    const result = await parseAndJoinStyles(levelStyles, `.${className}, .${hashClass}`);
     classes.push(result);
   }
 
