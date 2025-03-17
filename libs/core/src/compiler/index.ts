@@ -605,7 +605,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
           const css = readFileSync(filepath, 'utf8');
           const filepathHash = /.*-([^-]+)-\d+.css/.exec(file)?.at(1) || toHash(filepath, 6);
           if (layerAcc.includes(filepathHash)) return layerAcc;
-          return `${layerAcc}\n/*start:${filepathHash}*/\n${css}\n/*end:${filepathHash}*/\n`;
+          return `${layerAcc}\n/*start:${filepathHash}-${file}*/\n${css}\n/*end:${filepathHash}*/\n`;
         }, '');
 
         const layerFileName = `l_${layer}.css`;
@@ -630,7 +630,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
   }
 };
 
-export const generateFile = async (dirname: string, file: string) => {
+export const generateFile = async (dirname: string, file: string, prod = isProduction()) => {
   try {
     const destDir = await getDestDir(dirname);
     const validFile = isSaltyFile(file);
@@ -653,7 +653,9 @@ export const generateFile = async (dirname: string, file: string) => {
 
         if (value.isClassName) {
           const generator = value.generator._withBuildContext({
-            name,
+            callerName: name,
+            isProduction: prod,
+            config,
           });
 
           const styles = await generator.css;
@@ -669,7 +671,8 @@ export const generateFile = async (dirname: string, file: string) => {
         if (!value.generator) return;
 
         const generator = value.generator._withBuildContext({
-          name,
+          callerName: name,
+          isProduction: prod,
           config,
         });
 
@@ -696,7 +699,7 @@ export const generateFile = async (dirname: string, file: string) => {
             const found = currentLayerFileContent.includes(filepathHash);
             if (!found) {
               const css = readFileSync(filepath, 'utf8');
-              const newContent = `/*start:${filepathHash}*/\n${css}\n/*end:${filepathHash}*/\n`;
+              const newContent = `/*start:${filepathHash}-${file}*/\n${css}\n/*end:${filepathHash}*/\n`;
               currentLayerFileContent = `${currentLayerFileContent.replace(/\}$/, '')}\n${newContent}\n}`;
             }
           });
@@ -743,9 +746,9 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
         if (!value.generator) return;
 
         const generator = value.generator._withBuildContext({
-          name,
+          callerName: name,
+          isProduction: prod,
           config,
-          prod,
         });
 
         const regexpResult = new RegExp(`\\s${name}[=\\s]+[^()]+styled\\(([^,]+),`, 'g').exec(original);
