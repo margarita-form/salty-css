@@ -522,6 +522,8 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
     // Generate CSS for components
     for (const componentResult of generationResults.components) {
       const { src, name } = componentResult;
+      if (!localCssFiles[src]) localCssFiles[src] = [];
+
       const generator = componentResult.generator._withBuildContext({
         callerName: name,
         isProduction: prod,
@@ -540,14 +542,15 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       writeFileSync(cssPath, styles);
 
       if (config.importStrategy === 'component') {
-        if (!localCssFiles[src]) localCssFiles[src] = [generator.cssFileName];
-        else localCssFiles[src].push(generator.cssFileName);
+        localCssFiles[src].push(generator.cssFileName);
       }
     }
 
     // Generate CSS for class names
     for (const classNameResult of generationResults.classNames) {
       const { src, name } = classNameResult;
+      if (!localCssFiles[src]) localCssFiles[src] = [];
+
       const generator = classNameResult.generator._withBuildContext({
         callerName: name,
         isProduction: prod,
@@ -565,8 +568,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       writeFileSync(cssPath, styles);
 
       if (config.importStrategy === 'component') {
-        if (!localCssFiles[src]) localCssFiles[src] = [generator.cssFileName];
-        else localCssFiles[src].push(generator.cssFileName);
+        localCssFiles[src].push(generator.cssFileName);
       }
     }
 
@@ -580,7 +582,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
         const dasherized = dashCase(parsedPath.name);
 
         const cssFile = join(destDir, `css/f_${dasherized}-${hashName}.css`);
-        writeFileSync(cssFile, cssContent);
+        writeFileSync(cssFile, cssContent || `/* Empty file */`);
       });
     }
 
@@ -716,8 +718,7 @@ export const generateFile = async (dirname: string, file: string, prod = isProdu
         const dasherized = dashCase(parsedPath.name);
 
         const cssFile = join(destDir, `css/f_${dasherized}-${hashName}.css`);
-
-        writeFileSync(cssFile, cssContent);
+        writeFileSync(cssFile, cssContent || `/* Empty file */`);
       }
     }
   } catch (e) {
