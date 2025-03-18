@@ -21,7 +21,7 @@ export const parseStyles = async <T extends object>(
   currentScope = '',
   config?: (SaltyConfig & CachedConfig) | undefined,
   omitTemplates = false
-): Promise<Set<string>> => {
+): Promise<string[]> => {
   if (!styles) throw new Error('No styles provided to parseStyles function!');
   const cssStyles = new Set<string>();
   const entries = Object.entries(styles);
@@ -144,11 +144,12 @@ export const parseStyles = async <T extends object>(
   });
 
   const mapped = resolved.join('\n');
-  if (!mapped.trim()) return cssStyles;
+  if (!mapped.trim()) return Array.from(cssStyles);
 
   const css = currentScope ? `${currentScope} { ${mapped} }` : mapped;
-  cssStyles.add(css);
-  return cssStyles;
+  const alreadyExists = cssStyles.has(css);
+  if (alreadyExists) return Array.from(cssStyles);
+  return [css, ...cssStyles];
 };
 
 export const parseAndJoinStyles = async <T extends object>(
@@ -158,5 +159,5 @@ export const parseAndJoinStyles = async <T extends object>(
   omitTemplates = false
 ): Promise<string> => {
   const css = await parseStyles(styles, currentClass, config, omitTemplates);
-  return [...css].join('\n');
+  return css.join('\n');
 };
