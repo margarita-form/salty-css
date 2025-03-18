@@ -50,14 +50,18 @@ export const variables = defineVariables({
     base: {
       fontSize: {
         heading: {
-          regular: '2.5vw',
+          small: 'clamp(20px, 1.5vw, 32px)',
+          regular: 'clamp(32px, 2.5vw, 48px)',
+          large: 'clamp(48px, 4vw, 64px)',
         },
       },
     },
     [largeMobileDown]: {
       fontSize: {
         heading: {
-          regular: '5vw',
+          small: 'clamp(20px, 3vw, 32px)',
+          regular: 'clamp(32px, 5vw, 48px)',
+          large: 'clamp(48px, 8vw, 64px)',
         },
       },
     },
