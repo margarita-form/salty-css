@@ -143,10 +143,10 @@ export const parseStyles = async <T extends object>(
     );
   });
 
-  const mapped = resolved.join('\n');
+  const mapped = resolved.filter((value) => value !== undefined).join('\n\t');
   if (!mapped.trim()) return Array.from(cssStyles);
 
-  const css = currentScope ? `${currentScope} { ${mapped} }` : mapped;
+  const css = currentScope ? `${currentScope} {\n\t${mapped}\n}` : mapped;
   const alreadyExists = cssStyles.has(css);
   if (alreadyExists) return Array.from(cssStyles);
   return [css, ...cssStyles];
