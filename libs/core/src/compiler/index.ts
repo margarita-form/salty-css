@@ -139,7 +139,7 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
         if (value.isMedia) generationResults.mediaQueries.push([name, value as any]);
         else if (value.isGlobalDefine) generationResults.globalStyles.push(value as any);
         else if (value.isDefineVariables) generationResults.variables.push(value as any);
-        else if (value.isDefineTemplates) generationResults.templates.push((value as any)._setPath(outputFilePath));
+        else if (value.isDefineTemplates) generationResults.templates.push((value as any)._setPath(`${name};;${outputFilePath}`));
       });
     })
   );
