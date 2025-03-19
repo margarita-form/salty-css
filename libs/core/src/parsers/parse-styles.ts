@@ -37,14 +37,21 @@ export const parseStyles = async <T extends object>(
     if (value instanceof Promise) value = await value;
 
     if (config?.templates && config.templatePaths[_key]) {
-      const [name, path] = config.templatePaths[_key].split(';;');
+      try {
+        const [name, path] = config.templatePaths[_key].split(';;');
 
-      const functions = await import(path);
-      const values = functions[name];
-      if (values && typeof values.params[_key] === 'function') {
-        const templateStyles = await values.params[_key](value);
-        const [result] = await parseStyles(templateStyles, '');
-        return result;
+        const functions = await import(path);
+        const isSaltyConfig = path.includes('salty.config');
+        const values = isSaltyConfig ? functions[name].templates : functions[name];
+        const template = isSaltyConfig ? values[_key] : values.params[_key];
+        if (values && typeof template === 'function') {
+          const templateStyles = await template(value);
+          const [result] = await parseStyles(templateStyles, '');
+          return result;
+        }
+      } catch (error) {
+        console.error(`Error loading template "${_key}" from path "${config.templatePaths[_key]}"`, error);
+        return undefined;
       }
     }
 

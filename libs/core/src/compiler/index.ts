@@ -16,7 +16,7 @@ import { dotCase } from '../util/dot-case';
 import { saltyReset } from '../templates/salty-reset';
 import { RCFile } from '../types/cli-types';
 import { mergeFactories, mergeObjects } from '../css';
-import { GlobalStylesFactory, TemplatesFactory, VariablesFactory } from '../factories';
+import { defineTemplates, GlobalStylesFactory, TemplatesFactory, VariablesFactory } from '../factories';
 import { StyledGenerator, ClassNameGenerator } from '../generators';
 import { StylesGenerator } from '../generators/styles-generator';
 
@@ -119,7 +119,7 @@ const generateConfig = async (dirname: string) => {
 
   const now = Date.now();
   const { config } = await import(`${coreConfigDest}?t=${now}`);
-  return config;
+  return { config, path: coreConfigDest };
 };
 
 export const generateConfigStyles = async (dirname: string, configFiles: Set<string>) => {
@@ -145,7 +145,7 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
   );
 
   // Generate the config files
-  const config = await generateConfig(dirname);
+  const { config, path: configPath } = await generateConfig(dirname);
 
   // Cache the config content
   const configCacheContent = { ...config } as CachedConfig;
@@ -250,7 +250,8 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
   writeFileSync(templateStylesPath, `@layer templates { ${templateStylesString} }`);
   configCacheContent.templates = templates;
 
-  const templateFactories = mergeFactories(generationResults.templates);
+  const configTemplateFactories = config.templates ? [defineTemplates(config.templates)._setPath(`config;;${configPath}`)] : [];
+  const templateFactories = mergeFactories(generationResults.templates, configTemplateFactories);
 
   configCacheContent.templatePaths = Object.fromEntries(Object.entries(templateFactories).map(([key, faktory]) => [key, faktory._path]));
 
