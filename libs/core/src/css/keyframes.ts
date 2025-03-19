@@ -1,4 +1,4 @@
-import { parseStyles } from '../parsers/parse-styles';
+import { parseAndJoinStyles } from '../parsers/parse-styles';
 import { CssStyles, StyleValue } from '../types';
 import { toHash } from '../util';
 
@@ -26,10 +26,10 @@ interface KeyframesParams {
 
 type KeyframesProps = Keyframes & KeyframesConfig;
 
-export const keyframes = ({ animationName: _name, params: _params, appendInitialStyles, ...keyframes }: KeyframesProps) => {
+export const keyframes = async ({ animationName: _name, params: _params, appendInitialStyles, ...keyframes }: KeyframesProps) => {
   const animationName = _name || toHash(keyframes);
 
-  const fn = (params: KeyframesParams = {}) => {
+  const fn = async (params: KeyframesParams = {}) => {
     const {
       duration = '500ms',
       easing = 'ease-in-out',
@@ -44,16 +44,27 @@ export const keyframes = ({ animationName: _name, params: _params, appendInitial
     if (!appendInitialStyles) return animation;
     const startingFrom = keyframes.from || keyframes['0%'];
     if (!startingFrom) return animation;
-    const startStyles = parseStyles(startingFrom, '');
+    const startStyles = await parseAndJoinStyles(startingFrom, '');
     return `${animation};${startStyles}`;
   };
 
-  const keyframesCss = Object.entries(keyframes).reduce((acc, [key, value]) => {
-    if (!value) return acc;
-    const styles = parseStyles(value, '');
+  // const keyframesCss = Object.entries(keyframes).reduce((acc, [key, value]) => {
+  //   if (!value) return acc;
+  //   const styles = parseAndJoinStyles(value, '');
+  //   const keyStr = typeof key === 'number' ? `${key}%` : key;
+  //   return `${acc}${keyStr}{${styles}}`;
+  // }, '');
+
+  const entries = Object.entries(keyframes);
+  const promises = entries.map(async ([key, value]) => {
+    if (!value) return '';
+    const styles = await parseAndJoinStyles(value, '');
     const keyStr = typeof key === 'number' ? `${key}%` : key;
-    return `${acc}${keyStr}{${styles}}`;
-  }, '');
+    return `${keyStr}{${styles}}`;
+  });
+
+  const resolved = await Promise.all(promises);
+  const keyframesCss = resolved.join('');
 
   const css = `@keyframes ${animationName} {${keyframesCss}}`;
 

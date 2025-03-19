@@ -1,4 +1,4 @@
-import { parseStyles } from '../parsers/parse-styles';
+import { parseAndJoinStyles } from '../parsers/parse-styles';
 import { StyledParams, Styles } from '../types';
 import { SaltyConfig } from '../types/config-types';
 import { dashCase, toHash } from '../util';
@@ -7,12 +7,21 @@ export interface StylesGeneratorBuildTimeProps {
   callerName?: string;
   isProduction?: boolean;
   config?: SaltyConfig;
+  classNames?: string[];
 }
 
 export class StylesGenerator<const STYLE_PARAMS extends StyledParams = StyledParams> {
   public buildContext: StylesGeneratorBuildTimeProps = {};
 
   constructor(public params: STYLE_PARAMS) {}
+
+  get priority(): number {
+    return 0;
+  }
+
+  get isRoot(): boolean {
+    return this.priority === 0;
+  }
 
   get hash() {
     return toHash(this.params.base || this.params);
@@ -23,11 +32,13 @@ export class StylesGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
   }
 
   get classNames() {
-    const classNames: string[] = [this.hash];
+    const classNames = new Set([this.cssClassName]);
     const { className } = this.params;
-    if (typeof className == 'string') classNames.push(className);
-    if (typeof className == 'object') classNames.push(...className);
-    return classNames.join(' ');
+    if (typeof className == 'string') classNames.add(className);
+    if (typeof className == 'object') className.forEach((c) => classNames.add(c));
+    this.getTemplateClasses().forEach((c) => classNames.add(c));
+    if (this.buildContext.classNames) this.buildContext.classNames.forEach((c) => classNames.add(c));
+    return [...classNames].join(' ');
   }
 
   get cssFileName() {
@@ -44,8 +55,17 @@ export class StylesGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
     const { config } = this.buildContext;
 
     const combinedStyles: Styles = { ...base, variants, compoundVariants };
-    const css = parseStyles(combinedStyles, `.${this.cssClassName}`, config);
+    const css = parseAndJoinStyles(combinedStyles, `.${this.cssClassName}`, config, this.isRoot);
     return css;
+  }
+
+  public getTemplateClasses(config = this.buildContext.config) {
+    if (!config?.templates || !this.params.base || this.priority > 0) return [];
+    const templateKeys = Object.keys(config.templates);
+    return Object.entries(this.params.base).reduce((acc, [key, value]) => {
+      if (templateKeys.includes(key)) acc.push('t_' + toHash(dashCase(`${key}-${value}`), 4));
+      return acc;
+    }, [] as string[]);
   }
 
   public _withBuildContext(context: StylesGeneratorBuildTimeProps) {

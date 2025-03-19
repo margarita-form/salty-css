@@ -32,7 +32,7 @@ export const IndexPage = () => {
         Eget sodales neque ex in magna. Suspendisse pulvinar ultricies arcu, ut faucibus nunc lacinia et. Praesent porttitor fringilla lobortis.
       </Body>
 
-      <Button variant="underLined" href="https://salty-css.dev">
+      <Button variant="underlined" href="https://salty-css.dev">
         Outlined
       </Button>
     </Wrapper>

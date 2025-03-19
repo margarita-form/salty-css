@@ -1,13 +1,18 @@
 import { dashCase } from '../util';
-import { ValueParserReturnValue } from './parser-types';
+import { SyncronousStyleValueModifierFunction } from './parser-types';
 
-export const parseValueTokens = (value: string): ValueParserReturnValue => {
-  if (typeof value !== 'string') return { result: value };
-  const hasToken = /\{[^{}]+\}/g.test(value);
-  if (!hasToken) return { result: value };
-  const result = value.replace(/\{([^{}]+)\}/g, (...args) => {
-    const variable = dashCase(args[1].replaceAll('.', '-'));
-    return `var(--${variable})`;
-  });
-  return { result };
-};
+export const parseValueTokens =
+  (tokenNames?: string[]): SyncronousStyleValueModifierFunction =>
+  (value: unknown) => {
+    if (typeof value !== 'string') return undefined;
+    const hasToken = /\{[^{}]+\}/g.test(value);
+    if (!hasToken) return undefined;
+    const transformed = value.replace(/\{([^{}]+)\}/g, (...args) => {
+      const variable = dashCase(args[1].replaceAll('.', '-'));
+      if (tokenNames && !tokenNames.includes(variable)) console.warn(`Token ${variable} might not exist`);
+      return `var(--${variable})`;
+    });
+    return { transformed };
+  };
+
+export const parseVariableTokens = parseValueTokens();

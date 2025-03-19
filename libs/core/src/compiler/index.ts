@@ -6,17 +6,17 @@ import { join, parse as parsePath } from 'path';
 import { statSync, existsSync, mkdirSync, readdirSync, writeFileSync, readFileSync } from 'fs';
 import { dashCase } from '../util/dash-case';
 import { readFile, writeFile } from 'fs/promises';
-import { parseStyles } from '../parsers/parse-styles';
+import { parseAndJoinStyles } from '../parsers/parse-styles';
 import { getTemplateTypes, parseTemplates } from '../parsers/parse-templates';
-import { CachedConfig, CssConditionalVariables, CssResponsiveVariables, SaltyConfig, SaltyVariables } from '../config';
-import { parseValueTokens } from '../parsers/parse-tokens';
+import { CachedConfig, CssConditionalVariables, CssResponsiveVariables, CssTemplates, SaltyConfig, SaltyVariables } from '../config';
+import { parseVariableTokens } from '../parsers/parse-tokens';
 import { detectCurrentModuleType } from '../util/module-type';
 import { logger } from '../bin/logger';
 import { dotCase } from '../util/dot-case';
 import { saltyReset } from '../templates/salty-reset';
 import { RCFile } from '../types/cli-types';
-import { mergeStyles } from '../css';
-import { GlobalStylesFactory, TemplatesFactory, VariablesFactory } from '../factories';
+import { mergeFactories, mergeObjects } from '../css';
+import { defineTemplates, GlobalStylesFactory, TemplatesFactory, VariablesFactory } from '../factories';
 import { StyledGenerator, ClassNameGenerator } from '../generators';
 import { StylesGenerator } from '../generators/styles-generator';
 
@@ -119,7 +119,7 @@ const generateConfig = async (dirname: string) => {
 
   const now = Date.now();
   const { config } = await import(`${coreConfigDest}?t=${now}`);
-  return config;
+  return { config, path: coreConfigDest };
 };
 
 export const generateConfigStyles = async (dirname: string, configFiles: Set<string>) => {
@@ -134,18 +134,18 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
 
   await Promise.all(
     [...configFiles].map(async (src) => {
-      const contents = await compileSaltyFile(dirname, src, destDir);
+      const { contents, outputFilePath } = await compileSaltyFile(dirname, src, destDir);
       Object.entries(contents).forEach(([name, value]) => {
         if (value.isMedia) generationResults.mediaQueries.push([name, value as any]);
         else if (value.isGlobalDefine) generationResults.globalStyles.push(value as any);
         else if (value.isDefineVariables) generationResults.variables.push(value as any);
-        else if (value.isDefineTemplates) generationResults.templates.push(value as any);
+        else if (value.isDefineTemplates) generationResults.templates.push((value as any)._setPath(`${name};;${outputFilePath}`));
       });
     })
   );
 
   // Generate the config files
-  const config = await generateConfig(dirname);
+  const { config, path: configPath } = await generateConfig(dirname);
 
   // Cache the config content
   const configCacheContent = { ...config } as CachedConfig;
@@ -167,8 +167,9 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
       variableTokens.add(`"${tsName}"`);
 
       const cssName = [...path.map(dashCase), dashedKey].join('-');
-      const { result } = parseValueTokens(value);
-      return `--${cssName}: ${result};`;
+      const result = parseVariableTokens(value);
+      if (!result) return `--${cssName}: ${value};`;
+      return `--${cssName}: ${result.transformed};`;
     });
   };
 
@@ -206,11 +207,11 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
     });
   };
 
-  const _staticVariables = mergeStyles(getStaticVariables(config.variables), getGeneratedVariables('static'));
+  const _staticVariables = mergeObjects(getStaticVariables(config.variables), getGeneratedVariables('static'));
   const staticVariables = parseVariables(_staticVariables);
-  const _responsiveVariables = mergeStyles(config.variables?.responsive, getGeneratedVariables('responsive'));
+  const _responsiveVariables = mergeObjects<CssResponsiveVariables>(config.variables?.responsive, getGeneratedVariables('responsive'));
   const responsiveVariables = parseResponsiveVariables(_responsiveVariables);
-  const _conditionalVariables = mergeStyles(config.variables?.conditional, getGeneratedVariables('conditional'));
+  const _conditionalVariables = mergeObjects(config.variables?.conditional, getGeneratedVariables('conditional'));
   const conditionalVariables = parseConditionalVariables(_conditionalVariables);
 
   const variablesPath = join(destDir, 'css/_variables.css');
@@ -220,8 +221,8 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
 
   // Generate global styles
   const globalStylesPath = join(destDir, 'css/_global.css');
-  const mergedGlobalStyles = mergeStyles(config.global, generationResults.globalStyles);
-  const globalStylesString = parseStyles(mergedGlobalStyles, '');
+  const mergedGlobalStyles = mergeObjects(config.global, generationResults.globalStyles);
+  const globalStylesString = await parseAndJoinStyles(mergedGlobalStyles, '');
 
   writeFileSync(globalStylesPath, `@layer global { ${globalStylesString} }`);
 
@@ -235,19 +236,24 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
   };
 
   const resetStyles = getResetStyles();
-  const resetStylesString = parseStyles(resetStyles, '');
+  const resetStylesString = await parseAndJoinStyles(resetStyles, '');
 
   writeFileSync(resetStylesPath, `@layer reset { ${resetStylesString} }`);
 
   // Generate templates
   const templateStylesPath = join(destDir, 'css/_templates.css');
-  const templates = mergeStyles(config.templates, generationResults.templates);
+  const templates = mergeObjects<CssTemplates>(config.templates, generationResults.templates);
 
-  const templateStylesString = parseTemplates(templates);
+  const templateStylesString = await parseTemplates(templates);
   const templateTokens = getTemplateTypes(templates);
 
-  writeFileSync(templateStylesPath, templateStylesString);
+  writeFileSync(templateStylesPath, `@layer templates { ${templateStylesString} }`);
   configCacheContent.templates = templates;
+
+  const configTemplateFactories = config.templates ? [defineTemplates(config.templates)._setPath(`config;;${configPath}`)] : [];
+  const templateFactories = mergeFactories(generationResults.templates, configTemplateFactories);
+
+  configCacheContent.templatePaths = Object.fromEntries(Object.entries(templateFactories).map(([key, faktory]) => [key, faktory._path]));
 
   // Generate media query helpers
   const { mediaQueries } = generationResults;
@@ -364,10 +370,7 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
     ],
   });
 
-  const now = Date.now();
-  const contents = await import(`${outputFilePath}?t=${now}`);
-
-  return contents as {
+  type Contents = {
     [key: string]: {
       generator: any;
       isClassName?: boolean;
@@ -377,10 +380,15 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
       isDefineTemplates?: boolean;
       isKeyframes?: boolean;
       animationName?: string;
-      css?: string;
+      css?: Promise<string>;
       styles?: any;
     };
   };
+
+  const now = Date.now();
+  const contents = (await import(`${outputFilePath}?t=${now}`)) as Contents;
+
+  return { contents, outputFilePath };
 };
 
 const getConfigCache = async (dirname: string) => {
@@ -397,7 +405,7 @@ const getConfig = async (dirname: string) => {
   const coreConfigDest = join(destDir, 'salty.config.js');
   const now = Date.now();
   const { config } = await import(`${coreConfigDest}?t=${now}`);
-  return mergeStyles<SaltyConfig>(config, cached);
+  return mergeObjects<SaltyConfig>(config, cached);
 };
 
 const isProduction = () => {
@@ -470,7 +478,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
 
     await Promise.all(
       [...files].map(async (src) => {
-        const contents = await compileSaltyFile(dirname, src, destDir);
+        const { contents } = await compileSaltyFile(dirname, src, destDir);
         Object.entries(contents).forEach(([name, value]) => {
           if (value.isKeyframes) {
             generationResults.keyframes.push({
@@ -515,6 +523,8 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
     // Generate CSS for components
     for (const componentResult of generationResults.components) {
       const { src, name } = componentResult;
+      if (!localCssFiles[src]) localCssFiles[src] = [];
+
       const generator = componentResult.generator._withBuildContext({
         callerName: name,
         isProduction: prod,
@@ -522,36 +532,44 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       });
 
       if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
+      const styles = await generator.css;
+      if (!styles) continue;
+
       cssFiles[generator.priority].push(generator.cssFileName);
 
       const filePath = `css/${generator.cssFileName}`;
       const cssPath = join(destDir, filePath);
-      writeFileSync(cssPath, generator.css);
+
+      writeFileSync(cssPath, styles);
 
       if (config.importStrategy === 'component') {
-        if (!localCssFiles[src]) localCssFiles[src] = [generator.cssFileName];
-        else localCssFiles[src].push(generator.cssFileName);
+        localCssFiles[src].push(generator.cssFileName);
       }
     }
 
     // Generate CSS for class names
     for (const classNameResult of generationResults.classNames) {
       const { src, name } = classNameResult;
+      if (!localCssFiles[src]) localCssFiles[src] = [];
+
       const generator = classNameResult.generator._withBuildContext({
         callerName: name,
         isProduction: prod,
         config,
       });
 
+      const styles = await generator.css;
+      if (!styles) continue;
+
       cssFiles[0].push(generator.cssFileName);
 
       const filePath = `css/${generator.cssFileName}`;
       const cssPath = join(destDir, filePath);
-      writeFileSync(cssPath, generator.css);
+
+      writeFileSync(cssPath, styles);
 
       if (config.importStrategy === 'component') {
-        if (!localCssFiles[src]) localCssFiles[src] = [generator.cssFileName];
-        else localCssFiles[src].push(generator.cssFileName);
+        localCssFiles[src].push(generator.cssFileName);
       }
     }
 
@@ -565,7 +583,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
         const dasherized = dashCase(parsedPath.name);
 
         const cssFile = join(destDir, `css/f_${dasherized}-${hashName}.css`);
-        writeFileSync(cssFile, cssContent);
+        writeFileSync(cssFile, cssContent || `/* Empty file */`);
       });
     }
 
@@ -581,7 +599,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       }
     });
     const globalImports = importsWithData.map((file) => `@import url('./css/${file}');`);
-    let cssContent = `@layer reset, global, l0, l1, l2, l3, l4, l5, l6, l7, l8;\n\n${globalImports.join('\n')}\n${otherGlobalCssFiles}`;
+    let cssContent = `@layer reset, global, templates, l0, l1, l2, l3, l4, l5, l6, l7, l8;\n\n${globalImports.join('\n')}\n${otherGlobalCssFiles}`;
 
     if (config.importStrategy !== 'component') {
       const mergedContent = cssFiles.reduce((acc, val, layer) => {
@@ -590,7 +608,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
           const css = readFileSync(filepath, 'utf8');
           const filepathHash = /.*-([^-]+)-\d+.css/.exec(file)?.at(1) || toHash(filepath, 6);
           if (layerAcc.includes(filepathHash)) return layerAcc;
-          return `${layerAcc}\n/*start:${filepathHash}*/\n${css}\n/*end:${filepathHash}*/\n`;
+          return `${layerAcc}\n/*start:${filepathHash}-${file}*/\n${css}\n/*end:${filepathHash}*/\n`;
         }, '');
 
         const layerFileName = `l_${layer}.css`;
@@ -615,7 +633,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
   }
 };
 
-export const generateFile = async (dirname: string, file: string) => {
+export const generateFile = async (dirname: string, file: string, prod = isProduction()) => {
   try {
     const destDir = await getDestDir(dirname);
     const validFile = isSaltyFile(file);
@@ -623,45 +641,55 @@ export const generateFile = async (dirname: string, file: string) => {
     if (validFile) {
       const cssFiles: string[][] = [];
       const config = await getConfig(dirname);
-      const contents = await compileSaltyFile(dirname, file, destDir);
-      Object.entries(contents).forEach(([name, value]: [string, any]) => {
+      const { contents } = await compileSaltyFile(dirname, file, destDir);
+      for (const [name, value] of Object.entries(contents)) {
+        // Object.entries(contents).forEach(([name, value]: [string, any]) => {
         if (value.isKeyframes && value.css) {
           const fileName = `a_${value.animationName}.css`;
           const filePath = `css/${fileName}`;
           const cssPath = join(destDir, filePath);
 
-          writeFileSync(cssPath, value.css);
+          writeFileSync(cssPath, await value.css);
 
           return;
         }
 
         if (value.isClassName) {
-          const generator = value.factory._withBuildContext({
-            name,
+          const generator = value.generator._withBuildContext({
+            callerName: name,
+            isProduction: prod,
+            config,
           });
+
+          const styles = await generator.css;
+          if (!styles) continue;
 
           cssFiles[0].push(generator.cssFileName);
 
           const filePath = `css/${generator.cssFileName}`;
           const cssPath = join(destDir, filePath);
-          writeFileSync(cssPath, generator.css);
+          writeFileSync(cssPath, styles);
         }
 
         if (!value.generator) return;
 
         const generator = value.generator._withBuildContext({
-          name,
+          callerName: name,
+          isProduction: prod,
           config,
         });
+
+        const styles = await generator.css;
+        if (!styles) continue;
 
         const filePath = `css/${generator.cssFileName}`;
         const cssPath = join(destDir, filePath);
 
-        writeFileSync(cssPath, generator.css);
+        writeFileSync(cssPath, styles);
 
         if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
         cssFiles[generator.priority].push(generator.cssFileName);
-      });
+      }
 
       if (config.importStrategy !== 'component') {
         cssFiles.forEach((val, layer) => {
@@ -674,7 +702,7 @@ export const generateFile = async (dirname: string, file: string) => {
             const found = currentLayerFileContent.includes(filepathHash);
             if (!found) {
               const css = readFileSync(filepath, 'utf8');
-              const newContent = `/*start:${filepathHash}*/\n${css}\n/*end:${filepathHash}*/\n`;
+              const newContent = `/*start:${filepathHash}-${file}*/\n${css}\n/*end:${filepathHash}*/\n`;
               currentLayerFileContent = `${currentLayerFileContent.replace(/\}$/, '')}\n${newContent}\n}`;
             }
           });
@@ -691,8 +719,7 @@ export const generateFile = async (dirname: string, file: string) => {
         const dasherized = dashCase(parsedPath.name);
 
         const cssFile = join(destDir, `css/f_${dasherized}-${hashName}.css`);
-
-        writeFileSync(cssFile, cssContent);
+        writeFileSync(cssFile, cssContent || `/* Empty file */`);
       }
     }
   } catch (e) {
@@ -713,7 +740,7 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
       if (copy !== original) await writeFile(file, original);
 
       const config = await getConfig(dirname);
-      const contents = await compileSaltyFile(dirname, file, destDir);
+      const { contents } = await compileSaltyFile(dirname, file, destDir);
 
       let current = original;
       Object.entries(contents).forEach(([name, value]) => {
@@ -721,9 +748,9 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
         if (!value.generator) return;
 
         const generator = value.generator._withBuildContext({
-          name,
+          callerName: name,
+          isProduction: prod,
           config,
-          prod,
         });
 
         const regexpResult = new RegExp(`\\s${name}[=\\s]+[^()]+styled\\(([^,]+),`, 'g').exec(original);

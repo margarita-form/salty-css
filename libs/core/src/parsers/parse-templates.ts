@@ -1,26 +1,28 @@
-import { dashCase } from '../util';
-import { parseStyles } from './parse-styles';
+import { dashCase, toHash } from '../util';
+import { parseAndJoinStyles } from './parse-styles';
 
-export const parseTemplates = <T extends object>(obj: T, path: PropertyKey[] = []): string => {
+export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey[] = []): Promise<string> => {
   if (!obj) return '';
   const classes: string[] = [];
 
   const levelStyles = {} as Record<PropertyKey, any>;
 
-  Object.entries(obj).forEach(([key, value]) => {
-    if (typeof value === 'object') {
-      if (!value) return;
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === 'function') {
+      // Skip functions
+    } else if (value && typeof value === 'object') {
       const _key = key.trim();
-      const result = parseTemplates(value, [...path, _key]);
+      const result = await parseTemplates(value, [...path, _key]);
       classes.push(result);
     } else {
       levelStyles[key] = value;
     }
-  });
+  }
 
   if (Object.keys(levelStyles).length) {
     const className = path.map(dashCase).join('-');
-    const result = parseStyles(levelStyles, `.${className}`);
+    const hashClass = 't_' + toHash(className, 4);
+    const result = await parseAndJoinStyles(levelStyles, `.${className}, .${hashClass}`);
     classes.push(result);
   }
 
@@ -34,7 +36,9 @@ export const getTemplateKeys = <T extends object>(templates: T): string[] => {
 export const getTemplateTypes = <T extends object>(templates: T): Record<string, string> => {
   if (!templates) return {};
   return Object.entries(templates).reduce((acc, [key, value]) => {
-    if (typeof value === 'object')
+    if (typeof value === 'function') {
+      acc[key] = 'any';
+    } else if (typeof value === 'object')
       acc[key] = getTemplateTokens(value)
         .map((val) => `"${val}"`)
         .join(' | ');

@@ -2,15 +2,16 @@ import { createElement, ForwardedRef, forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { StyledComponentProps, Tag } from '@salty-css/core/types';
 import { dashCase } from '@salty-css/core/util';
-import { parseValueTokens } from '@salty-css/core/parsers/parse-tokens';
+import { parseVariableTokens } from '@salty-css/core/parsers/parse-tokens';
 import { StyledGeneratorClientProps } from '@salty-css/core/generators';
+import { CommonRecord } from '@salty-css/core/types/util-types';
 
 const _styledKeys = ['passProps'];
 
 export const elementFactory = (
   tagName: Tag<any>,
-  _className: string,
-  _generatorProps: StyledGeneratorClientProps,
+  _className = '',
+  _generatorProps: StyledGeneratorClientProps = {},
   _additionalProps?: Record<PropertyKey, any>
 ) => {
   const fn = (
@@ -31,19 +32,19 @@ export const elementFactory = (
     if (_generatorProps.defaultProps) Object.assign(props, _generatorProps.defaultProps);
     if (props) Object.assign(passedProps, props);
 
-    const additionalClasses = new Set<string>(className.split(' '));
+    const uniqueClasses = new Set<string>([..._className.split(' '), ...className.split(' ')]);
 
     const extendsComponent = typeof extend === 'function' || typeof extend === 'object';
     const extendsStyled = extendsComponent && 'isStyled' in extend;
     const type = extendsComponent ? extend : element || extend;
     if (!type) throw new Error('No element provided');
 
-    const styles = passedProps['style'] || {};
+    const styles: CommonRecord = passedProps['style'] || {};
     if (!passedProps['style']) passedProps['style'] = styles;
 
     Object.entries(styles).forEach(([key, value]) => {
-      const { result } = parseValueTokens(value);
-      styles[key] = result;
+      const result = parseVariableTokens(value);
+      if (result) styles[key] = result.transformed;
     });
 
     if (_generatorProps.propValueKeys) {
@@ -61,10 +62,10 @@ export const elementFactory = (
       _generatorProps.variantKeys.forEach((key) => {
         const [name, defaultValue] = key.split('=');
         if (props[name] !== undefined) {
-          additionalClasses.add(`${name}-${props[name]}`);
+          uniqueClasses.add(`${name}-${props[name]}`);
           if (_vks) _vks.add(name);
         } else if (defaultValue !== undefined) {
-          additionalClasses.add(`${name}-${defaultValue}`);
+          uniqueClasses.add(`${name}-${defaultValue}`);
         }
       });
     }
@@ -80,7 +81,7 @@ export const elementFactory = (
     } else if (extendsStyled) Object.assign(passedProps, { _vks });
 
     if (!extendsStyled) _styledKeys.forEach((key) => delete passedProps[key]);
-    const joinedClassNames = clsx(_className, ...additionalClasses);
+    const joinedClassNames = clsx(...uniqueClasses);
 
     return createElement(
       type,

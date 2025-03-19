@@ -1,19 +1,22 @@
 import { CssModifiers } from '../types/config-types';
-import { ValueParserReturnValue } from './parser-types';
+import { StyleValueModifierFunction } from './parser-types';
 
-export const parseValueModifiers = (value: string, modifiers?: CssModifiers): ValueParserReturnValue => {
-  if (typeof value !== 'string') return { result: value };
-  if (!modifiers) return { result: value };
+export const parseValueModifiers =
+  (modifiers?: CssModifiers): StyleValueModifierFunction =>
+  (value: string) => {
+    if (typeof value !== 'string') return undefined;
+    if (!modifiers) return undefined;
 
-  const additionalCss = [] as object[];
-  Object.values(modifiers).forEach((modifier) => {
-    const { pattern, transform } = modifier;
-    value = value.replace(pattern, (match) => {
-      const { value: result, css } = transform(match);
-      if (css) additionalCss.push(css);
-      return result;
+    let transformed = value;
+    const additionalCss = [] as object[];
+    Object.values(modifiers).forEach((modifier) => {
+      const { pattern, transform } = modifier;
+      transformed = transformed.replace(pattern, (match) => {
+        const { value: _value, css } = transform(match);
+        if (css) additionalCss.push(css);
+        return _value;
+      });
     });
-  });
 
-  return { result: value, additionalCss };
-};
+    return { transformed, additionalCss };
+  };

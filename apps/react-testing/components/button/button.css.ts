@@ -49,7 +49,7 @@ export const Button = styled(DynamicLink, {
           color: 'currentColor',
         },
       },
-      underLined: {
+      underlined: {
         textDecoration: 'underline 1px solid currentColor',
         background: 'transparent',
         padding: 0,

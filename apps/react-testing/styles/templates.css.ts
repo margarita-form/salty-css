@@ -24,4 +24,11 @@ export default defineTemplates({
       },
     },
   },
+  epicCard: (value: string) => {
+    return {
+      padding: value,
+      borderRadius: '8px',
+      boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+    };
+  },
 });
