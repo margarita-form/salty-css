@@ -21,7 +21,7 @@ export const saltyPlugin = (dir: string): PluginOption => {
     },
     handleHotUpdate: async ({ file, server }) => {
       const shouldRestart = await checkShouldRestart(file);
-      if (shouldRestart) await server.restart();
+      if (shouldRestart) server.restart();
     },
     watchChange: {
       handler: async (filePath: string) => {
