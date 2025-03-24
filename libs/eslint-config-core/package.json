@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/eslint-config-core",
-  "version": "0.0.1-alpha.215",
+  "version": "0.0.1-alpha.216",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -38,8 +38,8 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.0.1-alpha.215",
-    "@salty-css/eslint-plugin-core": "^0.0.1-alpha.215",
+    "@salty-css/core": "^0.0.1-alpha.216",
+    "@salty-css/eslint-plugin-core": "^0.0.1-alpha.216",
     "eslint": ">=9.x || >=8.x || >=7.x"
   }
 }
