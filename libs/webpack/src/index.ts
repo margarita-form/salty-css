@@ -19,7 +19,7 @@ export const saltyPlugin = (config: Configuration, dir: string, isServer = false
     config.plugins?.push({
       apply: (compiler) => {
         let started = false;
-        compiler.hooks.watchRun.tapPromise({ name: 'generateCss' }, async () => {
+        compiler.hooks.beforeCompile.tapPromise({ name: 'generateCss' }, async () => {
           if (started) return;
           started = true;
 
