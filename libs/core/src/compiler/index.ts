@@ -561,7 +561,8 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       const styles = await generator.css;
       if (!styles) continue;
 
-      cssFiles[0].push(generator.cssFileName);
+      if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
+      cssFiles[generator.priority].push(generator.cssFileName);
 
       const filePath = `css/${generator.cssFileName}`;
       const cssPath = join(destDir, filePath);
@@ -664,7 +665,8 @@ export const generateFile = async (dirname: string, file: string, prod = isProdu
           const styles = await generator.css;
           if (!styles) continue;
 
-          cssFiles[0].push(generator.cssFileName);
+          if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
+          cssFiles[generator.priority].push(generator.cssFileName);
 
           const filePath = `css/${generator.cssFileName}`;
           const cssPath = join(destDir, filePath);
