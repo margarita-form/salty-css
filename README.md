@@ -16,7 +16,13 @@ Is there anything saltier than CSS in frontend web development? Salty CSS is bui
 
 ## Get started
 
-Fastest way to get started with any framework is `npx salty-css init [directory]` command
+Fastest way to get started with any framework is
+
+```bash
+npx salty-css init [directory]
+```
+
+Other guides:
 
 - Next.js → [Next.js guide](#nextjs) + [Next.js example app](https://github.com/margarita-form/salty-css-website)
 - React + Vite → [React + Vite guide](#react--vite) + [React example code](#code-examples)
