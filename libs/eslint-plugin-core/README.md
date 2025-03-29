@@ -57,13 +57,13 @@ Fastest way to get started with any framework is `npx salty-css init [directory]
 Styled function is the main way to use Salty CSS within React. Styled function creates a React component that then can be used anywhere in your app. All styled functions must be created in `.css.ts` or `.css.tsx` files
 
 ```ts
-// components/my-component.css.ts
+// /components/my-component.css.ts
 import { styled } from '@salty-css/react/styled';
 
 // Define a component with a styled function. First argument is the component name or existing component to extend and second argument is the object containing the styles and other options
 export const Component = styled('div', {
-  className: 'wrapper', // Define custom class name that will be included for this component
-  element: 'section', // Define the html element that will be rendered for this component, overrides the first 'div' argument
+  className: 'wrapper', // Define optional custom class name that will be included for this component
+  element: 'section', // Override the html element that will be rendered for this component
   base: {
     // 👉 Add your CSS-in-JS base styles here! 👈
   },
@@ -83,21 +83,41 @@ export const Component = styled('div', {
 });
 ```
 
+Example usage:
+
+```tsx
+import { Component } from './my-component.css';
+
+export const Page = () => {
+  return <Component>Hello world</Component>;
+};
+```
+
 ## Class name function
 
 Create CSS class names with possibility to add scope and media queries etc. Function `className` is quite similar to `styled` but does not allow extending components or classes.
 
 ```ts
-// styles/my-class.css.ts
+// /components/my-class.css.ts
 import { className } from '@salty-css/react/class-name';
 
 // Define a CSS class with className function. First and only argument is the object containing the styles and other options
 export const myClass = className({
-  className: 'wrapper', // Define custom class name that will be included to the scope
+  className: 'wrapper', // Define optional custom class name that will be included to the scope
   base: {
     // 👉 Add your CSS-in-JS base styles here! 👈
   },
 });
+```
+
+Example usage:
+
+```tsx
+import { myClass } from './my-class.css';
+
+export const Page = () => {
+  return <div className={myClass}>Hello world</div>;
+};
 ```
 
 ## Global styles
@@ -178,7 +198,7 @@ export default defineVariables({
   },
 
   /* 
-  Conditional variables are used to define styles that depend on a class name (e.g. <div className="theme-dark">). or data-attribute (e.g. <div data-theme="dark">).
+  Conditional variables are used to define styles that depend on a class name (e.g. <div className="theme-dark">). or data-attribute (e.g. <div data-theme="dark">). Names for these variables will be "{theme.backgroundColor}" and "{theme.textColor}".
   */
   conditional: {
     theme: {
@@ -191,6 +211,21 @@ export default defineVariables({
         textColor: '{colors.dark}',
       },
     },
+  },
+});
+```
+
+Example usage:
+
+```ts
+styled('span', {
+  base: {
+    // Use of static font family variable
+    fontFamily: '{colors.fontFamily.heading}',
+    // Use of responsive font size variable
+    fontSize: '{fontSize.heading.regular}',
+    // Use of conditional theme text color variable
+    color: '{theme.textColor}',
   },
 });
 ```
