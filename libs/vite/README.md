@@ -4,7 +4,7 @@
 
 Is there anything saltier than CSS in frontend web development? Salty CSS is built to provide better developer experience for developers looking for performant and feature rich CSS-in-JS solutions.
 
-[Get started](#get-started) | [API](#api) | [Website](https://salty-css.dev/) | [GitHub](https://github.com/margarita-form/salty-css) | [NPM](https://www.npmjs.com/package/@salty-css/core)
+[Get started](#get-started) | [API](#api) | [Discord](https://discord.gg/R6kr4KxMhP) | [Website](https://salty-css.dev/) | [GitHub](https://github.com/margarita-form/salty-css) | [NPM](https://www.npmjs.com/package/@salty-css/core)
 
 ## Features
 
@@ -16,7 +16,13 @@ Is there anything saltier than CSS in frontend web development? Salty CSS is bui
 
 ## Get started
 
-Fastest way to get started with any framework is `npx salty-css init [directory]` command
+Fastest way to get started with any framework is
+
+```bash
+npx salty-css init [directory]
+```
+
+Other guides:
 
 - Next.js → [Next.js guide](#nextjs) + [Next.js example app](https://github.com/margarita-form/salty-css-website)
 - React + Vite → [React + Vite guide](#react--vite) + [React example code](#code-examples)
