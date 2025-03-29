@@ -1,3 +1,5 @@
+[Get started](#get-started) | [API](#api) | [Website](https://salty-css.dev/) | [GitHub](https://github.com/margarita-form/salty-css) | [NPM](https://www.npmjs.com/package/@salty-css/core)
+
 ![Salty CSS Banner](https://salty-css.dev/assets/banners/dvd.svg)
 
 # Salty CSS - CSS-in-JS library that is kinda sweet
@@ -32,7 +34,7 @@ Fastest way to get started with any framework is `npx salty-css init [directory]
 2. Salty CSS components created with styled function can extend non Salty CSS components (`export const CustomLink = styled(NextJSLink, { ... });`) but those components must take in `className` prop for styles to apply.
 3. Among common types like `string` and `number`, CSS-in-JS properties in Salty CSS do support `functions` and `promises` as values (`styled('span', { base: { color: async () => 'red' } });`) but running asynchronous tasks or importing heavy 3rd party libraries into `*.css.ts` or `*.css.tsx` files can cause longer build times.
 
-## Functions
+## API
 
 ### Styling
 
