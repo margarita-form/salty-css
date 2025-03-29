@@ -218,7 +218,16 @@ export default defineVariables({
 Example usage:
 
 ```ts
-styled('span', { base: { fontFamily: '{colors.fontFamily.heading}', fontSize: '{fontSize.heading.regular}', color: '{theme.textColor}' } });
+styled('span', {
+  base: {
+    // Use of static font family variable
+    fontFamily: '{colors.fontFamily.heading}',
+    // Use of responsive font size variable
+    fontSize: '{fontSize.heading.regular}',
+    // Use of conditional theme text color variable
+    color: '{theme.textColor}',
+  },
+});
 ```
 
 ## Media queries
