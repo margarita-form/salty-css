@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as esbuild from 'esbuild';
 import { execSync } from 'child_process';
@@ -479,7 +480,9 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
     await Promise.all(
       [...files].map(async (src) => {
         const { contents } = await compileSaltyFile(dirname, src, destDir);
-        Object.entries(contents).forEach(([name, value]) => {
+        for (let [name, value] of Object.entries(contents)) {
+          if (value instanceof Promise) value = await value;
+
           if (value.isKeyframes) {
             generationResults.keyframes.push({
               value: value as any,
@@ -499,7 +502,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
               name,
             });
           }
-        });
+        }
       })
     );
 

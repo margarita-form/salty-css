@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CachedConfig, SaltyConfig } from '../types/config-types';
 import { CompoundVariant } from '../types';
 import { parseValueModifiers } from './parse-modifiers';
@@ -26,15 +27,15 @@ export const parseStyles = async <T extends object>(
   const cssStyles = new Set<string>();
   const entries = Object.entries(styles);
 
-  const promises = entries.map(async ([key, value]) => {
+  const processStyleEntry = async ([key, value]: [key: string, any]) => {
     const _key = key.trim();
     const propertyName = propertyNameCheck(_key);
 
     const toString = (val: unknown, eol = ';') => `${propertyName}:${val}${eol}`;
     const context = { scope: currentScope, config }; // todo, add typing and add custom context options
 
-    if (typeof value === 'function') value = value(context);
-    if (value instanceof Promise) value = await value;
+    if (typeof value === 'function') return processStyleEntry([key, value(context)]);
+    if (value instanceof Promise) return processStyleEntry([key, await value]);
 
     if (config?.templates && config.templatePaths[_key]) {
       try {
@@ -124,7 +125,9 @@ export const parseStyles = async <T extends object>(
     }
 
     return toString(value);
-  });
+  };
+
+  const promises = entries.map(processStyleEntry);
 
   const { modifiers } = config || {};
 
