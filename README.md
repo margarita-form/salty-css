@@ -32,15 +32,35 @@ Fastest way to get started with any framework is `npx salty-css init [directory]
 2. Salty CSS components created with styled function can extend non Salty CSS components (`export const CustomLink = styled(NextJSLink, { ... });`) but those components must take in `className` prop for styles to apply.
 3. Among common types like `string` and `number`, CSS-in-JS properties in Salty CSS do support `functions` and `promises` as values (`styled('span', { base: { color: async () => 'red' } });`) but running asynchronous tasks or importing heavy 3rd party libraries into `*.css.ts` or `*.css.tsx` files can cause longer build times.
 
-## Salty CSS styled function
+## Functions
+
+### Styling
+
+- [styled](#styled-function) (react only) - create React components that can be used anywhere easily
+- [className](#class-name-function) (framework agnostic) - create a CSS class string that can be applied to any element
+
+### Global
+
+- [defineGlobalStyles](#global-styles) - set global styles like `html` and `body`
+- [defineVariables](#variables) - create CSS variables (tokens) that can be used in any styling function
+- [defineMediaQuery](#media-queries) - create CSS media queries and use them in any styling function
+- [defineTemplates](#templates) - create reusable templates that can be applied when same styles are used over and over again
+- [keyframes](#keyframes-animations) - create CSS keyframes animation that can be used and imported in any styling function
+
+### Helpers & utility
+
+- [defineViewportClamp](#viewport-clamp) - create CSS clamp functions that are based on user's viewport and can calculate relative values easily
+- [color](#color-function) - transform any valid color code or variable to be darker, lighter etc. easily (uses [color library by Qix-](https://github.com/Qix-/color))
+
+## Styled function
 
 Styled function is the main way to use Salty CSS within React. Styled function creates a React component that then can be used anywhere in your app. All styled functions must be created in `.css.ts` or `.css.tsx` files
 
 ```ts
-// components/wrapper.css.ts
+// components/my-component.css.ts
 import { styled } from '@salty-css/react/styled';
 
-// Define a component with styled function. First argument is the component name or existing component to extend and second argument is the object containing the styles and other options
+// Define a component with a styled function. First argument is the component name or existing component to extend and second argument is the object containing the styles and other options
 export const Component = styled('div', {
   className: 'wrapper', // Define custom class name that will be included for this component
   element: 'section', // Define the html element that will be rendered for this component, overrides the first 'div' argument
@@ -61,6 +81,251 @@ export const Component = styled('div', {
   },
   passProps: true, // Pass variant props to the rendered element / parent component (default: false)
 });
+```
+
+## Class name function
+
+Create CSS class names with possibility to add scope and media queries etc. Function `className` is quite similar to `styled` but does not allow extending components or classes.
+
+```ts
+// styles/my-class.css.ts
+import { className } from '@salty-css/react/class-name';
+
+// Define a CSS class with className function. First and only argument is the object containing the styles and other options
+export const myClass = className({
+  className: 'wrapper', // Define custom class name that will be included to the scope
+  base: {
+    // 👉 Add your CSS-in-JS base styles here! 👈
+  },
+});
+```
+
+## Global styles
+
+```ts
+// /styles/global.css.ts
+import { defineGlobalStyles } from '@salty-css/core/factories';
+
+export default defineGlobalStyles({
+  html: {
+    fontFamily: 'Arial, sans-serif',
+  },
+  body: {
+    backgroundColor: '#fff',
+    margin: 0,
+  },
+  // Add more global styles as needed
+});
+```
+
+## Variables
+
+```ts
+// /styles/variables.css.ts
+import { defineVariables } from '@salty-css/core/factories';
+
+export default defineVariables({
+  /*
+  Define static variable token (like colors, font sizes, etc.). and use them in your styles (e.g. color: '{colors.brand.highlight}').
+  Variables can be nested (colors.brand.main) and can reference other variables.
+  */
+  colors: {
+    dark: '#111',
+    light: '#fefefe',
+    brand: {
+      main: '#0070f3',
+      highlight: '#ff4081',
+    },
+  },
+  fontFamily: {
+    heading: 'Arial, sans-serif',
+    body: 'Georgia, serif',
+  },
+
+  /* 
+  Define variables that are responsive to a media query (defined in media.css.ts) asn use them in your styles as normal (e.g. font-size: '{fontSize.heading.regular}').
+
+  These variables will be automatically updated when the media query is matched. Base values are used when no media query is matched.
+  */
+  responsive: {
+    base: {
+      fontSize: {
+        heading: {
+          small: '32px',
+          regular: '48px',
+          large: '64px',
+        },
+        body: {
+          small: '16px',
+          regular: '20px',
+          large: '24px',
+        },
+      },
+    },
+    '@largeMobileDown': {
+      fontSize: {
+        heading: {
+          small: '20px',
+          regular: '32px',
+          large: '48px',
+        },
+        body: {
+          small: '14px',
+          regular: '16px',
+          large: '20px',
+        },
+      },
+    },
+  },
+
+  /* 
+  Conditional variables are used to define styles that depend on a class name (e.g. <div className="theme-dark">). or data-attribute (e.g. <div data-theme="dark">).
+  */
+  conditional: {
+    theme: {
+      dark: {
+        backgroundColor: '{colors.dark}',
+        textColor: '{colors.light}',
+      },
+      light: {
+        backgroundColor: '{colors.light}',
+        textColor: '{colors.dark}',
+      },
+    },
+  },
+});
+```
+
+## Media queries
+
+Create global media queries that can be either used directly as a scope (e.g. `'@MEDIA_QUERY_NAME': { color: 'blue' }`) or imported to be used in JS.
+
+```ts
+// /styles/media.css.ts
+import { defineMediaQuery } from '@salty-css/react/config';
+
+export const largePortraitUp = defineMediaQuery((media) => media.minWidth(600));
+export const largeMobileDown = defineMediaQuery((media) => media.maxWidth(600));
+```
+
+Example usage:
+
+```ts
+styled('span', { base: { fontSize: '64px', '@largeMobileDown': { fontSize: '32px' } } });
+```
+
+## Templates
+
+With templates you can create reusable styles that can be used in any styles function. Templates can be static (all values defined in the template) or functions (parameters can be passed to define values). Templates can be used in styles by using template's name (e.g. textStyle) as property name and for static a key as the value for functions any supported parameter value can be used as the value.
+
+```ts
+// /styles/templates.css.ts
+import { defineTemplates } from '@salty-css/core/factories';
+
+export default defineTemplates({
+  // Static templates for text styles.
+  textStyle: {
+    headline: {
+      small: {
+        fontSize: '{fontSize.heading.small}',
+      },
+      regular: {
+        fontSize: '{fontSize.heading.regular}',
+      },
+      large: {
+        fontSize: '{fontSize.heading.large}',
+      },
+    },
+    body: {
+      small: {
+        fontSize: '{fontSize.body.small}',
+        lineHeight: '1.5em',
+      },
+      regular: {
+        fontSize: '{fontSize.body.regular}',
+        lineHeight: '1.33em',
+      },
+    },
+  },
+  // Dynamic function templates for card styles.
+  card: (value: string) => {
+    return {
+      padding: value,
+      borderRadius: '8px',
+      boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+    };
+  },
+});
+```
+
+Example usage:
+
+```ts
+styled('div', { base: { textStyle: 'headline.large', card: '20px' } });
+```
+
+## Keyframes animations
+
+```ts
+// /styles/animations.css.ts
+import { keyframes } from '@salty-css/react/keyframes';
+
+export const fadeIn = keyframes({
+  // Name of the animation in final CSS
+  animationName: 'fadeIn',
+  // Add `from` or `0%` to the component's css making it the initial state.
+  appendInitialStyles: true,
+  // CSS animation default params used with the value
+  params: {
+    delay: '250ms',
+    fillMode: 'forwards',
+  },
+  // Rest is animation timeline
+  from: {
+    opacity: 0,
+  },
+  to: {
+    opacity: 1,
+  },
+});
+```
+
+Example usage:
+
+```ts
+import { fadeIn } from 'path-to-animations.css.ts';
+
+export const Wrapper = styled('div', { base: { animation: fadeIn } });
+```
+
+## Viewport clamp
+
+Create a CSS clamp function based on screen sizes. Useful when aiming to create font sizes or spacings that scale with the screen.
+
+```ts
+// /styles/clamp.css.ts
+import { defineViewportClamp } from '@salty-css/react/helpers';
+
+export const fhdClamp = defineViewportClamp({ screenSize: 1920 });
+export const mobileClamp = defineViewportClamp({ screenSize: 640 });
+```
+
+Example usage:
+
+```ts
+styled('span', { base: { fontSize: fhdClamp(96), '@largeMobileDown': { fontSize: mobileClamp(48) } } });
+```
+
+## Color function
+
+Modify any color easily, add opacity, darken...
+
+Example usage:
+
+```ts
+import { color } from '@salty-css/core/helpers';
+
+export const Wrapper = styled('span', { base: { backgroundColor: color('#000').alpha(0.5) } });
 ```
 
 ## Salty CSS CLI
