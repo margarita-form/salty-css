@@ -144,7 +144,6 @@ export default defineVariables({
 
   /* 
   Define variables that are responsive to a media query (defined in media.css.ts) asn use them in your styles as normal (e.g. font-size: '{fontSize.heading.regular}').
-
   These variables will be automatically updated when the media query is matched. Base values are used when no media query is matched.
   */
   responsive: {
