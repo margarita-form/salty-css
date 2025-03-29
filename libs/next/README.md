@@ -1,10 +1,10 @@
-[Get started](#get-started) | [API](#api) | [Website](https://salty-css.dev/) | [GitHub](https://github.com/margarita-form/salty-css) | [NPM](https://www.npmjs.com/package/@salty-css/core)
-
 ![Salty CSS Banner](https://salty-css.dev/assets/banners/dvd.svg)
 
 # Salty CSS - CSS-in-JS library that is kinda sweet
 
 Is there anything saltier than CSS in frontend web development? Salty CSS is built to provide better developer experience for developers looking for performant and feature rich CSS-in-JS solutions.
+
+[Get started](#get-started) | [API](#api) | [Website](https://salty-css.dev/) | [GitHub](https://github.com/margarita-form/salty-css) | [NPM](https://www.npmjs.com/package/@salty-css/core)
 
 ## Features
 
@@ -36,12 +36,12 @@ Fastest way to get started with any framework is `npx salty-css init [directory]
 
 ## API
 
-### Styling
+### Component styling
 
 - [styled](#styled-function) (react only) - create React components that can be used anywhere easily
 - [className](#class-name-function) (framework agnostic) - create a CSS class string that can be applied to any element
 
-### Global
+### Global styling
 
 - [defineGlobalStyles](#global-styles) - set global styles like `html` and `body`
 - [defineVariables](#variables) - create CSS variables (tokens) that can be used in any styling function
@@ -49,7 +49,7 @@ Fastest way to get started with any framework is `npx salty-css init [directory]
 - [defineTemplates](#templates) - create reusable templates that can be applied when same styles are used over and over again
 - [keyframes](#keyframes-animations) - create CSS keyframes animation that can be used and imported in any styling function
 
-### Helpers & utility
+### Styling helpers & utility
 
 - [defineViewportClamp](#viewport-clamp) - create CSS clamp functions that are based on user's viewport and can calculate relative values easily
 - [color](#color-function) - transform any valid color code or variable to be darker, lighter etc. easily (uses [color library by Qix-](https://github.com/Qix-/color))
