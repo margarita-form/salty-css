@@ -7,7 +7,7 @@ Is there anything saltier than CSS in frontend web development? Salty CSS is bui
 ## Features
 
 - Build time compilation to achieve awesome runtime performance and minimal size
-- Next.js, React Server Components, Vite and Webpack support
+- Next.js, React Server Components, Astro, Vite and Webpack support
 - Type safety with out of the box TypeScript and ESLint plugin
 - Advanced CSS variables configuration to allow smooth token usage
 - Style templates to create reusable styles easily
@@ -26,7 +26,15 @@ Fastest way to get started with any framework is `npx salty-css init [directory]
 - Build: `npx salty-css build [directory]`
 - Update Salty CSS packages: `npx salty-css up`
 
+## Good to know
+
+1. All Salty CSS functions (`styled`, `classNames`, `keyframes`, etc.) must be created in `*.css.ts` or `*.css.tsx` files. This is to ensure best build performance.
+2. Salty CSS components created with styled function can extend non Salty CSS components (`export const CustomLink = styled(NextJSLink, { ... });`) but those components must take in `className` prop for styles to apply.
+3. mong common types like `string` and `number`, CSS-in-JS properties in Salty CSS do support `functions` and `promises` as values (`styled('span', { base: { color: async () => 'red' } });`) but running asynchronous tasks or importing heavy 3rd party libraries into `*.css.ts` or `*.css.tsx` files can cause longer build times.
+
 ## Salty CSS styled function
+
+Styled function is the main way to use Salty CSS within React. Styled function creates a React component that then can be used anywhere in your app. All styled functions must be created in `.css.ts` or `.css.tsx` files
 
 ```ts
 // components/wrapper.css.ts
