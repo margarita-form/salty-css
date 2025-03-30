@@ -740,10 +740,6 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
     if (validFile) {
       const original = readFileSync(file, 'utf8');
 
-      const copy = original.replace(/^(?!export\s)const\s.*/gm, (original) => `export ${original}`);
-
-      if (copy !== original) await writeFile(file, original);
-
       const config = await getConfig(dirname);
       const { contents } = await compileSaltyFile(dirname, file, destDir);
 
