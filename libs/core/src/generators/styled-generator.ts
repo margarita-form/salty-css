@@ -19,6 +19,7 @@ export class StyledGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
   }
 
   override get priority(): number {
+    if (this.params.priority) return this.params.priority;
     if (typeof this.tagName === 'function' || typeof this.tagName === 'object') {
       const prev = this.tagName.generator?.priority || 0;
       return prev + 1;
