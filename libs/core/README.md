@@ -88,6 +88,7 @@ export const Component = styled('div', {
     // Add additional default props for the component (eg, id and other html element attributes)
   },
   passProps: true, // Pass variant props to the rendered element / parent component (default: false)
+  priority: 1, // Override automatic priotity layer with a custom value (0-8), higher is considered more important
 });
 ```
 
