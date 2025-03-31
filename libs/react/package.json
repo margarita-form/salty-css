@@ -44,6 +44,10 @@
       "import": "./class-name.js",
       "require": "./class-name.cjs"
     },
+    "./class-name-client": {
+      "import": "./class-name-client.js",
+      "require": "./class-name-client.cjs"
+    },
     "./keyframes": {
       "import": "./keyframes.js",
       "require": "./keyframes.cjs"

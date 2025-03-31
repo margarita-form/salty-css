@@ -6,7 +6,7 @@ import { toHash } from '../util/to-hash';
 import { join, parse as parsePath } from 'path';
 import { statSync, existsSync, mkdirSync, readdirSync, writeFileSync, readFileSync } from 'fs';
 import { dashCase } from '../util/dash-case';
-import { readFile, writeFile } from 'fs/promises';
+import { readFile } from 'fs/promises';
 import { parseAndJoinStyles } from '../parsers/parse-styles';
 import { getTemplateTypes, parseTemplates } from '../parsers/parse-templates';
 import { CachedConfig, CssConditionalVariables, CssResponsiveVariables, CssTemplates, SaltyConfig, SaltyVariables } from '../config';
@@ -20,6 +20,7 @@ import { mergeFactories, mergeObjects } from '../css';
 import { defineTemplates, GlobalStylesFactory, TemplatesFactory, VariablesFactory } from '../factories';
 import { StyledGenerator, ClassNameGenerator } from '../generators';
 import { StylesGenerator } from '../generators/styles-generator';
+import { Project } from 'ts-morph';
 
 interface GeneratorResult<V extends StylesGenerator> {
   generator: V;
@@ -744,53 +745,43 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
       const { contents } = await compileSaltyFile(dirname, file, destDir);
 
       let current = original;
+
       Object.entries(contents).forEach(([name, value]) => {
         if (value.isKeyframes) return;
-        if (!value.generator) return;
 
+        const project = new Project({});
+        const tree = project.createSourceFile('temp.ts', current);
+        const declaration = tree.getVariableDeclarationOrThrow(name);
+
+        if (!value.generator) return;
         const generator = value.generator._withBuildContext({
           callerName: name,
           isProduction: prod,
           config,
         });
 
-        const regexpResult = new RegExp(`\\s${name}[=\\s]+[^()]+styled\\(([^,]+),`, 'g').exec(original);
-        if (!regexpResult) return console.error('Could not find the original declaration');
-        const tagName = regexpResult.at(1)?.trim();
+        const currentStart = declaration.getStart();
+        const currentEnd = declaration.getEnd();
+        const range = current.slice(currentStart, currentEnd);
 
-        const matches = new RegExp(`\\s${name}[=\\s]+styled\\(`, 'g').exec(current);
-        if (!matches) return console.error('Could not find the original declaration');
-        const { index: rangeStart } = matches;
+        if (value.isClassName) {
+          const copy = current;
+          const clientVersion = ` ${name} = className("${generator.classNames}")`;
+          current = current.replace(range, clientVersion);
 
-        let forceStop = false;
-        const timeout = setTimeout(() => (forceStop = true), 5000);
-
-        let currentIndex = 0;
-        let endBracketFound = false;
-        let innerBracketCount = 0;
-
-        // Find the end of the styled call
-        while (!endBracketFound && !forceStop) {
-          const char = current[rangeStart + currentIndex];
-          if (char === '(') innerBracketCount++;
-          if (char === ')') innerBracketCount--;
-          if (innerBracketCount === 0 && char === ')') endBracketFound = true;
-          if (currentIndex > current.length) forceStop = true;
-          currentIndex++;
+          if (copy === current) console.error('Minimize file failed to change content', { name });
         }
 
-        if (!forceStop) clearTimeout(timeout);
-        else throw new Error('Failed to find the end of the styled call and timed out');
+        if (range.includes('styled')) {
+          const tagName = /styled\(([^,]+),/.exec(range)?.at(1)?.trim();
 
-        const rangeEnd = rangeStart + currentIndex;
-        const range = current.slice(rangeStart, rangeEnd);
+          // Replace the styled call with the client version
+          const copy = current;
+          const clientVersion = ` ${name} = styled(${tagName}, "${generator.classNames}", ${JSON.stringify(generator.clientProps)})`;
+          current = current.replace(range, clientVersion);
 
-        // Replace the styled call with the client version
-        const copy = current;
-        const clientVersion = ` ${name} = styled(${tagName}, "${generator.classNames}", ${JSON.stringify(generator.clientProps)});`;
-        current = current.replace(range, clientVersion);
-
-        if (copy === current) console.error('Minimize file failed to change content', { name, tagName });
+          if (copy === current) console.error('Minimize file failed to change content', { name, tagName });
+        }
       });
 
       if (config.importStrategy === 'component') {
@@ -800,6 +791,9 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
         const cssFileName = `f_${dasherized}-${fileHash}.css`;
         current = `import '../../saltygen/css/${cssFileName}';\n${current}`;
       }
+
+      current = current.replace(`@salty-css/react/class-name`, `@salty-css/react/class-name-client`);
+
       current = current.replace(`{ styled }`, `{ styledClient as styled }`);
       current = current.replace(`@salty-css/react/styled`, `@salty-css/react/styled-client`);
 
