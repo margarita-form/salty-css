@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/core",
-  "version": "0.0.1-alpha.228",
+  "version": "0.0.1-alpha.229",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -35,8 +35,8 @@
     "esbuild": ">=0.21.x",
     "ora": ">=8.x",
     "react": ">=18.x || >=19.x",
-    "winston": ">=3.x",
-    "typescript": ">=5.x"
+    "typescript": ">=5.x",
+    "winston": ">=3.x"
   },
   "exports": {
     "./bin/main": {
