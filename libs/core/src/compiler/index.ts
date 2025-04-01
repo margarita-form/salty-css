@@ -20,7 +20,7 @@ import { mergeFactories, mergeObjects } from '../css';
 import { defineTemplates, GlobalStylesFactory, TemplatesFactory, VariablesFactory } from '../factories';
 import { StyledGenerator, ClassNameGenerator } from '../generators';
 import { StylesGenerator } from '../generators/styles-generator';
-import { Project } from 'ts-morph';
+import { getFunctionRange } from './get-function-range';
 
 interface GeneratorResult<V extends StylesGenerator> {
   generator: V;
@@ -746,23 +746,18 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
 
       let current = original;
 
-      Object.entries(contents).forEach(([name, value]) => {
-        if (value.isKeyframes) return;
+      for (const [name, value] of Object.entries(contents)) {
+        if (value.isKeyframes) continue;
 
-        const project = new Project({});
-        const tree = project.createSourceFile('temp.ts', current);
-        const declaration = tree.getVariableDeclarationOrThrow(name);
-
-        if (!value.generator) return;
+        if (!value.generator) continue;
         const generator = value.generator._withBuildContext({
           callerName: name,
           isProduction: prod,
           config,
         });
 
-        const currentStart = declaration.getStart();
-        const currentEnd = declaration.getEnd();
-        const range = current.slice(currentStart, currentEnd);
+        const [start, end] = await getFunctionRange(current, name);
+        const range = current.slice(start, end);
 
         if (value.isClassName) {
           const copy = current;
@@ -782,7 +777,7 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
 
           if (copy === current) console.error('Minimize file failed to change content', { name, tagName });
         }
-      });
+      }
 
       if (config.importStrategy === 'component') {
         const fileHash = toHash(file, 6);

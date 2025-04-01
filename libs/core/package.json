@@ -35,8 +35,8 @@
     "esbuild": ">=0.21.x",
     "ora": ">=8.x",
     "react": ">=18.x || >=19.x",
-    "ts-morph": ">=25.0.1",
-    "winston": ">=3.x"
+    "winston": ">=3.x",
+    "typescript": ">=5.x"
   },
   "exports": {
     "./bin/main": {
