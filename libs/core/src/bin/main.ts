@@ -3,13 +3,14 @@ import { existsSync } from 'fs';
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join, relative, parse as parsePath, format as formatPath } from 'path';
 import { render } from 'ejs';
-import { generateCss } from '../compiler';
+import { generateCss, generateFile, isSaltyFile } from '../compiler';
 import { pascalCase } from '../util';
 import { logError, logger } from './logger';
 import { formatWithPrettier } from './prettier';
 import { npmInstall } from './bin-util';
-import { PathLike } from 'fs';
+import { PathLike, watch as watchChanges } from 'fs';
 import { RCFile } from '../types/cli-types';
+import { checkShouldRestart } from '../server';
 
 export async function main() {
   const program = new Command();
@@ -392,6 +393,7 @@ export async function main() {
 
   interface BuildOptions {
     dir: string;
+    watch: boolean;
   }
 
   program
@@ -399,12 +401,25 @@ export async function main() {
     .alias('b')
     .description('Build the Salty-CSS project.')
     .option('-d, --dir <dir>', 'Project directory to build the project in.')
+    .option('--watch', 'Watch for changes and rebuild the project.')
     .action(async function (this: Command, _dir = defaultProject) {
       logger.info('Building the Salty-CSS project...');
-      const { dir = _dir } = this.opts<BuildOptions>();
+      const { dir = _dir, watch } = this.opts<BuildOptions>();
       if (!dir) return logError('Project directory must be provided. Add it as the first argument after build command or use the --dir option.');
       const projectDir = resolveProjectDir(dir);
       await generateCss(projectDir);
+      if (watch) {
+        logger.info('Watching for changes in the project directory...');
+        watchChanges(projectDir, { recursive: true }, async (event, filePath) => {
+          const shouldRestart = await checkShouldRestart(filePath);
+          if (shouldRestart) {
+            await generateCss(projectDir, false, false);
+          } else {
+            const saltyFile = isSaltyFile(filePath);
+            if (saltyFile) await generateFile(projectDir, filePath);
+          }
+        });
+      }
     });
 
   /**
