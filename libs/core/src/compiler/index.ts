@@ -156,46 +156,60 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
   const variableTokens = new Set<string>();
 
   type Variables = string | undefined;
-  const parseVariables = <T extends object>(obj: T, path: PropertyKey[] = []): Variables[] => {
+  const parseVariables = async <T extends object>(obj: T, path: PropertyKey[] = []): Promise<Variables[]> => {
     if (!obj) return [];
-    return Object.entries(obj).flatMap(([key, value]): Variables | Variables[] => {
-      if (!value) return undefined;
-      if (typeof value === 'object') return parseVariables(value, [...path, key]);
+    const promises = Object.entries(obj).map(async ([key, value]): Promise<Variables | Variables[]> => {
+      const parseVariable = async (value: unknown) => {
+        if (!value) return undefined;
+        if (value instanceof Promise) return await parseVariable(await value);
+        if (typeof value === 'function') return await parseVariable(await value());
+        if (typeof value === 'object') return await parseVariables(value, [...path, key]);
 
-      const dottedKey = dotCase(key);
-      const dashedKey = dashCase(key);
+        const dottedKey = dotCase(key);
+        const dashedKey = dashCase(key);
 
-      const tsName = [...path, dottedKey].join('.');
-      variableTokens.add(`"${tsName}"`);
+        const tsName = [...path, dottedKey].join('.');
+        variableTokens.add(`"${tsName}"`);
 
-      const cssName = [...path.map(dashCase), dashedKey].join('-');
-      const result = parseVariableTokens(value);
-      if (!result) return `--${cssName}: ${value};`;
-      return `--${cssName}: ${result.transformed};`;
+        const cssName = [...path.map(dashCase), dashedKey].join('-');
+        const result = parseVariableTokens(value);
+        if (!result) return `--${cssName}: ${value};`;
+        return `--${cssName}: ${result.transformed};`;
+      };
+      return await parseVariable(value);
     });
+
+    const results = await Promise.all(promises);
+    return results.flat();
   };
 
-  const parseResponsiveVariables = <T extends CssResponsiveVariables>(obj: T): Variables[] => {
+  const parseResponsiveVariables = async <T extends CssResponsiveVariables>(obj: T): Promise<Variables[]> => {
     if (!obj) return [];
 
-    return Object.entries(obj).flatMap(([mediaQuery, values]): Variables | Variables[] => {
-      const variables = parseVariables(values);
+    const promises = Object.entries(obj).map(async ([mediaQuery, values]): Promise<Variables | Variables[]> => {
+      const variables = await parseVariables(values);
       if (mediaQuery === 'base') return variables.join('');
       return `${mediaQuery} { ${variables.join('')} }`;
     });
+    const results = await Promise.all(promises);
+    return results.flat();
   };
 
-  const parseConditionalVariables = <T extends CssConditionalVariables>(obj: T): Variables[] => {
+  const parseConditionalVariables = async <T extends CssConditionalVariables>(obj: T): Promise<Variables[]> => {
     if (!obj) return [];
 
-    return Object.entries(obj).flatMap(([property, conditions]): Variables | Variables[] => {
-      return Object.entries(conditions).flatMap(([condition, values]): Variables | Variables[] => {
-        const variables = parseVariables(values, [property]);
+    const promises = Object.entries(obj).map(async ([property, conditions]): Promise<Variables | Variables[]> => {
+      const promises = Object.entries(conditions).map(async ([condition, values]): Promise<Variables | Variables[]> => {
+        const variables = await parseVariables(values, [property]);
         const conditionScope = `.${property}-${condition}, [data-${property}="${condition}"]`;
         const combined = variables.join('');
         return `${conditionScope} { ${combined} }`;
       });
+      const result = await Promise.all(promises);
+      return result.flat();
     });
+    const results = await Promise.all(promises);
+    return results.flat();
   };
 
   const getStaticVariables = (variables: SaltyVariables): Record<string, any> => {
@@ -210,11 +224,11 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
   };
 
   const _staticVariables = mergeObjects(getStaticVariables(config.variables), getGeneratedVariables('static'));
-  const staticVariables = parseVariables(_staticVariables);
+  const staticVariables = await parseVariables(_staticVariables);
   const _responsiveVariables = mergeObjects<CssResponsiveVariables>(config.variables?.responsive, getGeneratedVariables('responsive'));
-  const responsiveVariables = parseResponsiveVariables(_responsiveVariables);
+  const responsiveVariables = await parseResponsiveVariables(_responsiveVariables);
   const _conditionalVariables = mergeObjects(config.variables?.conditional, getGeneratedVariables('conditional'));
-  const conditionalVariables = parseConditionalVariables(_conditionalVariables);
+  const conditionalVariables = await parseConditionalVariables(_conditionalVariables);
 
   const variablesPath = join(destDir, 'css/_variables.css');
   const variablesCss = `:root { ${staticVariables.join('')} ${responsiveVariables.join('')} } ${conditionalVariables.join('')}`;
