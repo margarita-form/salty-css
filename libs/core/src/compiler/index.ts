@@ -152,6 +152,11 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
   // Cache the config content
   const configCacheContent = { ...config } as CachedConfig;
 
+  // Generate media query helpers
+  const { mediaQueries } = generationResults;
+  configCacheContent.mediaQueries = Object.fromEntries(mediaQueries.map(([name, value]) => [`@${name}`, value]));
+  const mediaQueryKeys = mediaQueries.map(([name]) => `'@${name}'`).join(' | ');
+
   // Generate variables css file
   const variableTokens = new Set<string>();
 
@@ -189,6 +194,10 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
     const promises = Object.entries(obj).map(async ([mediaQuery, values]): Promise<Variables | Variables[]> => {
       const variables = await parseVariables(values);
       if (mediaQuery === 'base') return variables.join('');
+      if (configCacheContent.mediaQueries[mediaQuery]) {
+        const mediaQueryValue = configCacheContent.mediaQueries[mediaQuery];
+        return `${mediaQueryValue} { ${variables.join('')} }`;
+      }
       return `${mediaQuery} { ${variables.join('')} }`;
     });
     const results = await Promise.all(promises);
@@ -270,11 +279,6 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
   const templateFactories = mergeFactories(generationResults.templates, configTemplateFactories);
 
   configCacheContent.templatePaths = Object.fromEntries(Object.entries(templateFactories).map(([key, faktory]) => [key, faktory._path]));
-
-  // Generate media query helpers
-  const { mediaQueries } = generationResults;
-  configCacheContent.mediaQueries = Object.fromEntries(mediaQueries.map(([name, value]) => [`@${name}`, value]));
-  const mediaQueryKeys = mediaQueries.map(([name]) => `'@${name}'`).join(' | ');
 
   // Generate types
 
