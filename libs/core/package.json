@@ -32,7 +32,7 @@
     "commander": ">=12.x",
     "csstype": "^3.1.x",
     "ejs": ">=3.x",
-    "esbuild": ">=0.21.x",
+    "esbuild": ">=0.25.x",
     "ora": ">=8.x",
     "react": ">=18.x || >=19.x",
     "typescript": ">=5.x",
