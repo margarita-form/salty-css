@@ -428,7 +428,13 @@ And note: steps 2 & 3 are just to show how get new components up and running, st
 
 And note: steps 2 & 3 are just to show how get new components up and running, step 1 does all of the important stuff 🤯
 
-#### Manual configuration
+### Test it out
+
+Check out React + Vite + Salty CSS demo repository at https://github.com/margarita-form/salty-css-react-vite-demo or view it in CodeSandbox:
+
+[![Edit margarita-form/salty-css-react-vite-demo/main](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/github/margarita-form/salty-css-react-vite-demo/main?import=true&embed=1)
+
+### Manual configuration
 
 1. For Vite support install `npm i @salty-css/vite @salty-css/core`
 2. In `vite.config` add import for salty plugin `import { saltyPlugin } from '@salty-css/vite';` and then add `saltyPlugin(__dirname)` to your vite configuration plugins
