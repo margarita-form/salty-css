@@ -24,9 +24,9 @@ export const saltyPlugin = (dir: string): PluginOption => {
       if (shouldRestart) server.restart();
     },
     watchChange: {
-      handler: async (filePath: string) => {
+      handler: async (filePath, change) => {
         const saltyFile = isSaltyFile(filePath);
-        if (saltyFile) {
+        if (saltyFile && change.event !== 'delete') {
           const shouldRestart = await checkShouldRestart(filePath);
           if (!shouldRestart) await generateFile(dir, filePath);
         }
