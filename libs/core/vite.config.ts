@@ -45,6 +45,7 @@ export default defineConfig({
         'bin/index': 'src/bin/index.ts',
         'bin/main': 'src/bin/main.ts',
         'compiler/index': 'src/compiler/index.ts',
+        'factories/index': 'src/factories/index.ts',
         'css/index': 'src/css/index.ts',
         'css/keyframes': 'src/css/keyframes.ts',
         'css/media': 'src/css/media.ts',
