@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/core",
-  "version": "0.0.1-alpha.239",
+  "version": "0.0.1-alpha.240",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -66,6 +66,10 @@
     "./css/merge": {
       "import": "./css/merge.js",
       "require": "./css/merge.cjs"
+    },
+    "./factories": {
+      "import": "./factories/index.js",
+      "require": "./factories/index.cjs"
     },
     "./generator": {
       "import": "./generator/index.js",
