@@ -673,8 +673,7 @@ export const generateFile = async (dirname: string, file: string, prod = isProdu
           const cssPath = join(destDir, filePath);
 
           writeFileSync(cssPath, await value.css);
-
-          return;
+          continue;
         }
 
         if (value.isClassName) {
@@ -693,9 +692,10 @@ export const generateFile = async (dirname: string, file: string, prod = isProdu
           const filePath = `css/${generator.cssFileName}`;
           const cssPath = join(destDir, filePath);
           writeFileSync(cssPath, styles);
+          continue;
         }
 
-        if (!value.generator) return;
+        if (!value.generator) continue;
 
         const generator = value.generator._withBuildContext({
           callerName: name,

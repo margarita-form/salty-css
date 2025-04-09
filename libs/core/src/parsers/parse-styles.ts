@@ -77,10 +77,10 @@ export const parseStyles = async <T extends object>(
       if (_key === 'variants') {
         const variantEntries = Object.entries(value);
         for (const [prop, conditions] of variantEntries) {
-          if (!conditions) return;
+          if (!conditions) continue;
           const entries = Object.entries(conditions);
           for (const [val, styles] of entries) {
-            if (!styles) return;
+            if (!styles) continue;
             const scope = `${currentScope}.${prop}-${val}`;
             const results = await parseStyles(styles, scope, config);
             results.forEach((res) => cssStyles.add(res));
