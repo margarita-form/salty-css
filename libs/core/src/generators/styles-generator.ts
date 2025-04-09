@@ -24,7 +24,8 @@ export class StylesGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
   }
 
   get hash() {
-    return toHash(this.params.base || this.params);
+    const { base, variants, compoundVariants } = this.params;
+    return toHash({ base, variants, compoundVariants });
   }
 
   get cssClassName() {
