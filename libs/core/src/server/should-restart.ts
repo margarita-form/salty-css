@@ -12,5 +12,6 @@ export const checkShouldRestart = async (filename: string): Promise<boolean> => 
   if (!isSalty) return false;
   const contents = await readFile(filename, 'utf-8');
   if (/.+define[A-Z]\w+/.test(contents)) return true;
+  if (/.+keyframes\(.+/.test(contents)) return true;
   return false;
 };
