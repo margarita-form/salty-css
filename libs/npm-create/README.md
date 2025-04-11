@@ -64,6 +64,14 @@ To get help with problems, [Join Salty CSS Discord server](https://discord.gg/R6
 - [defineViewportClamp](#viewport-clamp) - create CSS clamp functions that are based on user's viewport and can calculate relative values easily
 - [color](#color-function) - transform any valid color code or variable to be darker, lighter etc. easily (uses [color library by Qix-](https://github.com/Qix-/color))
 
+### Salty CSS CLI
+
+In your existing repository you can use `npx salty-css [command]` to initialize a project, generate components, update related packages and build required files.
+
+- Initialize project → `npx salty-css init [directory]` - Installs required packages, detects framework in use and creates project files to the provided directory. Directory can be left blank if you want files to be created to the current directory.
+- Generate component → `npx salty-css update [version]` - Update @salty-css packages in your repository. Default version is "latest". Additional options like `--dir`, `--tag`, `--name` and `--className` are also supported.
+- Build files → `npx salty-css build [directory/filename]` - Compile Salty CSS related files in your project. This should not be needed if you are using tools like Next.js or Vite
+
 ## Styled function
 
 Styled function is the main way to use Salty CSS within React. Styled function creates a React component that then can be used anywhere in your app. All styled functions must be created in `.css.ts` or `.css.tsx` files
@@ -374,14 +382,6 @@ import { color } from '@salty-css/core/helpers';
 
 export const Wrapper = styled('span', { base: { backgroundColor: color('#000').alpha(0.5) } });
 ```
-
-## Salty CSS CLI
-
-In your existing repository you can use `npx salty-css [command]` to initialize a project, generate components, update related packages and build required files.
-
-- Initialize project → `npx salty-css init [directory]` - Installs required packages, detects framework in use and creates project files to the provided directory. Directory can be left blank if you want files to be created to the current directory.
-- Generate component → `npx salty-css update [version]` - Update @salty-css packages in your repository. Default version is "latest". Additional options like `--dir`, `--tag`, `--name` and `--className` are also supported.
-- Build files → `npx salty-css build [directory]` - Compile Salty CSS related files in your project. This should not be needed if you are using tools like Next.js or Vite
 
 ## Usage
 
