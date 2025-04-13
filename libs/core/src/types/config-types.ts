@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BaseStyles, CssStyles } from '../types';
+import { BaseStyles, CssStyles, MediaQueryStyles } from '../types';
 import { OrString } from '../types/util-types';
 
 export type GlobalStyles = Record<string, BaseStyles>;
@@ -22,7 +22,7 @@ export interface SaltyVariables {
   [key: string]: undefined | string | number | CssVariableTokensObject;
 }
 
-type CssTemplate = CssStyles | { [key: PropertyKey]: CssTemplate };
+type CssTemplate = MediaQueryStyles | CssStyles | { [key: PropertyKey]: CssTemplate };
 
 export interface CssTemplateObject {
   [key: PropertyKey]: CssTemplate;
