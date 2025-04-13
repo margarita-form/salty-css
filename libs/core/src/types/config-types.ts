@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CssProperties, CssStyles } from '../types';
+import { BaseStyles, CssStyles } from '../types';
 import { OrString } from '../types/util-types';
 
-export type GlobalStyles = Record<string, CssProperties>;
+export type GlobalStyles = Record<string, BaseStyles>;
 
 export type CssVariableTokensObject = Record<string, unknown>;
 
