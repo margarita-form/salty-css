@@ -90,11 +90,11 @@ export interface GeneratorOptions {
   priority?: number;
 }
 
-interface Base extends CssProperties, CssStyles, CssPseudos, TemplateTokens, MediaQueryStyles {}
+export interface BaseStyles extends CssProperties, CssStyles, CssPseudos, TemplateTokens, MediaQueryStyles {}
 
 type Pseudos = CSS.Pseudos | `&${CSS.Pseudos}`;
 type CssPseudos = { [P in Pseudos]?: CssStyles };
 
 export interface StyledParams extends GeneratorOptions, Variants {
-  base?: Base;
+  base?: BaseStyles;
 }
