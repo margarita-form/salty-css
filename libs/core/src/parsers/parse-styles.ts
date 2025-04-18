@@ -109,7 +109,7 @@ export const parseStyles = async <T extends object>(
         return undefined;
       }
 
-      const scope = key.includes('&') ? _key.replace('&', currentScope) : _key.startsWith(':') ? `${currentScope}${_key}` : `${currentScope} ${_key}`;
+      const scope = key.includes('&') ? _key.replaceAll('&', currentScope) : _key.startsWith(':') ? `${currentScope}${_key}` : `${currentScope} ${_key}`;
       const results = await parseStyles(value, scope, config);
       results.forEach((result) => cssStyles.add(result));
       return undefined;
