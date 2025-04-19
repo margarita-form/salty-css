@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { StylesGenerator } from './styles-generator';
 import { StyledParams, Tag } from '../types';
+import { dashCase } from '../util';
 
 export interface StyledGeneratorClientProps {
   element?: string;
@@ -45,11 +46,12 @@ export class StyledGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
     const propValueKeys = new Set<string>([]);
 
     if (this.params.base) {
-      const matches = JSON.stringify(this.params.base).match(/\{props\.([\w\d]+)\}/gi);
+      const matches = JSON.stringify(this.params.base).match(/\{-?props\.([^}]+)\}/gi);
       if (matches) {
         matches.forEach((match) => {
-          const value = match.replace(/\{props\.([\w\d]+)\}/gi, '$1');
-          if (value) propValueKeys.add(value);
+          const value = match.replace(/\{(?:-)?props\.([^}]+)\}/gi, '$1');
+          const dashed = dashCase(value);
+          if (value) propValueKeys.add(dashed);
         });
       }
     }
