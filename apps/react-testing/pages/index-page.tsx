@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { ButtonsWrapper, Button } from '../components/button/button.css';
 import { CommonHeading, MainHeading } from '../components/heading/heading.salty';
-import { Wrapper } from '../components/wrapper/wrapper.styled';
+import { notificationClass, Wrapper } from '../components/wrapper/wrapper.styled';
 import { Body } from '../components/body/body.css';
 
 export const IndexPage = () => {
@@ -9,6 +9,8 @@ export const IndexPage = () => {
 
   return (
     <Wrapper className="theme-darkAlt" ref={wrapper}>
+      <div className={notificationClass}>This is a testing app</div>
+
       <MainHeading>Salty CSS react testing</MainHeading>
 
       <Body>
@@ -28,12 +30,14 @@ export const IndexPage = () => {
 
       <CommonHeading>Go to the website</CommonHeading>
 
+      <div className={notificationClass.variant('type', 'success').variant('random', 'nice')}>Website has some instructions</div>
+
       <Body style={{ marginBottom: '1em' }}>
         Eget sodales neque ex in magna. Suspendisse pulvinar ultricies arcu, ut faucibus nunc lacinia et. Praesent porttitor fringilla lobortis.
       </Body>
 
       <Button variant="underlined" href="https://salty-css.dev">
-        Outlined
+        Website link
       </Button>
     </Wrapper>
   );
