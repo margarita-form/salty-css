@@ -242,7 +242,7 @@ Example usage:
 styled('span', {
   base: {
     // Use of static font family variable
-    fontFamily: '{colors.fontFamily.heading}',
+    fontFamily: '{fontFamily.heading}',
     // Use of responsive font size variable
     fontSize: '{fontSize.heading.regular}',
     // Use of conditional theme text color variable
