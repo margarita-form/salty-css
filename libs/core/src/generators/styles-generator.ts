@@ -1,12 +1,12 @@
 import { parseAndJoinStyles } from '../parsers/parse-styles';
 import { StyledParams, Styles } from '../types';
-import { SaltyConfig } from '../types/config-types';
+import { CachedConfig, SaltyConfig } from '../types/config-types';
 import { dashCase, toHash } from '../util';
 
 export interface StylesGeneratorBuildTimeProps {
   callerName?: string;
   isProduction?: boolean;
-  config?: SaltyConfig;
+  config?: SaltyConfig & CachedConfig;
   classNames?: string[];
 }
 
