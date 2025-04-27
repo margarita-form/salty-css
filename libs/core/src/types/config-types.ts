@@ -89,7 +89,25 @@ export interface SaltyConfig {
   /**
    * default unit for px based properties when providing a number value. Default is 'px'.
    */
-  defaultUnit?: 'px' | 'rem' | 'em' | 'vh' | 'vw' | 'vmin' | 'vmax' | 'cm' | 'mm' | 'in' | 'pt' | 'pc' | 'ch' | 'ex' | 'fr' | 'percent' | OrString;
+  defaultUnit?:
+    | 'px'
+    | 'rem'
+    | 'em'
+    | 'vh'
+    | 'vw'
+    | 'vmin'
+    | 'vmax'
+    | 'cm'
+    | 'mm'
+    | 'in'
+    | 'pt'
+    | 'pc'
+    | 'ch'
+    | 'ex'
+    | 'fr'
+    | 'percent'
+    | `viewport-clamp:${number}`
+    | OrString;
 }
 
 // Config file that has only computed, cached values gathered from the Salty config and define function files.

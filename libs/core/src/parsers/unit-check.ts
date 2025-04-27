@@ -1,4 +1,5 @@
 import { SaltyConfig } from '../config';
+import { defineViewportClamp } from '../helpers/viewport-clamp';
 
 const pxProperties: (string | RegExp)[] = [
   'top',
@@ -34,6 +35,19 @@ export const addUnit = (key: string, value: string | number, config?: SaltyConfi
 
   if (isPxProperty) {
     const unit = config?.defaultUnit || 'px';
+    const isClamp = unit.startsWith('viewport-clamp:');
+    if (isClamp) {
+      try {
+        const screenSize = unit.split(':')[1];
+        const viewportClamp = defineViewportClamp({
+          screenSize: parseInt(screenSize),
+        });
+        return viewportClamp(Number(value));
+      } catch (error) {
+        console.error(error);
+        throw new Error(`Invalid viewport-clamp value: ${unit}`);
+      }
+    }
     return `${value}${unit}`;
   }
   return `${value}`;
