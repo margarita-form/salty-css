@@ -47,6 +47,10 @@
       "import": "./compiler/index.js",
       "require": "./compiler/index.cjs"
     },
+    "./parsers": {
+      "import": "./parsers/index.js",
+      "require": "./parsers/index.cjs"
+    },
     "./css": {
       "import": "./css/index.js",
       "require": "./css/index.cjs"
