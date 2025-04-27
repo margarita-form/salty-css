@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/react",
-  "version": "0.0.1-alpha.266",
+  "version": "0.0.1-alpha.267",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -63,10 +63,14 @@
     "./helpers": {
       "import": "./helpers.js",
       "require": "./helpers.cjs"
+    },
+    "./dynamic-styles": {
+      "import": "./dynamic-styles.js",
+      "require": "./dynamic-styles.cjs"
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.0.1-alpha.266",
+    "@salty-css/core": "^0.0.1-alpha.267",
     "clsx": ">=2.x",
     "react": ">=19.x || >=18.3.x"
   }
