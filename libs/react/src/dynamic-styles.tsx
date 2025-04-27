@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { parseStyles } from '@salty-css/core/parsers';
 import { BaseStyles } from '@salty-css/core/types';
 import { toHash } from '@salty-css/core/util';
 import clsx from 'clsx';
-import { HTMLAttributes } from 'react';
+import { createElement, HTMLAttributes } from 'react';
 
 /**
  * Create a hash of the dynamic styles that then can be used as scope.
@@ -30,8 +31,9 @@ interface DynamicStylesProps extends HTMLAttributes<HTMLElement> {
  * Add any dynamic styles to your app with a custom scope.
  * Note: this works only with server components.
  */
-export const DynamicStyles = async ({ as: Component, scope, styles, ...rest }: DynamicStylesProps) => {
-  if (Component) {
+export const DynamicStyles = async ({ as, scope, styles, ...rest }: DynamicStylesProps) => {
+  if (as) {
+    const Component = (props: any) => (typeof as === 'string' ? createElement(as, props) : as(props));
     if (!styles) return <Component {...rest} />;
     const className = getDynamicStylesClassName(styles);
     const css = await getDynamicStylesCss(styles, scope || `.${className}`);
