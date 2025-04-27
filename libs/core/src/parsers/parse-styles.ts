@@ -20,7 +20,7 @@ import { StyleValueModifierFunction } from './parser-types';
 export const parseStyles = async <T extends object>(
   styles?: T,
   currentScope = '',
-  config?: (SaltyConfig & CachedConfig) | undefined,
+  config?: (SaltyConfig & CachedConfig) | CachedConfig | undefined,
   omitTemplates = false
 ): Promise<string[]> => {
   if (!styles) throw new Error('No styles provided to parseStyles function!');
