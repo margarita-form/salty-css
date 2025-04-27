@@ -2,7 +2,7 @@ import { createElement, ForwardedRef, forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { StyledComponentProps, Tag } from '@salty-css/core/types';
 import { dashCase } from '@salty-css/core/util';
-import { parseVariableTokens } from '@salty-css/core/parsers/parse-tokens';
+import { parseVariableTokens } from '@salty-css/core/parsers';
 import { StyledGeneratorClientProps } from '@salty-css/core/generators';
 import { CommonRecord } from '@salty-css/core/types/util-types';
 
@@ -100,7 +100,7 @@ export const elementFactory = (
   Object.assign(withRef, {
     isStyled: true,
     className: _className,
-    toString: () => `.${_className}`,
+    toString: () => `.${_generatorProps.hash}`,
   });
 
   return withRef;

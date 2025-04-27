@@ -5,6 +5,7 @@ import { dashCase } from '../util';
 
 export interface StyledGeneratorClientProps {
   element?: string;
+  hash?: string;
   variantKeys?: string[];
   propValueKeys?: string[];
   passProps?: boolean | string | string[];
@@ -58,6 +59,7 @@ export class StyledGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
 
     return {
       element,
+      hash: this.hash,
       variantKeys: [...variantKeys],
       propValueKeys: [...propValueKeys],
       passProps,
