@@ -28,7 +28,7 @@ export const parseStyles = async <T extends object>(
   const entries = Object.entries(styles);
 
   const processStyleEntry = async ([key, value]: [key: string, any]) => {
-    const _key = key.trim();
+    const _key = key.trim().replace(/^\?+/g, '');
     const propertyName = propertyNameCheck(_key);
 
     const toString = (val: unknown, eol = ';') => `${propertyName}:${val}${eol}`;
