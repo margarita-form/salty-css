@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/core",
-  "version": "0.0.1-alpha.279",
+  "version": "0.0.1-alpha.280",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -103,9 +103,9 @@
       "import": "./server/index.js",
       "require": "./server/index.cjs"
     },
-    "./cache/get-config-cache": {
-      "import": "./cache/get-config-cache.js",
-      "require": "./cache/get-config-cache.cjs"
+    "./cache/resolve-dynamic-config-cache": {
+      "import": "./cache/resolve-dynamic-config-cache.js",
+      "require": "./cache/resolve-dynamic-config-cache.cjs"
     }
   },
   "bin": {
