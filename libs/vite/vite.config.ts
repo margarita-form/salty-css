@@ -49,7 +49,21 @@ export default defineConfig({
     },
     rollupOptions: {
       // External packages that should not be bundled into your library.
-      external: ['@salty-css/core', 'path', 'fs', 'fs/promises', 'esbuild', 'winston', 'child_process', 'react', 'commander', 'ejs', 'ora', 'typescript'],
+      external: [
+        //
+        /@salty-css\/.+/,
+        'path',
+        'fs',
+        'fs/promises',
+        'esbuild',
+        'winston',
+        'child_process',
+        'react',
+        'commander',
+        'ejs',
+        'ora',
+        'typescript',
+      ],
     },
   },
   test: {

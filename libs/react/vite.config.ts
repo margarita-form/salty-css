@@ -40,6 +40,7 @@ export default defineConfig({
         media: 'src/media.ts',
         config: 'src/config.ts',
         helpers: 'src/helpers.ts',
+        'dynamic-styles': 'src/dynamic-styles.tsx',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;
@@ -58,17 +59,17 @@ export default defineConfig({
     rollupOptions: {
       // External packages that should not be bundled into your library.
       external: [
-        '@salty-css/core',
-        'path',
-        'fs',
-        'fs/promises',
-        'esbuild',
-        'winston',
-        'child_process',
+        //
+        /@salty-css\/.+/,
+        /fs.*/,
+        /path\/.*/,
+        /esbuild.*/,
+        /winston.*/,
+        /child_process.*/,
         'react',
-        'react-dom',
-        'react/jsx-runtime',
-        'typescript',
+        /react\/jsx.*/,
+        /react-dom\/.*/,
+        /typescript.*/,
       ],
     },
   },
