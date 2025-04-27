@@ -21,10 +21,12 @@ export const getDynamicStylesCss = async (styles: BaseStyles, scope?: string) =>
   return parsed.join('\n');
 };
 
+type AnyComponent = (...args: any[]) => React.ReactNode;
+
 interface DynamicStylesProps extends HTMLAttributes<HTMLElement> {
   styles?: BaseStyles;
   scope?: string;
-  as?: (...args: any[]) => React.ReactNode;
+  as?: string | AnyComponent;
 }
 
 /**
