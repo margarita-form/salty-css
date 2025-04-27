@@ -41,7 +41,7 @@ export const parseStyles = async <T extends object>(
       try {
         const [name, path] = config.templatePaths[_key].split(';;');
 
-        const functions = await import(/* webpackIgnore: true */ path);
+        const functions = await import(/* webpackIgnore: true */ /* @vite-ignore */ path);
         const isSaltyConfig = path.includes('salty.config');
         const values = isSaltyConfig ? functions[name].templates : functions[name];
         const template = isSaltyConfig ? values[_key] : values.params[_key];
