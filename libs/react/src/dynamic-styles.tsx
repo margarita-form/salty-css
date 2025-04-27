@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { parseStyles } from '@salty-css/core/parsers';
 import { BaseStyles } from '@salty-css/core/types';
+import { resolveDynamicConfigCache } from '@salty-css/core/cache/resolve-dynamic-config-cache';
 import { toHash } from '@salty-css/core/util';
 import clsx from 'clsx';
 import { createElement, HTMLAttributes } from 'react';
@@ -17,7 +18,8 @@ export const getDynamicStylesClassName = (styles: BaseStyles) => {
  * Note: this works only with server components.
  */
 export const getDynamicStylesCss = async (styles: BaseStyles, scope?: string) => {
-  const parsed = await parseStyles(styles, scope);
+  const config = await resolveDynamicConfigCache();
+  const parsed = await parseStyles(styles, scope, config);
   return parsed.join('\n');
 };
 

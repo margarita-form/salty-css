@@ -53,6 +53,14 @@ interface Cache {
   destDir?: string;
 }
 
+export const getCorePackageRoot = () => {
+  let { pathname } = new URL(import.meta.url);
+  while (/core\/?(src\/)?$/.test(pathname) === false) {
+    pathname = join(pathname, '../');
+  }
+  return pathname;
+};
+
 const cache: Cache = {
   externalModules: [],
   rcFile: undefined,
@@ -306,6 +314,10 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
   // Save config cache file
   const configCachePath = join(destDir, 'cache/config-cache.json');
   writeFileSync(configCachePath, JSON.stringify(configCacheContent, null, 2));
+
+  const corePackageRoot = getCorePackageRoot();
+  const configCacheSecondaryPath = join(corePackageRoot, 'cache/config-cache.json');
+  writeFileSync(configCacheSecondaryPath, JSON.stringify(configCacheContent, null, 2));
 };
 
 const replaceStyledTag = (currentFile: string) => {
@@ -425,7 +437,7 @@ const getConfig = async (dirname: string) => {
   const coreConfigDest = join(destDir, 'salty.config.js');
   const now = Date.now();
   const { config } = await import(`${coreConfigDest}?t=${now}`);
-  return mergeObjects<SaltyConfig>(config, cached);
+  return mergeObjects<SaltyConfig & CachedConfig>(config, cached);
 };
 
 const isProduction = () => {

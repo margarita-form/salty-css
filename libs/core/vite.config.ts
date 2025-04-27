@@ -35,6 +35,7 @@ export default defineConfig({
     outDir: './dist',
     emptyOutDir: true,
     reportCompressedSize: true,
+    assetsInlineLimit: 0,
     commonjsOptions: {
       transformMixedEsModules: true,
     },
@@ -58,6 +59,7 @@ export default defineConfig({
         'types/index': 'src/types/index.ts',
         'util/index': 'src/util/index.ts',
         'server/index': 'src/server/index.ts',
+        'cache/resolve-dynamic-config-cache': 'src/cache/resolve-dynamic-config-cache.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;
