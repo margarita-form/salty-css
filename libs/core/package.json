@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/core",
-  "version": "0.0.1-alpha.270",
+  "version": "0.0.1-alpha.271",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -39,6 +39,10 @@
     "winston": ">=3.x"
   },
   "exports": {
+    "./bin": {
+      "import": "./bin/index.js",
+      "require": "./bin/index.cjs"
+    },
     "./bin/main": {
       "import": "./bin/main.js",
       "require": "./bin/main.cjs"
@@ -47,9 +51,9 @@
       "import": "./compiler/index.js",
       "require": "./compiler/index.cjs"
     },
-    "./parsers": {
-      "import": "./parsers/index.js",
-      "require": "./parsers/index.cjs"
+    "./factories": {
+      "import": "./factories/index.js",
+      "require": "./factories/index.cjs"
     },
     "./css": {
       "import": "./css/index.js",
@@ -71,13 +75,17 @@
       "import": "./css/merge.js",
       "require": "./css/merge.cjs"
     },
-    "./factories": {
-      "import": "./factories/index.js",
-      "require": "./factories/index.cjs"
+    "./helpers": {
+      "import": "./helpers/index.js",
+      "require": "./helpers/index.cjs"
     },
     "./generators": {
       "import": "./generators/index.js",
       "require": "./generators/index.cjs"
+    },
+    "./parsers": {
+      "import": "./parsers/index.js",
+      "require": "./parsers/index.cjs"
     },
     "./config": {
       "import": "./config/index.js",
@@ -91,9 +99,9 @@
       "import": "./util/index.js",
       "require": "./util/index.cjs"
     },
-    "./helpers": {
-      "import": "./helpers/index.js",
-      "require": "./helpers/index.cjs"
+    "./server": {
+      "import": "./server/index.js",
+      "require": "./server/index.cjs"
     }
   },
   "bin": {
