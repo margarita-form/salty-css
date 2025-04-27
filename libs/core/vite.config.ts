@@ -53,7 +53,7 @@ export default defineConfig({
         'css/merge': 'src/css/merge.ts',
         'helpers/index': 'src/helpers/index.ts',
         'generators/index': 'src/generators/index.ts',
-        'parsers/index': 'src/factories/index.ts',
+        'parsers/index': 'src/parsers/index.ts',
         'config/index': 'src/config/index.ts',
         'types/index': 'src/types/index.ts',
         'util/index': 'src/util/index.ts',
