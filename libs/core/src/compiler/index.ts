@@ -21,6 +21,7 @@ import { defineTemplates, GlobalStylesFactory, TemplatesFactory, VariablesFactor
 import { StyledGenerator, ClassNameGenerator } from '../generators';
 import { StylesGenerator } from '../generators/styles-generator';
 import { getFunctionRange } from './get-function-range';
+import { getCorePackageRoot } from './helpers';
 
 interface GeneratorResult<V extends StylesGenerator> {
   generator: V;
@@ -52,14 +53,6 @@ interface Cache {
   rcFile?: RCFile;
   destDir?: string;
 }
-
-export const getCorePackageRoot = () => {
-  let { pathname } = new URL(import.meta.url);
-  while (/core\/?(src\/)?$/.test(pathname) === false) {
-    pathname = join(pathname, '../');
-  }
-  return pathname;
-};
 
 const cache: Cache = {
   externalModules: [],

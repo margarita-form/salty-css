@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import { getCorePackageRoot } from '../compiler';
+import { getCorePackageRoot } from '../compiler/helpers';
 
 export const resolveDynamicConfigCache = async () => {
   const corePackageRoot = getCorePackageRoot();
