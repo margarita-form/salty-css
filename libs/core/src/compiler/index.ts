@@ -21,7 +21,7 @@ import { defineTemplates, GlobalStylesFactory, TemplatesFactory, VariablesFactor
 import { StyledGenerator, ClassNameGenerator } from '../generators';
 import { StylesGenerator } from '../generators/styles-generator';
 import { getFunctionRange } from './get-function-range';
-import { getCorePackageRoot } from './helpers';
+import { getCorePackageRoot, resolveValue } from './helpers';
 
 interface GeneratorResult<V extends StylesGenerator> {
   generator: V;
@@ -505,21 +505,21 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       [...files].map(async (src) => {
         const { contents } = await compileSaltyFile(dirname, src, destDir);
         for (let [name, value] of Object.entries(contents)) {
-          if (value instanceof Promise) value = await value;
+          const resolved = await resolveValue<any>(value, 1);
 
-          if (value.isKeyframes) {
+          if (resolved.isKeyframes) {
             generationResults.keyframes.push({
-              value: value as any,
+              value: resolved as any,
               src,
               name,
             });
-          } else if (value.isClassName) {
+          } else if (resolved.isClassName) {
             generationResults.classNames.push({
               ...value,
               src,
               name,
             });
-          } else if (value.generator) {
+          } else if (resolved.generator) {
             generationResults.components.push({
               ...value,
               src,
