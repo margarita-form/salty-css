@@ -73,5 +73,9 @@ export const keyframes = ({ animationName: _name, params: _params, appendInitial
     return fn;
   };
 
+  Object.assign(modifyKeyframes, {
+    _shouldResolve: true,
+  });
+
   return modifyKeyframes;
 };

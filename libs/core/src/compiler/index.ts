@@ -21,7 +21,7 @@ import { defineTemplates, GlobalStylesFactory, TemplatesFactory, VariablesFactor
 import { StyledGenerator, ClassNameGenerator } from '../generators';
 import { StylesGenerator } from '../generators/styles-generator';
 import { getFunctionRange } from './get-function-range';
-import { getCorePackageRoot, resolveValue } from './helpers';
+import { getCorePackageRoot, resolveExportValue } from './helpers';
 
 interface GeneratorResult<V extends StylesGenerator> {
   generator: V;
@@ -505,7 +505,7 @@ export const generateCss = async (dirname: string, prod = isProduction(), clean 
       [...files].map(async (src) => {
         const { contents } = await compileSaltyFile(dirname, src, destDir);
         for (let [name, value] of Object.entries(contents)) {
-          const resolved = await resolveValue<any>(value, 1);
+          const resolved = await resolveExportValue<any>(value, 1);
 
           if (resolved.isKeyframes) {
             generationResults.keyframes.push({
@@ -674,18 +674,19 @@ export const generateFile = async (dirname: string, file: string, prod = isProdu
       const config = await getConfig(dirname);
       const { contents } = await compileSaltyFile(dirname, file, destDir);
       for (const [name, value] of Object.entries(contents)) {
-        // Object.entries(contents).forEach(([name, value]: [string, any]) => {
-        if (value.isKeyframes && value.css) {
-          const fileName = `a_${value.animationName}.css`;
+        const resolved = await resolveExportValue<any>(value, 1);
+
+        if (resolved.isKeyframes && resolved.css) {
+          const fileName = `a_${resolved.animationName}.css`;
           const filePath = `css/${fileName}`;
           const cssPath = join(destDir, filePath);
 
-          writeFileSync(cssPath, await value.css);
+          writeFileSync(cssPath, await resolved.css);
           continue;
         }
 
-        if (value.isClassName) {
-          const generator = value.generator._withBuildContext({
+        if (resolved.isClassName) {
+          const generator = resolved.generator._withBuildContext({
             callerName: name,
             isProduction: prod,
             config,
@@ -703,9 +704,9 @@ export const generateFile = async (dirname: string, file: string, prod = isProdu
           continue;
         }
 
-        if (!value.generator) continue;
+        if (!resolved.generator) continue;
 
-        const generator = value.generator._withBuildContext({
+        const generator = resolved.generator._withBuildContext({
           callerName: name,
           isProduction: prod,
           config,
@@ -773,10 +774,11 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
       let current = original;
 
       for (const [name, value] of Object.entries(contents)) {
-        if (value.isKeyframes) continue;
+        const resolved = await resolveExportValue<any>(value, 1);
+        if (resolved.isKeyframes) continue;
 
-        if (!value.generator) continue;
-        const generator = value.generator._withBuildContext({
+        if (!resolved.generator) continue;
+        const generator = resolved.generator._withBuildContext({
           callerName: name,
           isProduction: prod,
           config,
@@ -785,7 +787,7 @@ export const minimizeFile = async (dirname: string, file: string, prod = isProdu
         const [start, end] = await getFunctionRange(current, name);
         const range = current.slice(start, end);
 
-        if (value.isClassName) {
+        if (resolved.isClassName) {
           const copy = current;
           const clientVersion = ` ${name} = className("${generator.classNames}")`;
           current = current.replace(range, clientVersion);
