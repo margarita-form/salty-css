@@ -24,8 +24,8 @@ export class StylesGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
   }
 
   get hash() {
-    const { base, variants, compoundVariants } = this.params;
-    return toHash({ base, variants, compoundVariants });
+    const { base, variants, compoundVariants, anyOfVariants } = this.params;
+    return toHash({ base, variants, compoundVariants, anyOfVariants });
   }
 
   get cssClassName() {
@@ -52,10 +52,10 @@ export class StylesGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
   }
 
   get css() {
-    const { base = {}, variants = {}, compoundVariants = [] } = this.params;
+    const { base = {}, variants = {}, compoundVariants = [], anyOfVariants = [] } = this.params;
     const { config } = this.buildContext;
 
-    const combinedStyles: Styles = { ...base, variants, compoundVariants };
+    const combinedStyles: Styles = { ...base, variants, compoundVariants, anyOfVariants };
     const css = parseAndJoinStyles(combinedStyles, `.${this.cssClassName}`, config, this.isRoot);
     return css;
   }

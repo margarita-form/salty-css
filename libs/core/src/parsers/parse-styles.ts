@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CachedConfig, SaltyConfig } from '../types/config-types';
-import { CompoundVariant } from '../types';
+import { MultiVariant } from '../types';
 import { parseValueModifiers } from './parse-modifiers';
 import { parseValueTokens } from './parse-tokens';
 import { addUnit } from './unit-check';
@@ -90,11 +90,25 @@ export const parseStyles = async <T extends object>(
       }
 
       if (_key === 'compoundVariants') {
-        for (const variant of value as CompoundVariant[]) {
+        for (const variant of value as MultiVariant[]) {
           const { css, ...rest } = variant;
           const scope = Object.entries(rest).reduce((acc, [prop, val]) => {
             return `${acc}.${prop}-${val}`;
           }, currentScope);
+          const results = await parseStyles(css as T, scope, config);
+          results.forEach((res) => cssStyles.add(res));
+        }
+        return undefined;
+      }
+
+      if (_key === 'anyOfVariants') {
+        for (const variant of value as MultiVariant[]) {
+          const { css, ...rest } = variant;
+          const scopes = Object.entries(rest).map(([prop, val]) => {
+            return `.${prop}-${val}`;
+          });
+          const scope = `${currentScope}:where(${scopes.join(', ')})`;
+          console.log(`Union variant scope: ${scope}`);
           const results = await parseStyles(css as T, scope, config);
           results.forEach((res) => cssStyles.add(res));
         }

@@ -30,7 +30,7 @@ export class StyledGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
   }
 
   get clientProps(): StyledGeneratorClientProps {
-    const { element, variants = {}, compoundVariants = [], defaultVariants = {}, defaultProps = {}, passProps } = this.params;
+    const { element, variants = {}, compoundVariants = [], anyOfVariants = [], defaultVariants = {}, defaultProps = {}, passProps } = this.params;
     const { callerName, isProduction } = this.buildContext;
 
     const variantKeys = new Set<string>([]);
@@ -43,6 +43,7 @@ export class StyledGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
 
     Object.keys(variants).forEach(addVariantKey);
     compoundVariants.map((cv) => Object.keys(cv).forEach(addVariantKey));
+    anyOfVariants.map((cv) => Object.keys(cv).forEach(addVariantKey));
 
     const propValueKeys = new Set<string>([]);
 

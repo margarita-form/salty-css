@@ -34,11 +34,13 @@ type VariantOptions = {
   [key in InvalidVariantKeys]?: never;
 };
 
-export type CompoundVariant = { [key: PropertyKey]: string | boolean | undefined } | { css: CSSinJS };
+export type MultiVariant = { [key: PropertyKey]: string | boolean | undefined } | { css: CSSinJS };
+
 type Variants = {
   variants?: VariantOptions & { [key: PropertyKey]: { [key: PropertyKey]: CSSinJS } };
   defaultVariants?: { [key: PropertyKey]: any };
-  compoundVariants?: CompoundVariant[];
+  compoundVariants?: MultiVariant[];
+  anyOfVariants?: MultiVariant[];
 };
 
 type BooleanVariantValue = 'true' | 'false' | boolean;
@@ -51,13 +53,17 @@ export type Merge<T> = { [k in AllKeys<T>]?: PickType<T, k> };
 export type VariantProps<
   STYLES extends StyledParams,
   B = STYLES['variants'] extends undefined ? object : STYLES['variants'],
-  C = STYLES['compoundVariants'] extends CompoundVariant[] ? Merge<STYLES['compoundVariants'][number]> : object
+  C = STYLES['compoundVariants'] extends MultiVariant[] ? Merge<STYLES['compoundVariants'][number]> : object,
+  U = STYLES['anyOfVariants'] extends MultiVariant[] ? Merge<STYLES['anyOfVariants'][number]> : object
 > = Merge<
   | {
       [K in keyof B]?: K extends 'css' ? never : VariantPropValue<keyof B[K]>;
     }
   | {
       [K in keyof C]?: K extends 'css' ? never : VariantPropValue<C[K]>;
+    }
+  | {
+      [K in keyof U]?: K extends 'css' ? never : VariantPropValue<U[K]>;
     }
 >;
 
