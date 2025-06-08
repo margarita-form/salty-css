@@ -288,7 +288,7 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
 
   const tsTokensTypes = `
   // Variable types
-  type VariableTokens = ${tsVariableTokens}; 
+  type VariableTokens = ${tsVariableTokens || `''`}; 
   type PropertyValueToken = \`{\${VariableTokens}}\`;
 
   // Template types
