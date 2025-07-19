@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as esbuild from 'esbuild';
 import { execSync } from 'child_process';
+import { Script } from 'vm';
 import { toHash } from '../util/to-hash';
 import { join, parse as parsePath } from 'path';
 import { statSync, existsSync, mkdirSync, readdirSync, writeFileSync, readFileSync } from 'fs';
@@ -70,7 +71,7 @@ const getExternalModules = (coreConfigPath: string) => {
   return externalModules;
 };
 
-const getDestDir = async (dirname: string) => {
+export const getDestDir = async (dirname: string) => {
   if (cache.destDir) return cache.destDir;
   const projectConfig = await getRCProjectConfig(dirname);
   const destDir = join(dirname, projectConfig?.saltygenDir || 'saltygen');
@@ -116,13 +117,23 @@ const generateConfig = async (dirname: string) => {
     treeShaking: true,
     bundle: true,
     outfile: coreConfigDest,
-    format: moduleType,
+    format: 'cjs',
     external: externalModules,
   });
 
-  const now = Date.now();
-  const { config } = await import(`${coreConfigDest}?t=${now}`);
-  return { config, path: coreConfigDest };
+  // const now = Date.now();
+  // const { config } = await import(/* @vite-ignore */ `${coreConfigDest}?t=${now}`);
+  // return { config, path: coreConfigDest };
+  const raw = await readFile(coreConfigDest, 'utf8');
+  const scriptReal = new Script(raw);
+  const context = { module: { exports: {} } };
+  scriptReal.runInNewContext(context);
+
+  const { config } = context.module.exports as { config: SaltyConfig };
+  return {
+    config,
+    path: coreConfigDest,
+  };
 };
 
 export const generateConfigStyles = async (dirname: string, configFiles: Set<string>) => {
@@ -222,7 +233,7 @@ export const generateConfigStyles = async (dirname: string, configFiles: Set<str
     return results.flat();
   };
 
-  const getStaticVariables = (variables: SaltyVariables): Record<string, any> => {
+  const getStaticVariables = (variables: SaltyVariables | undefined = {}): Record<string, any> => {
     return { ...variables, responsive: undefined, conditional: undefined };
   };
 
@@ -376,7 +387,7 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
     treeShaking: true,
     bundle: true,
     outfile: outputFilePath,
-    format: moduleType,
+    format: 'cjs',
     target: ['node20'],
     keepNames: true,
     external: externalModules,
@@ -410,10 +421,18 @@ export const compileSaltyFile = async (dirname: string, sourceFilePath: string, 
     };
   };
 
-  const now = Date.now();
-  const contents = (await import(`${outputFilePath}?t=${now}`)) as Contents;
+  // const now = Date.now();
+  // const contents = (await import(/* @vite-ignore */ `${outputFilePath}?t=${now}`)) as Contents;
+  // return { contents, outputFilePath };
 
-  return { contents, outputFilePath };
+  const context = { module: { exports: {} } };
+  const raw = await readFile(outputFilePath, 'utf8');
+  new Script(raw).runInNewContext(context);
+
+  return {
+    contents: context.module.exports as Contents,
+    outputFilePath,
+  };
 };
 
 const getConfigCache = async (dirname: string) => {
@@ -424,12 +443,19 @@ const getConfigCache = async (dirname: string) => {
   return JSON.parse(contents);
 };
 
-const getConfig = async (dirname: string) => {
+export const getConfig = async (dirname: string) => {
   const cached = await getConfigCache(dirname);
   const destDir = await getDestDir(dirname);
   const coreConfigDest = join(destDir, 'salty.config.js');
-  const now = Date.now();
-  const { config } = await import(`${coreConfigDest}?t=${now}`);
+  // const now = Date.now();
+  // const { config } = await import(/* @vite-ignore */ `${coreConfigDest}?t=${now}`);
+
+  const context = { module: { exports: {} } };
+  const raw = await readFile(coreConfigDest, 'utf8');
+  new Script(raw).runInNewContext(context);
+
+  const { config } = context.module.exports as { config: SaltyConfig };
+
   return mergeObjects<SaltyConfig & CachedConfig>(config, cached);
 };
 

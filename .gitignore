@@ -3,6 +3,9 @@
 saltygen
 config-cache*
 
+# Astro
+.astro
+
 # compiled output
 dist
 tmp

@@ -7,7 +7,8 @@
   "scripts": {
     "pretty": "prettier --write .",
     "update-readmes": "node ./scripts/update-readmes.mjs",
-    "dev:react-testing": "nx run react-testing:serve",
+    "dev:react": "nx run react-testing:serve",
+    "dev:astro": "nx run astro-testing:dev",
     "test:core": "nx run core:test",
     "build:react-testing": "nx run react-testing:build",
     "build:core": "nx run core:build",
@@ -74,6 +75,7 @@
   ],
   "dependencies": {
     "@types/child-process-promise": "^2.2.6",
+    "astro": "^5.12.0",
     "clsx": "^2.1.1",
     "color": "^5.0.0",
     "commander": "^13.1.0",
