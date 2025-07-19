@@ -1,4 +1,5 @@
 import { styled } from '@salty-css/astro/styled';
+import Link from './link.astro';
 
 export const Wrapper = styled('span', {
   base: {
@@ -13,5 +14,15 @@ export const Container = styled('div', {
     backgroundColor: 'blue',
     padding: '10px',
     color: 'white',
+  },
+});
+
+export const Button = styled(Link, {
+  base: {
+    display: 'inline-block',
+    backgroundColor: 'green',
+    padding: '10px',
+    color: 'white',
+    margin: '10px',
   },
 });
