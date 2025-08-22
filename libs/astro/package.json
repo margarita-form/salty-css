@@ -1,5 +1,5 @@
 {
-  "name": "@salty-css/react",
+  "name": "@salty-css/astro",
   "version": "0.0.1-alpha.300",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -10,7 +10,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "React library for Salty CSS",
+  "description": "Astro library for Salty CSS",
   "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",
@@ -24,8 +24,8 @@
     "!**/*.tsbuildinfo"
   ],
   "nx": {
-    "sourceRoot": "libs/react/src",
-    "name": "react"
+    "sourceRoot": "libs/astro/src",
+    "name": "astro"
   },
   "exports": {
     ".": {
@@ -70,8 +70,6 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.0.1-alpha.300",
-    "clsx": ">=2.x",
-    "react": ">=19.x || >=18.3.x"
+    "@salty-css/core": "^0.0.1-alpha.300"
   }
 }
