@@ -1,5 +1,7 @@
 import { styled } from '@salty-css/astro/styled';
 import Link from './link.astro';
+import CurrentUrl from './current-url.astro';
+import CurrentRadnom from './current-radnom.astro';
 
 export const Wrapper = styled('span', {
   base: {
@@ -24,5 +26,21 @@ export const Button = styled(Link, {
     padding: '10px',
     color: 'white',
     margin: '10px',
+  },
+});
+
+export const UrlBox = styled(CurrentUrl, {
+  base: {
+    padding: '10px',
+    background: 'red',
+    color: 'white',
+  },
+});
+
+export const RandomValue = styled(CurrentRadnom, {
+  base: {
+    padding: '10px',
+    background: 'purple',
+    color: 'white',
   },
 });
