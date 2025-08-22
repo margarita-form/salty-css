@@ -24,12 +24,13 @@
     "publish:npm-create": "cd libs/npm-create && npm publish",
     "publish:core": "cd libs/core/dist && npm publish",
     "publish:react": "cd libs/react/dist && npm publish",
+    "publish:astro": "cd libs/astro/dist && npm publish",
     "publish:vite": "cd libs/vite/dist && npm publish",
     "publish:next": "cd libs/next/dist && npm publish",
     "publish:webpack": "cd libs/webpack/dist && npm publish",
     "publish:eslint-config-core": "cd libs/eslint-config-core/dist && npm publish",
     "publish:eslint-plugin-core": "cd libs/eslint-plugin-core/dist && npm publish",
-    "publish:all-dev": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && read -p 'Enter OTP: ' OTP && npm run publish:cli --tag dev --otp $OTP && npm run publish:npm-create --tag dev --otp $OTP && npm run publish:core --tag dev --otp $OTP && npm run publish:react --tag dev --otp $OTP && npm run publish:react --tag dev --otp $OTP && npm run publish:vite --tag dev --otp $OTP && npm run publish:next --tag dev --otp $OTP && npm run publish:webpack --tag dev --otp $OTP && npm run publish:eslint-config-core --tag dev --otp $OTP && npm run publish:eslint-plugin-core --tag dev --otp $OTP",
+    "publish:all-dev": "npm run build:all && lerna version --force-publish -m \"chore(release-dev): version %v\" && npm run build:all && read -p 'Enter OTP: ' OTP && npm run publish:cli --tag dev --otp $OTP && npm run publish:npm-create --tag dev --otp $OTP && npm run publish:core --tag dev --otp $OTP && npm run publish:react --tag dev --otp $OTP && npm run publish:astro --tag dev --otp $OTP && npm run publish:vite --tag dev --otp $OTP && npm run publish:next --tag dev --otp $OTP && npm run publish:webpack --tag dev --otp $OTP && npm run publish:eslint-config-core --tag dev --otp $OTP && npm run publish:eslint-plugin-core --tag dev --otp $OTP",
     "publish:all": "npm run build:all && lerna version --force-publish -m \"chore(release): version %v\" && npm run build:all && read -p 'Enter OTP: ' OTP && npm run publish:cli --otp $OTP && npm run publish:npm-create --otp $OTP && npm run publish:core --otp $OTP && npm run publish:react --otp $OTP && npm run publish:vite --otp $OTP && npm run publish:next --otp $OTP && npm run publish:webpack --otp $OTP && npm run publish:eslint-config-core --otp $OTP && npm run publish:eslint-plugin-core --otp $OTP"
   },
   "devDependencies": {
