@@ -18,6 +18,7 @@ const templateLoaderPlugin: () => PluginOption = () => ({
 export default defineConfig({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/libs/core',
+  builder: {},
   plugins: [
     nxViteTsPaths(),
     templateLoaderPlugin(),
@@ -36,6 +37,7 @@ export default defineConfig({
     emptyOutDir: true,
     reportCompressedSize: true,
     assetsInlineLimit: 0,
+    ssr: true,
     commonjsOptions: {
       transformMixedEsModules: true,
     },
@@ -77,7 +79,7 @@ export default defineConfig({
     },
     rollupOptions: {
       // External packages that should not be bundled into your library.
-      external: ['path', 'fs', 'fs/promises', 'esbuild', 'winston', 'child_process', 'react', 'commander', 'ejs', 'ora', 'typescript'],
+      external: ['path', 'fs', 'fs/promises', 'esbuild', 'winston', 'child_process', 'react', 'commander', 'ejs', 'ora', 'typescript', 'vm'],
     },
   },
   test: {
