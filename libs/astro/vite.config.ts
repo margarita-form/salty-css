@@ -33,6 +33,7 @@ export default defineConfig({
       entry: {
         index: 'src/index.ts',
         styled: 'src/styled.ts',
+        config: 'src/config.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;
@@ -54,7 +55,7 @@ export default defineConfig({
         //
         /@salty-css\/.+/,
         /fs.*/,
-        /path\/.*/,
+        /path.*/,
         /esbuild.*/,
         /winston.*/,
         /child_process.*/,
