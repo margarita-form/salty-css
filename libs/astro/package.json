@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/astro",
-  "version": "0.0.1-alpha.302",
+  "version": "0.0.1-alpha.303",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -36,40 +36,13 @@
       "import": "./styled.js",
       "require": "./styled.cjs"
     },
-    "./styled-client": {
-      "import": "./styled-client.js",
-      "require": "./styled-client.cjs"
-    },
-    "./class-name": {
-      "import": "./class-name.js",
-      "require": "./class-name.cjs"
-    },
-    "./class-name-client": {
-      "import": "./class-name-client.js",
-      "require": "./class-name-client.cjs"
-    },
-    "./keyframes": {
-      "import": "./keyframes.js",
-      "require": "./keyframes.cjs"
-    },
-    "./media": {
-      "import": "./media.js",
-      "require": "./media.cjs"
-    },
     "./config": {
       "import": "./config.js",
       "require": "./config.cjs"
-    },
-    "./helpers": {
-      "import": "./helpers.js",
-      "require": "./helpers.cjs"
-    },
-    "./dynamic-styles": {
-      "import": "./dynamic-styles.js",
-      "require": "./dynamic-styles.cjs"
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.0.1-alpha.302"
+    "@salty-css/core": "^0.0.1-alpha.303",
+    "vite": "^6.3.5"
   }
 }

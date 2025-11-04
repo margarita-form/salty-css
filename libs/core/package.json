@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/core",
-  "version": "0.0.1-alpha.302",
+  "version": "0.0.1-alpha.303",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -50,6 +50,18 @@
     "./compiler": {
       "import": "./compiler/index.js",
       "require": "./compiler/index.cjs"
+    },
+    "./compiler/get-files": {
+      "import": "./compiler/get-files.js",
+      "require": "./compiler/get-files.cjs"
+    },
+    "./compiler/get-function-range": {
+      "import": "./compiler/get-function-range.js",
+      "require": "./compiler/get-function-range.cjs"
+    },
+    "./compiler/helpers": {
+      "import": "./compiler/helpers.js",
+      "require": "./compiler/helpers.cjs"
     },
     "./factories": {
       "import": "./factories/index.js",
