@@ -1,4 +1,4 @@
-import { generateFile, isSaltyFile, compileSaltyFile, getDestDir } from '@salty-css/core/compiler';
+import { isSaltyFile, getDestDir } from '@salty-css/core/compiler';
 import { getFunctionRange } from '@salty-css/core/compiler/get-function-range';
 import { resolveExportValue } from '@salty-css/core/compiler/helpers';
 import { SaltyCompiler } from '@salty-css/core/compiler/as-class';
@@ -52,7 +52,7 @@ export const saltyPlugin = (dir: string): PluginOption => {
 
         const originalContents = await readFile(filePath, 'utf-8');
 
-        const compiled = await compileSaltyFile(dir, filePath, destDir);
+        const compiled = await saltyCompiler.compileSaltyFile(filePath, destDir);
         for (const [name, value] of Object.entries(compiled.contents)) {
           const resolved = await resolveExportValue<any>(value, 1);
           if (!resolved.generator) continue;
@@ -108,15 +108,15 @@ export const saltyPlugin = (dir: string): PluginOption => {
       const shouldRestart = await checkShouldRestart(file);
       if (shouldRestart) server.restart();
     },
-    watchChange: {
-      handler: async (filePath, change) => {
-        const saltyFile = isSaltyFile(filePath);
-        if (saltyFile && change.event !== 'delete') {
-          const shouldRestart = await checkShouldRestart(filePath);
-          if (!shouldRestart) await generateFile(dir, filePath);
-        }
-      },
-    },
+    // watchChange: {
+    //   handler: async (filePath, change) => {
+    //     const saltyFile = isSaltyFile(filePath);
+    //     if (saltyFile && change.event !== 'delete') {
+    //       const shouldRestart = await checkShouldRestart(filePath);
+    //       if (!shouldRestart) await generateFile(dir, filePath);
+    //     }
+    //   },
+    // },
   };
 };
 

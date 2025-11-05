@@ -582,7 +582,7 @@ export class SaltyCompiler {
     writeFileSync(configCacheSecondaryPath, JSON.stringify(configCacheContent, null, 2));
   };
 
-  private compileSaltyFile = async (sourceFilePath: string, outputDirectory: string) => {
+  public compileSaltyFile = async (sourceFilePath: string, outputDirectory: string) => {
     const hashedName = toHash(sourceFilePath);
     const tempDir = join(outputDirectory, './temp');
 
