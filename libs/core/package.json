@@ -51,6 +51,10 @@
       "import": "./compiler/index.js",
       "require": "./compiler/index.cjs"
     },
+    "./compiler/as-class": {
+      "import": "./compiler/as-class.js",
+      "require": "./compiler/as-class.cjs"
+    },
     "./compiler/get-files": {
       "import": "./compiler/get-files.js",
       "require": "./compiler/get-files.cjs"
