@@ -717,6 +717,102 @@ export class SaltyCompiler {
     return undefined;
   };
 
+  generateFile = async (file: string) => {
+    try {
+      const destDir = await this.getDestDir();
+      const validFile = isSaltyFile(file);
+
+      if (validFile) {
+        const cssFiles: string[][] = [];
+        const config = await this.getConfig();
+        const { contents } = await this.compileSaltyFile(file, destDir);
+        for (const [name, value] of Object.entries(contents)) {
+          const resolved = await resolveExportValue<any>(value, 1);
+
+          if (resolved.isKeyframes && resolved.css) {
+            const fileName = `a_${resolved.animationName}.css`;
+            const filePath = `css/${fileName}`;
+            const cssPath = join(destDir, filePath);
+
+            writeFileSync(cssPath, await resolved.css);
+            continue;
+          }
+
+          if (resolved.isClassName) {
+            const generator = resolved.generator._withBuildContext({
+              callerName: name,
+              isProduction: this.isProduction,
+              config,
+            });
+
+            const styles = await generator.css;
+            if (!styles) continue;
+
+            if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
+            cssFiles[generator.priority].push(generator.cssFileName);
+
+            const filePath = `css/${generator.cssFileName}`;
+            const cssPath = join(destDir, filePath);
+            writeFileSync(cssPath, styles);
+            continue;
+          }
+
+          if (!resolved.generator) continue;
+
+          const generator = resolved.generator._withBuildContext({
+            callerName: name,
+            isProduction: this.isProduction,
+            config,
+          });
+
+          const styles = await generator.css;
+          if (!styles) continue;
+
+          const filePath = `css/${generator.cssFileName}`;
+          const cssPath = join(destDir, filePath);
+
+          writeFileSync(cssPath, styles);
+
+          if (!cssFiles[generator.priority]) cssFiles[generator.priority] = [];
+          cssFiles[generator.priority].push(generator.cssFileName);
+        }
+
+        if (config.importStrategy !== 'component') {
+          cssFiles.forEach((val, layer) => {
+            const layerFileName = `l_${layer}.css`;
+            const layerFilePath = join(destDir, 'css', layerFileName);
+            let currentLayerFileContent = readFileSync(layerFilePath, 'utf8');
+            val.forEach((file) => {
+              const filepath = join(destDir, 'css', file);
+              const filepathHash = /.*-([^-]+)-\d+.css/.exec(file)?.at(1) || toHash(filepath, 6);
+              const found = currentLayerFileContent.includes(filepathHash);
+              if (!found) {
+                const css = readFileSync(filepath, 'utf8');
+                const newContent = `/*start:${filepathHash}-${file}*/\n${css}\n/*end:${filepathHash}*/\n`;
+                currentLayerFileContent = `${currentLayerFileContent.replace(/\}$/, '')}\n${newContent}\n}`;
+              }
+            });
+            writeFileSync(layerFilePath, currentLayerFileContent);
+          });
+        } else {
+          const cssContent = cssFiles
+            .flat()
+            .map((file) => `@import url('./${file}');`)
+            .join('\n');
+
+          const hashName = toHash(file, 6);
+          const parsedPath = parsePath(file);
+          const dasherized = dashCase(parsedPath.name);
+
+          const cssFile = join(destDir, `css/f_${dasherized}-${hashName}.css`);
+          writeFileSync(cssFile, cssContent || `/* Empty file */`);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   private replaceStyledTag = (currentFile: string) => {
     return currentFile.replace(/styled\(([^"'`{,]+),/g, (match, tag) => {
       // Check if the tag is a string
