@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/astro",
-  "version": "0.0.1-alpha.306",
+  "version": "0.0.1-alpha.307",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -36,13 +36,18 @@
       "import": "./styled.js",
       "require": "./styled.cjs"
     },
-    "./config": {
-      "import": "./config.js",
-      "require": "./config.cjs"
+    "./astro-vite-plugin": {
+      "import": "./astro-vite-plugin.js",
+      "require": "./astro-vite-plugin.cjs"
+    },
+    "./integration": {
+      "import": "./integration.js",
+      "require": "./integration.cjs"
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.0.1-alpha.306",
+    "@salty-css/core": "^0.0.1-alpha.307",
+    "astro": "^5.13.2",
     "vite": "^6.3.5"
   }
 }
