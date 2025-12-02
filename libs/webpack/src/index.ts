@@ -1,10 +1,13 @@
 import type { Configuration } from 'webpack';
 import { resolve } from 'path';
-import { generateCss, generateFile, isSaltyFile, saltyFileRegExp } from '@salty-css/core/compiler';
 import { checkShouldRestart } from '@salty-css/core/server';
 import { watch } from 'fs';
+import { isSaltyFile, saltyFileRegExp } from '@salty-css/core/compiler/helpers';
+import { SaltyCompiler } from '@salty-css/core/compiler/as-class';
 
 export const saltyPlugin = (config: Configuration, dir: string, isServer = false, cjs = false) => {
+  const saltyCompiler = new SaltyCompiler(dir);
+
   config.module?.rules?.push({
     test: saltyFileRegExp(),
     use: [
@@ -23,15 +26,15 @@ export const saltyPlugin = (config: Configuration, dir: string, isServer = false
           if (started) return;
           started = true;
 
-          await generateCss(dir);
+          await saltyCompiler.generateCss();
 
           watch(dir, { recursive: true }, async (event, filePath) => {
             const shouldRestart = await checkShouldRestart(filePath);
             if (shouldRestart) {
-              await generateCss(dir, false, false);
+              await saltyCompiler.generateCss();
             } else {
               const saltyFile = isSaltyFile(filePath);
-              if (saltyFile) await generateFile(dir, filePath);
+              if (saltyFile) await saltyCompiler.generateFile(dir);
             }
           });
         });

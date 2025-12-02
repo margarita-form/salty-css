@@ -47,10 +47,6 @@
       "import": "./bin/main.js",
       "require": "./bin/main.cjs"
     },
-    "./compiler": {
-      "import": "./compiler/index.js",
-      "require": "./compiler/index.cjs"
-    },
     "./compiler/as-class": {
       "import": "./compiler/as-class.js",
       "require": "./compiler/as-class.cjs"

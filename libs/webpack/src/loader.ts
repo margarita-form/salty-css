@@ -1,5 +1,5 @@
 import type { LoaderContext } from 'webpack';
-import { generateFile, minimizeFile } from '@salty-css/core/compiler';
+import { SaltyCompiler } from '@salty-css/core/compiler/as-class';
 
 interface SaltyLoaderOptions {
   dir: string;
@@ -10,6 +10,7 @@ type WebpackLoaderThis = LoaderContext<SaltyLoaderOptions>;
 export default async function (this: WebpackLoaderThis) {
   const { dir } = this.getOptions();
   const { resourcePath } = this;
-  await generateFile(dir, resourcePath);
-  return await minimizeFile(dir, resourcePath);
+  const saltyCompiler = new SaltyCompiler(dir);
+  await saltyCompiler.generateFile(resourcePath);
+  return await saltyCompiler.minimizeFile(resourcePath);
 }

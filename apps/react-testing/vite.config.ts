@@ -4,18 +4,21 @@ import dts from 'vite-plugin-dts';
 import * as path from 'path';
 import react from '@vitejs/plugin-react-swc';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { generateCss, generateFile, isSaltyFile, minimizeFile } from '../../libs/core/src/compiler';
+import { isSaltyFile } from '../../libs/core/src/compiler/helpers';
+import { SaltyCompiler } from '../../libs/core/src/compiler/as-class';
 import { checkShouldRestart } from '../../libs/core/src/server';
 
 // Copy of the Vite config from the React Testing app.
 export const saltyPlugin = (dir: string): PluginOption => {
+  const saltyCompiler = new SaltyCompiler(dir);
+
   return {
     name: 'stylegen',
-    buildStart: () => generateCss(dir),
+    buildStart: async () => await saltyCompiler.generateCss(),
     load: async (filePath: string) => {
       const saltyFile = isSaltyFile(filePath);
       if (saltyFile) {
-        return await minimizeFile(dir, filePath);
+        return await saltyCompiler.minimizeFile(filePath);
       }
       return undefined;
     },
@@ -28,7 +31,7 @@ export const saltyPlugin = (dir: string): PluginOption => {
         const saltyFile = isSaltyFile(filePath);
         if (saltyFile && change.event !== 'delete') {
           const shouldRestart = await checkShouldRestart(filePath);
-          if (!shouldRestart) await generateFile(dir, filePath);
+          if (!shouldRestart) await saltyCompiler.generateFile(filePath);
         }
       },
     },

@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import { PluginOption } from 'vite';
-import { generateCss, generateFile, isSaltyFile, compileSaltyFile, getDestDir } from '../../libs/core/src/compiler';
+import { SaltyCompiler } from '../../libs/core/src/compiler/as-class';
+import { isSaltyFile } from '../../libs/core/src/compiler/helpers';
 import { checkShouldRestart } from '../../libs/core/src/server';
 import { resolveExportValue } from '../../libs/core/src/compiler/helpers';
 import { toHash } from '../../libs/core/src/util';
@@ -11,13 +12,23 @@ import { getFunctionRange } from '../../libs/core/src/compiler/get-function-rang
 const dir = new URL('.', import.meta.url).pathname + '/src';
 
 export const saltyPlugin = (): PluginOption => {
+  const saltyCompiler = new SaltyCompiler(dir);
+
   return {
     name: 'stylegen',
-    buildStart: () => generateCss(dir),
+    configureServer(_server) {
+      saltyCompiler.importFile = async (path: string) => {
+        const now = Date.now();
+        return _server.ssrLoadModule(`${path}?t=${now}`);
+      };
+    },
+    buildStart: async () => {
+      await saltyCompiler.generateCss();
+    },
     load: async (filePath) => {
       const saltyFile = isSaltyFile(filePath);
       if (saltyFile) {
-        const destDir = await getDestDir(dir);
+        const destDir = await saltyCompiler.getDestDir();
         if (/.+\?configFile=(\w+).+/.test(filePath)) {
           const searchParams = new URLSearchParams(filePath.split('?')[1]);
           const configFile = searchParams.get('configFile');
@@ -33,7 +44,6 @@ export const saltyPlugin = (): PluginOption => {
             const { props } = Astro;
             ---
             <${config.tagName} class="${config.classNames}" data-component-name="${config.componentName}" {...props}><slot/></${config.tagName}>`;
-            return '';
           } catch (error) {
             console.error('Error parsing config file:', error);
             return undefined;
@@ -45,7 +55,7 @@ export const saltyPlugin = (): PluginOption => {
 
         const originalContents = await readFile(filePath, 'utf-8');
 
-        const compiled = await compileSaltyFile(dir, filePath, destDir);
+        const compiled = await saltyCompiler.compileSaltyFile(filePath, destDir);
         for (const [name, value] of Object.entries(compiled.contents)) {
           const resolved = await resolveExportValue<any>(value, 1);
           if (!resolved.generator) continue;
@@ -68,7 +78,8 @@ export const saltyPlugin = (): PluginOption => {
             componentName: name,
             tagName: tagName.replace(/['"`]/g, ''),
             classNames: generator.classNames,
-          } as Record<string, any>;
+            imports: [] as (string | undefined)[],
+          };
 
           const extendsComponent = /^\w+$/.test(tagName);
           if (extendsComponent) {
@@ -99,15 +110,6 @@ export const saltyPlugin = (): PluginOption => {
     handleHotUpdate: async ({ file, server }) => {
       const shouldRestart = await checkShouldRestart(file);
       if (shouldRestart) server.restart();
-    },
-    watchChange: {
-      handler: async (filePath, change) => {
-        const saltyFile = isSaltyFile(filePath);
-        if (saltyFile && change.event !== 'delete') {
-          const shouldRestart = await checkShouldRestart(filePath);
-          if (!shouldRestart) await generateFile(dir, filePath);
-        }
-      },
     },
   };
 };

@@ -112,7 +112,7 @@ export class SaltyCompiler {
    * Get the destination directory for generated files based on the project configuration.
    * Caches the result to avoid redundant computations.
    */
-  private getDestDir = async () => {
+  public getDestDir = async () => {
     if (this.cache.destDir) return this.cache.destDir;
     const projectConfig = await this.getRCProjectConfig(this.projectRootDir);
     const destDir = join(this.projectRootDir, projectConfig?.saltygenDir || 'saltygen');

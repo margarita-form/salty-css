@@ -1,4 +1,4 @@
-import { isSaltyFile } from '@salty-css/core/compiler';
+import { isSaltyFile } from '@salty-css/core/compiler/helpers';
 import { SaltyCompiler } from '@salty-css/core/compiler/as-class';
 import { checkShouldRestart } from '@salty-css/core/server';
 import { PluginOption } from 'vite';

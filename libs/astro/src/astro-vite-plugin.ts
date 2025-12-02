@@ -1,4 +1,4 @@
-import { isSaltyFile, getDestDir } from '@salty-css/core/compiler';
+import { isSaltyFile } from '@salty-css/core/compiler/helpers';
 import { getFunctionRange } from '@salty-css/core/compiler/get-function-range';
 import { resolveExportValue } from '@salty-css/core/compiler/helpers';
 import { SaltyCompiler } from '@salty-css/core/compiler/as-class';
@@ -25,7 +25,7 @@ export const saltyPlugin = (dir: string): PluginOption => {
     load: async (filePath) => {
       const saltyFile = isSaltyFile(filePath);
       if (saltyFile) {
-        const destDir = await getDestDir(dir);
+        const destDir = await saltyCompiler.getDestDir();
         if (/.+\?configFile=(\w+).+/.test(filePath)) {
           const searchParams = new URLSearchParams(filePath.split('?')[1]);
           const configFile = searchParams.get('configFile');
@@ -108,15 +108,6 @@ export const saltyPlugin = (dir: string): PluginOption => {
       const shouldRestart = await checkShouldRestart(file);
       if (shouldRestart) server.restart();
     },
-    // watchChange: {
-    //   handler: async (filePath, change) => {
-    //     const saltyFile = isSaltyFile(filePath);
-    //     if (saltyFile && change.event !== 'delete') {
-    //       const shouldRestart = await checkShouldRestart(filePath);
-    //       if (!shouldRestart) await generateFile(dir, filePath);
-    //     }
-    //   },
-    // },
   };
 };
 
