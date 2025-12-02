@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/astro",
-  "version": "0.0.1-alpha.309",
+  "version": "0.0.1-alpha.310",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -46,7 +46,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.0.1-alpha.309",
+    "@salty-css/core": "^0.0.1-alpha.310",
     "astro": "^5.13.2",
     "vite": "^6.3.5"
   }
