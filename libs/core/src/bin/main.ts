@@ -3,7 +3,6 @@ import { existsSync } from 'fs';
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join, relative, parse as parsePath, format as formatPath } from 'path';
 import { render } from 'ejs';
-import { generateCss, generateFile, isSaltyFile } from '../compiler';
 import { pascalCase } from '../util';
 import { logError, logger } from './logger';
 import { formatWithPrettier } from './prettier';
@@ -11,6 +10,8 @@ import { npmInstall } from './bin-util';
 import { PathLike, watch as watchChanges } from 'fs';
 import { RCFile } from '../types/cli-types';
 import { checkShouldRestart } from '../server';
+import { SaltyCompiler } from '../compiler/as-class';
+import { isSaltyFile } from '../compiler/helpers';
 
 export async function main() {
   const program = new Command();
@@ -127,6 +128,8 @@ export async function main() {
 
       const projectDir = resolveProjectDir(dir);
       const projectFiles = await Promise.all([readTemplate('salty.config.ts'), readTemplate('saltygen/index.css')]);
+
+      const saltyCompiler = new SaltyCompiler(projectDir);
 
       // Create the project structure if it doesn't exist
       await mkdir(projectDir, { recursive: true });
@@ -375,7 +378,7 @@ export async function main() {
 
       // Run build once to generate the saltygen folder
       logger.info('Running the build to generate initial CSS...');
-      await generateCss(projectDir);
+      await saltyCompiler.generateCss();
 
       // All done & next steps
       logger.info('🎉 Salty CSS project initialized successfully!');
@@ -407,16 +410,17 @@ export async function main() {
       const { dir = _dir, watch } = this.opts<BuildOptions>();
       if (!dir) return logError('Project directory must be provided. Add it as the first argument after build command or use the --dir option.');
       const projectDir = resolveProjectDir(dir);
-      await generateCss(projectDir);
+      const saltyCompiler = new SaltyCompiler(projectDir);
+      await saltyCompiler.generateCss();
       if (watch) {
         logger.info('Watching for changes in the project directory...');
         watchChanges(projectDir, { recursive: true }, async (event, filePath) => {
           const shouldRestart = await checkShouldRestart(filePath);
           if (shouldRestart) {
-            await generateCss(projectDir, false, false);
+            await saltyCompiler.generateCss(false);
           } else {
             const saltyFile = isSaltyFile(filePath);
-            if (saltyFile) await generateFile(projectDir, filePath);
+            if (saltyFile) await saltyCompiler.generateFile(filePath);
           }
         });
       }
