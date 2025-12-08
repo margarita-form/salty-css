@@ -32,9 +32,14 @@ export default defineConfig({
       name: 'salty-css-astro',
       entry: {
         index: 'src/index.ts',
-        styled: 'src/styled.ts',
         'astro-vite-plugin': 'src/astro-vite-plugin.ts',
         integration: 'src/integration.ts',
+        styled: 'src/styled.ts',
+        'class-name': 'src/class-name.ts',
+        keyframes: 'src/keyframes.ts',
+        media: 'src/media.ts',
+        config: 'src/config.ts',
+        helpers: 'src/helpers.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;
