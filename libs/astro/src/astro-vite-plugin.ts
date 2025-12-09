@@ -48,6 +48,7 @@ export const saltyPlugin = (dir: string): PluginOption => {
         }
 
         const imports: string[] = [];
+        const consts: string[] = [];
         const exports: string[] = [];
 
         const originalContents = await readFile(filePath, 'utf-8');
@@ -56,6 +57,18 @@ export const saltyPlugin = (dir: string): PluginOption => {
         for (const [name, value] of Object.entries(compiled.contents)) {
           const resolved = await resolveExportValue<any>(value, 1);
           if (!resolved.generator) continue;
+
+          if (resolved.isClassName) {
+            const generator = resolved.generator._withBuildContext({
+              callerName: name,
+              isProduction: false,
+              config: {},
+            });
+
+            consts.push(`const ${name} = '${generator.classNames}';`);
+            exports.push(name);
+            continue;
+          }
 
           const [start, end] = await getFunctionRange(originalContents, name);
           const range = originalContents.slice(start, end);
@@ -100,13 +113,22 @@ export const saltyPlugin = (dir: string): PluginOption => {
           exports.push(name);
         }
 
-        return `${imports.join('\n')}export { ${exports.join(', ')} };`;
+        return `${imports.join('\n')}\n${consts.join('\n')}\nexport { ${exports.join(', ')} };`;
       }
       return undefined;
     },
     handleHotUpdate: async ({ file, server }) => {
       const shouldRestart = await checkShouldRestart(file);
       if (shouldRestart) server.restart();
+    },
+    watchChange: {
+      handler: async (filePath, change) => {
+        const saltyFile = isSaltyFile(filePath);
+        if (saltyFile && change.event !== 'delete') {
+          const shouldRestart = await checkShouldRestart(filePath);
+          if (!shouldRestart) await saltyCompiler.generateFile(filePath);
+        }
+      },
     },
   };
 };
