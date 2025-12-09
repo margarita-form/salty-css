@@ -1,0 +1,6 @@
+{
+  "name": "astro",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/astro",
+  "projectType": "library"
+}

@@ -7,6 +7,11 @@
       "dir": "apps/react-testing",
       "framework": "react",
       "components": "src"
+    },
+    {
+      "dir": "apps/astro-testing",
+      "framework": "astro",
+      "components": "src"
     }
   ]
 }

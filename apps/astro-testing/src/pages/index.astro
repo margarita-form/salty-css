@@ -1,0 +1,26 @@
+---
+import '../saltygen/index.css';
+import { Button, Container, justClass, RandomValue, UrlBox, Wrapper } from '../components/wrapper.css';
+
+Astro.locals.random = Math.random();
+
+console.log({ justClass });
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Astro</title>
+  </head>
+  <body>
+    <Wrapper> Wrapper works </Wrapper>
+    <Container> Container too </Container>
+    <Button text="link to google" href="https://www.google.com" />
+    <UrlBox />
+    <RandomValue />
+    <div class={justClass}>Just class works</div>
+  </body>
+</html>

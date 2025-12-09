@@ -1,6 +1,5 @@
 import { defineConfig } from '@salty-css/core/config';
 import { toHash } from '@salty-css/core/util';
-import { largeMobileDown } from './styles/media.css';
 
 export const config = defineConfig({
   externalModules: ['react', 'react-router-dom'],

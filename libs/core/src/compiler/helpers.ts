@@ -14,3 +14,9 @@ export const resolveExportValue = async <T>(value: unknown, maxLevel = 10, _leve
   if (typeof value === 'function' && '_shouldResolve' in value) return await resolveExportValue(await value(), _level + 1, maxLevel);
   return value as T;
 };
+
+export const saltyFileExtensions = ['salty', 'css', 'styles', 'styled'];
+
+export const saltyFileRegExp = (additional: string[] = []) => new RegExp(`\\.(${[...saltyFileExtensions, ...additional].join('|')})\\.`);
+
+export const isSaltyFile = (file: string, additional: string[] = []) => saltyFileRegExp(additional).test(file);

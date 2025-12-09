@@ -25,7 +25,7 @@
           "framework": {
             "type": "string",
             "description": "The framework used by the project.",
-            "enum": ["react", "other"]
+            "enum": ["react", "astro", "other"]
           },
           "components": {
             "type": "string",

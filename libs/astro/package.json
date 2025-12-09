@@ -1,0 +1,73 @@
+{
+  "name": "@salty-css/astro",
+  "version": "0.0.1-alpha.317",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "typings": "./dist/index.d.ts",
+  "type": "module",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Astro library for Salty CSS",
+  "homepage": "https://salty-css.dev/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/margarita-form/salty-css.git"
+  },
+  "bugs": {
+    "url": "https://github.com/margarita-form/salty-css/issues"
+  },
+  "files": [
+    "**/*",
+    "!**/*.tsbuildinfo"
+  ],
+  "nx": {
+    "sourceRoot": "libs/astro/src",
+    "name": "astro"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.cjs"
+    },
+    "./astro-vite-plugin": {
+      "import": "./astro-vite-plugin.js",
+      "require": "./astro-vite-plugin.cjs"
+    },
+    "./integration": {
+      "import": "./integration.js",
+      "require": "./integration.cjs"
+    },
+    "./styled": {
+      "import": "./styled.js",
+      "require": "./styled.cjs"
+    },
+    "./class-name": {
+      "import": "./class-name.js",
+      "require": "./class-name.cjs"
+    },
+    "./keyframes": {
+      "import": "./keyframes.js",
+      "require": "./keyframes.cjs"
+    },
+    "./media": {
+      "import": "./media.js",
+      "require": "./media.cjs"
+    },
+    "./config": {
+      "import": "./config.js",
+      "require": "./config.cjs"
+    },
+    "./helpers": {
+      "import": "./helpers.js",
+      "require": "./helpers.cjs"
+    }
+  },
+  "dependencies": {
+    "@salty-css/core": "^0.0.1-alpha.317",
+    "astro": "^5.13.2",
+    "vite": "^6.3.5"
+  }
+}

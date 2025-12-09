@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Rule } from 'eslint';
 import { Expression, VariableDeclaration } from 'estree';
-import { isSaltyFile } from '@salty-css/core/compiler';
+import { isSaltyFile } from '@salty-css/core/compiler/helpers';
 
 export const mustBeExported: Rule.RuleModule = {
   meta: {

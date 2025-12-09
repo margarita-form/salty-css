@@ -1,0 +1,12 @@
+---
+interface Props {
+  class?: string;
+  text?: string;
+}
+
+const { text = 'lorem ipsum', ...rest } = Astro.props;
+---
+
+<a {...rest} target="_blank">
+  {text}
+</a>

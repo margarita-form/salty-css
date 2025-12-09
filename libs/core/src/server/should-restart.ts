@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import { isSaltyFile } from '../compiler';
+import { isSaltyFile } from '../compiler/helpers';
 
 export const checkShouldRestart = async (filename: string): Promise<boolean> => {
   if (!filename) return false;

@@ -18,6 +18,7 @@ const templateLoaderPlugin: () => PluginOption = () => ({
 export default defineConfig({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/libs/core',
+  builder: {},
   plugins: [
     nxViteTsPaths(),
     templateLoaderPlugin(),
@@ -36,6 +37,7 @@ export default defineConfig({
     emptyOutDir: true,
     reportCompressedSize: true,
     assetsInlineLimit: 0,
+    ssr: true,
     commonjsOptions: {
       transformMixedEsModules: true,
     },
@@ -45,7 +47,10 @@ export default defineConfig({
       entry: {
         'bin/index': 'src/bin/index.ts',
         'bin/main': 'src/bin/main.ts',
-        'compiler/index': 'src/compiler/index.ts',
+        'compiler/as-class': 'src/compiler/as-class.ts',
+        'compiler/get-files': 'src/compiler/get-files.ts',
+        'compiler/get-function-range': 'src/compiler/get-function-range.ts',
+        'compiler/helpers': 'src/compiler/helpers.ts',
         'factories/index': 'src/factories/index.ts',
         'css/index': 'src/css/index.ts',
         'css/keyframes': 'src/css/keyframes.ts',
@@ -77,7 +82,7 @@ export default defineConfig({
     },
     rollupOptions: {
       // External packages that should not be bundled into your library.
-      external: ['path', 'fs', 'fs/promises', 'esbuild', 'winston', 'child_process', 'react', 'commander', 'ejs', 'ora', 'typescript'],
+      external: ['path', 'fs', 'fs/promises', 'esbuild', 'winston', 'child_process', 'react', 'commander', 'ejs', 'ora', 'typescript', 'vm'],
     },
   },
   test: {
