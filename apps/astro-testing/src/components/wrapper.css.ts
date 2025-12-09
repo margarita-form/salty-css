@@ -1,4 +1,5 @@
 import { styled } from '@salty-css/astro/styled';
+import { className } from '@salty-css/astro/class-name';
 import Link from './link.astro';
 import CurrentUrl from './current-url.astro';
 import CurrentRadnom from './current-radnom.astro';
@@ -42,5 +43,13 @@ export const RandomValue = styled(CurrentRadnom, {
     padding: '10px',
     background: 'purple',
     color: 'white',
+  },
+});
+
+export const justClass = className({
+  base: {
+    backgroundColor: 'black',
+    color: 'white',
+    padding: '10px',
   },
 });
