@@ -20,6 +20,13 @@ export const Container = styled('div', {
   },
 });
 
+export const CyanContainer = styled(Container, {
+  element: 'section',
+  base: {
+    backgroundColor: 'cyan',
+  },
+});
+
 export const Button = styled(Link, {
   base: {
     display: 'inline-block',

@@ -1,6 +1,6 @@
 ---
 import '../saltygen/index.css';
-import { Button, Container, justClass, RandomValue, UrlBox, Wrapper } from '../components/wrapper.css';
+import { Button, Container, justClass, RandomValue, CyanContainer, UrlBox, Wrapper } from '../components/wrapper.css';
 
 Astro.locals.random = Math.random();
 
@@ -18,6 +18,7 @@ console.log({ justClass });
   <body>
     <Wrapper> Wrapper works </Wrapper>
     <Container> Container too </Container>
+    <CyanContainer> Cyan Container works </CyanContainer>
     <Button text="link to google" href="https://www.google.com" />
     <UrlBox />
     <RandomValue />

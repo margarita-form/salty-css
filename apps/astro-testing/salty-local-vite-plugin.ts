@@ -1,14 +1,14 @@
-import { isSaltyFile } from '@salty-css/core/compiler/helpers';
-import { getFunctionRange } from '@salty-css/core/compiler/get-function-range';
-import { resolveExportValue } from '@salty-css/core/compiler/helpers';
-import { SaltyCompiler } from '@salty-css/core/compiler/as-class';
-import { checkShouldRestart } from '@salty-css/core/server';
-import { toHash } from '@salty-css/core/util';
+import { PluginOption } from 'vite';
+import { SaltyCompiler } from '../../libs/core/src/compiler/as-class';
+import { isSaltyFile } from '../../libs/core/src/compiler/helpers';
+import { checkShouldRestart } from '../../libs/core/src/server';
+import { resolveExportValue } from '../../libs/core/src/compiler/helpers';
+import { toHash } from '../../libs/core/src/util';
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { PluginOption } from 'vite';
+import { getFunctionRange } from '../../libs/core/src/compiler/get-function-range';
 
-export const saltyPlugin = (dir: string): PluginOption => {
+export const saltyLocalVitePlugin = (dir: string): PluginOption => {
   const saltyCompiler = new SaltyCompiler(dir);
 
   return {
@@ -154,5 +154,3 @@ export const saltyPlugin = (dir: string): PluginOption => {
     },
   };
 };
-
-export default saltyPlugin;
