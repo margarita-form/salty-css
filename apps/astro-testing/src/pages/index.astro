@@ -1,6 +1,6 @@
 ---
 import '../saltygen/index.css';
-import { Button, Container, justClass, RandomValue, CyanContainer, UrlBox, Wrapper } from '../components/wrapper.css';
+import { Button, Container, justClass, RandomValue, CyanContainer, UrlBox, Wrapper, DifferentElement } from '../components/wrapper.css';
 
 Astro.locals.random = Math.random();
 
@@ -23,5 +23,7 @@ console.log({ justClass });
     <UrlBox />
     <RandomValue />
     <div class={justClass}>Just class works</div>
+    <DifferentElement> Different Element works </DifferentElement>
+    <DifferentElement element="div"> Different Element as div works </DifferentElement>
   </body>
 </html>

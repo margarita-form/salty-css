@@ -38,7 +38,7 @@ export const saltyLocalVitePlugin = (dir: string): PluginOption => {
             const { clientProps = {}, classNames = '', tagIsComponent, tagName = 'div' } = config;
 
             const imports: string[] = config.imports || [];
-            const element = tagIsComponent ? tagName : `props.element || "${tagName}"`;
+            const element = tagIsComponent ? tagName : `props.element || "${clientProps.element || tagName}"`;
 
             let propsAttr = '';
             if (clientProps.element && tagIsComponent) propsAttr += ` element="${clientProps.element}"`;

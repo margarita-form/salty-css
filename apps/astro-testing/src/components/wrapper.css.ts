@@ -60,3 +60,17 @@ export const justClass = className({
     padding: '10px',
   },
 });
+
+export const DifferentElement = styled('section', {
+  element: 'article',
+  base: {
+    backgroundColor: 'red',
+    padding: '10px',
+    '&:is(article)': {
+      backgroundColor: 'blue',
+    },
+    '&:is(div)': {
+      backgroundColor: 'orange',
+    },
+  },
+});
