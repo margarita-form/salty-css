@@ -65,7 +65,7 @@ export default defineConfig({
         'util/index': 'src/util/index.ts',
         'server/index': 'src/server/index.ts',
         'cache/resolve-dynamic-config-cache': 'src/cache/resolve-dynamic-config-cache.ts',
-        'instances/classname-instance': 'src/css/classname-instance.ts',
+        'instances/classname-instance': 'src/instances/classname-instance.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;
