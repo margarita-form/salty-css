@@ -24,6 +24,7 @@ export const CyanContainer = styled(Container, {
   element: 'section',
   base: {
     backgroundColor: 'cyan',
+    color: 'black',
   },
 });
 
@@ -59,6 +60,14 @@ export const justClass = className({
     color: 'white',
     padding: '10px',
   },
+  variants: {
+    color: {
+      cyan: {
+        color: 'cyan',
+        backgroundColor: '#222',
+      },
+    },
+  },
 });
 
 export const DifferentElement = styled('section', {
@@ -68,6 +77,7 @@ export const DifferentElement = styled('section', {
     padding: '10px',
     '&:is(article)': {
       backgroundColor: 'blue',
+      color: 'white',
     },
     '&:is(div)': {
       backgroundColor: 'orange',

@@ -58,12 +58,11 @@ export const saltyPlugin = (dir: string): PluginOption => {
           }
         }
 
-        const imports: string[] = [];
+        const imports: string[] = ["import { classNameInstance } from '@salty-css/core/instances/classname-instance';"];
         const consts: string[] = [];
         const exports: string[] = [];
 
         const originalContents = await readFile(filePath, 'utf-8');
-
         const compiled = await saltyCompiler.compileSaltyFile(filePath, destDir);
 
         const components = Object.entries(compiled.contents);
@@ -78,7 +77,7 @@ export const saltyPlugin = (dir: string): PluginOption => {
               config: {},
             });
 
-            consts.push(`const ${name} = '${generator.classNames}';`);
+            consts.push(`const ${name} = classNameInstance(${JSON.stringify(generator.params)});`);
             exports.push(name);
             continue;
           }

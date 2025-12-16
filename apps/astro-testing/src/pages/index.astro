@@ -4,7 +4,7 @@ import { Button, Container, justClass, RandomValue, CyanContainer, UrlBox, Wrapp
 
 Astro.locals.random = Math.random();
 
-console.log({ justClass });
+const cyanClass = justClass.variant('color', 'cyan');
 ---
 
 <html lang="en">
@@ -23,6 +23,7 @@ console.log({ justClass });
     <UrlBox />
     <RandomValue />
     <div class={justClass}>Just class works</div>
+    <div class={cyanClass}>Cyan class works</div>
     <DifferentElement> Different Element works </DifferentElement>
     <DifferentElement element="div"> Different Element as div works </DifferentElement>
   </body>
