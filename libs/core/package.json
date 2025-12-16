@@ -120,8 +120,8 @@
       "require": "./cache/resolve-dynamic-config-cache.cjs"
     },
     "./instances/classname-instance": {
-      "import": "./css/classname-instance.js",
-      "require": "./css/classname-instance.cjs"
+      "import": "./instances/classname-instance.js",
+      "require": "./instances/classname-instance.cjs"
     }
   },
   "bin": {
