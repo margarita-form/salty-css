@@ -118,6 +118,10 @@
     "./cache/resolve-dynamic-config-cache": {
       "import": "./cache/resolve-dynamic-config-cache.js",
       "require": "./cache/resolve-dynamic-config-cache.cjs"
+    },
+    "./instances/classname-instance": {
+      "import": "./css/classname-instance.js",
+      "require": "./css/classname-instance.cjs"
     }
   },
   "bin": {
