@@ -9,7 +9,6 @@ export const resolveDynamicConfigCache = async () => {
   let contents = '';
   for (const pattern of patterns) {
     const potentialPath = join(currentDir, pattern, filename);
-    console.log(`Checking for config cache at: ${potentialPath}`);
     try {
       contents = await readFile(potentialPath, 'utf8');
       break;
