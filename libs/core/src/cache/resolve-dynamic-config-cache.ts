@@ -1,11 +1,27 @@
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import { getCorePackageRoot } from '../compiler/helpers';
 
 export const resolveDynamicConfigCache = async () => {
-  const corePackageRoot = getCorePackageRoot();
-  const coreConfigDest = join(corePackageRoot, 'cache/config-cache.json');
-  const contents = await readFile(coreConfigDest, 'utf8');
-  if (!contents) throw new Error(`Could not find config cache file at ${coreConfigDest}`);
+  const currentDir = process.cwd();
+  const filename = 'config-cache.json';
+  const patterns = ['', 'saltygen', 'src', 'src/saltygen', 'cache', 'src/cache', 'src/saltygen/cache'];
+
+  let contents = '';
+  for (const pattern of patterns) {
+    const potentialPath = join(currentDir, pattern, filename);
+    console.log(`Trying to read config cache from: ${potentialPath}`);
+    try {
+      contents = await readFile(potentialPath, 'utf8');
+      break;
+    } catch {
+      // File not found, continue searching
+    }
+  }
+
+  if (!contents) {
+    console.warn(`Could not find config cache file (${filename}) in any of the expected locations.`);
+    return {};
+  }
+
   return JSON.parse(contents);
 };
