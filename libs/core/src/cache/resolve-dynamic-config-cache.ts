@@ -6,6 +6,6 @@ export const resolveDynamicConfigCache = async () => {
   const corePackageRoot = getCorePackageRoot();
   const coreConfigDest = join(corePackageRoot, 'cache/config-cache.json');
   const contents = await readFile(coreConfigDest, 'utf8');
-  if (!contents) throw new Error('Could not find config cache file');
+  if (!contents) throw new Error(`Could not find config cache file at ${coreConfigDest}`);
   return JSON.parse(contents);
 };
