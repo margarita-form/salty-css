@@ -2,7 +2,6 @@ import { join } from 'path';
 
 export const getCorePackageRoot = () => {
   let { pathname } = new URL(import.meta.url);
-  console.log('getCorePackageRoot pathname start:', pathname);
   while (/core\/?(src\/)?$/.test(pathname) === false) {
     pathname = join(pathname, '../');
   }
