@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/core",
-  "version": "0.0.1-alpha.335",
+  "version": "0.0.1-alpha.336",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -122,6 +122,10 @@
     "./instances/classname-instance": {
       "import": "./instances/classname-instance.js",
       "require": "./instances/classname-instance.cjs"
+    },
+    "./runtime": {
+      "import": "./runtime/index.js",
+      "require": "./runtime/index.cjs"
     }
   },
   "bin": {
