@@ -20,7 +20,7 @@ import { StyleValueModifierFunction } from './parser-types';
 export const parseStyles = async <T extends object>(
   styles?: T,
   currentScope = '',
-  config?: (SaltyConfig & CachedConfig) | CachedConfig | undefined,
+  config?: Partial<SaltyConfig & CachedConfig> | CachedConfig | undefined,
   omitTemplates = false
 ): Promise<string[]> => {
   if (!styles) throw new Error('No styles provided to parseStyles function!');
@@ -37,7 +37,7 @@ export const parseStyles = async <T extends object>(
     if (typeof value === 'function') return processStyleEntry([key, value(context)]);
     if (value instanceof Promise) return processStyleEntry([key, await value]);
 
-    if (config?.templates && config.templatePaths[_key]) {
+    if (config?.templates && config.templatePaths?.[_key]) {
       try {
         const [name, path] = config.templatePaths[_key].split(';;');
 
@@ -182,7 +182,7 @@ export const parseStyles = async <T extends object>(
 export const parseAndJoinStyles = async <T extends object>(
   styles: T,
   currentClass: string,
-  config?: (SaltyConfig & CachedConfig) | undefined,
+  config?: Partial<SaltyConfig & CachedConfig> | undefined,
   omitTemplates = false
 ): Promise<string> => {
   const css = await parseStyles(styles, currentClass, config, omitTemplates);

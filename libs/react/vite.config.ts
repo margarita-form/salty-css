@@ -40,6 +40,7 @@ export default defineConfig({
         media: 'src/media.ts',
         config: 'src/config.ts',
         helpers: 'src/helpers.ts',
+        runtime: 'src/runtime.ts',
         'dynamic-styles': 'src/dynamic-styles.tsx',
       },
       fileName: (format, entryName) => {
