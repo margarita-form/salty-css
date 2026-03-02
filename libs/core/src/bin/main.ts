@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { existsSync } from 'fs';
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join, relative, parse as parsePath, format as formatPath } from 'path';
-import { render } from 'ejs';
+import ejs from 'ejs';
 import { pascalCase } from '../util';
 import { logError, logger } from './logger';
 import { formatWithPrettier } from './prettier';
@@ -31,7 +31,7 @@ export async function main() {
 
   const readTemplate = async <T extends object>(fileName: Template, options?: T) => {
     const { default: file } = await files[fileName];
-    const content = render(file, options);
+    const content = ejs.render(file, options);
     return { fileName, content };
   };
 
