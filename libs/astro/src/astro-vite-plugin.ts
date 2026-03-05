@@ -45,12 +45,22 @@ export const saltyPlugin = (dir: string): PluginOption => {
             if (clientProps.attr) for (const [key, value] of Object.entries<string>(clientProps.attr)) propsAttr += ` ${key}="${value}"`;
             propsAttr = propsAttr.trim();
 
+            const variantKeys = clientProps.variantKeys || [];
+
             const result = `---
             ${imports.join('\n')}
             const { props } = Astro;
             const Element = ${element};
+            const variantClasses = [
+              ${variantKeys
+                .map((key: string) => {
+                  const [name, defaultValue] = key.split('=');
+                  return `props.${name} !== undefined ? "${name}-" + props.${name} : ${defaultValue !== undefined ? `"${name}-${defaultValue}"` : '""'}`;
+                })
+                .join(',\n')}
+            ]
             ---
-            <Element class:list={["${classNames}", props.class]} ${propsAttr} {...props}><slot/></Element>`;
+            <Element class:list={["${classNames}", ...variantClasses, props.class]} ${propsAttr} {...props}><slot/></Element>`;
             return result;
           } catch (error) {
             console.error('Error parsing config file:', error);
