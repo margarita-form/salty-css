@@ -10,6 +10,13 @@ export const Wrapper = styled('span', {
     padding: '10px',
     color: '{colors.brand}',
   },
+  variants: {
+    color: {
+      orange: {
+        color: 'orange',
+      },
+    },
+  },
 });
 
 export const Container = styled('div', {
