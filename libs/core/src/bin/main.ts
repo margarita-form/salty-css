@@ -10,7 +10,7 @@ import { npmInstall } from './bin-util';
 import { PathLike, watch as watchChanges } from 'fs';
 import { RCFile } from '../types/cli-types';
 import { checkShouldRestart } from '../server';
-import { SaltyCompiler } from '../compiler/as-class';
+import { SaltyCompiler } from '../compiler/salty-compiler';
 import { isSaltyFile } from '../compiler/helpers';
 
 export async function main() {
