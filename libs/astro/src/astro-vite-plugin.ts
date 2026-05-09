@@ -1,7 +1,7 @@
 import { isSaltyFile } from '@salty-css/core/compiler/helpers';
 import { getFunctionRange } from '@salty-css/core/compiler/get-function-range';
 import { resolveExportValue } from '@salty-css/core/compiler/helpers';
-import { SaltyCompiler } from '@salty-css/core/compiler/as-class';
+import { SaltyCompiler } from '@salty-css/core/compiler/salty-compiler';
 import { checkShouldRestart } from '@salty-css/core/server';
 import { toHash } from '@salty-css/core/util';
 import { mkdir, readFile, writeFile } from 'fs/promises';

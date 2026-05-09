@@ -1,5 +1,6 @@
+/* eslint-disable @nx/enforce-module-boundaries */
 import { PluginOption } from 'vite';
-import { SaltyCompiler } from '../../libs/core/src/compiler/as-class';
+import { SaltyCompiler } from '../../libs/core/src/compiler/salty-compiler';
 import { isSaltyFile } from '../../libs/core/src/compiler/helpers';
 import { checkShouldRestart } from '../../libs/core/src/server';
 import { resolveExportValue } from '../../libs/core/src/compiler/helpers';

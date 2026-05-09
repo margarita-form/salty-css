@@ -47,7 +47,7 @@ export default defineConfig({
       entry: {
         'bin/index': 'src/bin/index.ts',
         'bin/main': 'src/bin/main.ts',
-        'compiler/as-class': 'src/compiler/as-class.ts',
+        'compiler/salty-compiler': 'src/compiler/salty-compiler.ts',
         'compiler/get-files': 'src/compiler/get-files.ts',
         'compiler/get-function-range': 'src/compiler/get-function-range.ts',
         'compiler/helpers': 'src/compiler/helpers.ts',

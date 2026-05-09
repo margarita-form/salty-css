@@ -17,7 +17,6 @@ import { dotCase } from '../util/dot-case';
 import { getTemplateTypes, parseAndJoinStyles, parseTemplates, parseVariableTokens } from '../parsers';
 import { saltyReset } from '../templates/salty-reset';
 import console from 'console';
-import { getFunctionRange } from './get-function-range';
 
 interface GeneratorResult<V extends StylesGenerator> {
   generator: V;
@@ -62,7 +61,7 @@ export class SaltyCompiler {
     }
   }
 
-  private get isProduction(): boolean {
+  public get isProduction(): boolean {
     try {
       return process.env['NODE_ENV'] !== 'development';
     } catch {
@@ -160,7 +159,7 @@ export class SaltyCompiler {
     return JSON.parse(contents);
   };
 
-  private getConfig = async () => {
+  public getConfig = async () => {
     const cached = await this.getConfigCache();
     const destDir = await this.getDestDir();
     const coreConfigDest = join(destDir, 'salty.config.js');
@@ -649,72 +648,13 @@ export class SaltyCompiler {
     return { contents, outputFilePath };
   };
 
-  public minimizeFile = async (file: string) => {
-    try {
-      const destDir = await this.getDestDir();
-      const validFile = isSaltyFile(file);
-
-      if (validFile) {
-        const original = readFileSync(file, 'utf8');
-
-        const config = await this.getConfig();
-        const { contents } = await this.compileSaltyFile(file, destDir);
-
-        let current = original;
-
-        for (const [name, value] of Object.entries(contents)) {
-          const resolved = await resolveExportValue<any>(value, 1);
-          if (resolved.isKeyframes) continue;
-
-          if (!resolved.generator) continue;
-          const generator = resolved.generator._withBuildContext({
-            callerName: name,
-            isProduction: this.isProduction,
-            config,
-          });
-
-          const [start, end] = await getFunctionRange(current, name);
-          const range = current.slice(start, end);
-
-          if (resolved.isClassName) {
-            const copy = current;
-            const clientVersion = ` ${name} = className("${generator.classNames}")`;
-            current = current.replace(range, clientVersion);
-
-            if (copy === current) console.error('Minimize file failed to change content', { name });
-          }
-
-          if (range.includes('styled')) {
-            const tagName = /styled\(([^,]+),/.exec(range)?.at(1)?.trim();
-
-            // Replace the styled call with the client version
-            const copy = current;
-            const clientVersion = ` ${name} = styled(${tagName}, "${generator.classNames}", ${JSON.stringify(generator.clientProps)})`;
-            current = current.replace(range, clientVersion);
-
-            if (copy === current) console.error('Minimize file failed to change content', { name, tagName });
-          }
-        }
-
-        if (config.importStrategy === 'component') {
-          const fileHash = toHash(file, 6);
-          const parsed = parsePath(file);
-          const dasherized = dashCase(parsed.name);
-          const cssFileName = `f_${dasherized}-${fileHash}.css`;
-          current = `import '../../saltygen/css/${cssFileName}';\n${current}`;
-        }
-
-        current = current.replace(`@salty-css/react/class-name`, `@salty-css/react/class-name-client`);
-
-        current = current.replace(`{ styled }`, `{ styledClient as styled }`);
-        current = current.replace(`@salty-css/react/styled`, `@salty-css/react/styled-client`);
-
-        return current;
-      }
-    } catch (e) {
-      console.error('Error in minimizeFile:', e);
-    }
-    return undefined;
+  /**
+   * Read the framework field from the current project's entry in `.saltyrc.json`.
+   * Used by framework-aware bundler plugins to dispatch to the right transform.
+   */
+  public getFramework = async (): Promise<string | undefined> => {
+    const projectConfig = await this.getRCProjectConfig(this.projectRootDir);
+    return projectConfig?.framework;
   };
 
   generateFile = async (file: string) => {

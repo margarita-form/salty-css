@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { checkShouldRestart } from '@salty-css/core/server';
 import { watch } from 'fs';
 import { isSaltyFile, saltyFileRegExp } from '@salty-css/core/compiler/helpers';
-import { SaltyCompiler } from '@salty-css/core/compiler/as-class';
+import { SaltyCompiler } from '@salty-css/core/compiler/salty-compiler';
 
 export const saltyPlugin = (config: Configuration, dir: string, isServer = false, cjs = false) => {
   const saltyCompiler = new SaltyCompiler(dir);

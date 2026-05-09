@@ -1,10 +1,27 @@
 import { isSaltyFile } from '@salty-css/core/compiler/helpers';
-import { SaltyCompiler } from '@salty-css/core/compiler/as-class';
+import { SaltyCompiler } from '@salty-css/core/compiler/salty-compiler';
 import { checkShouldRestart } from '@salty-css/core/server';
 import { PluginOption } from 'vite';
 
+type SaltyFileTransform = (compiler: SaltyCompiler, file: string) => Promise<string | undefined>;
+
+const loadFrameworkTransform = async (framework: string | undefined): Promise<SaltyFileTransform> => {
+  if (framework === 'react' || framework === undefined) {
+    const mod = await import('@salty-css/react/transform-salty-file');
+    return mod.transformSaltyFile;
+  }
+
+  throw new Error(`@salty-css/vite: framework "${framework}" is not supported. Supported: react.`);
+};
+
 export const saltyPlugin = (dir: string): PluginOption => {
   const saltyCompiler = new SaltyCompiler(dir);
+
+  let transformPromise: Promise<SaltyFileTransform> | undefined;
+  const getTransform = () => {
+    if (!transformPromise) transformPromise = saltyCompiler.getFramework().then(loadFrameworkTransform);
+    return transformPromise;
+  };
 
   return {
     name: 'stylegen',
@@ -12,7 +29,8 @@ export const saltyPlugin = (dir: string): PluginOption => {
     load: async (filePath: string) => {
       const saltyFile = isSaltyFile(filePath);
       if (saltyFile) {
-        return await saltyCompiler.minimizeFile(filePath);
+        const transform = await getTransform();
+        return await transform(saltyCompiler, filePath);
       }
       return undefined;
     },

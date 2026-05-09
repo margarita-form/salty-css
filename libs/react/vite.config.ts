@@ -42,6 +42,7 @@ export default defineConfig({
         helpers: 'src/helpers.ts',
         runtime: 'src/runtime.ts',
         'dynamic-styles': 'src/dynamic-styles.tsx',
+        'transform-salty-file': 'src/transform-salty-file.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;
@@ -63,7 +64,7 @@ export default defineConfig({
         //
         /@salty-css\/.+/,
         /fs.*/,
-        /path\/.*/,
+        /path.*/,
         /esbuild.*/,
         /winston.*/,
         /child_process.*/,
