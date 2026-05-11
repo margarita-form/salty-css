@@ -1,11 +1,14 @@
 import { saltyPlugin } from '@salty-css/webpack';
 
 type NextWebpackFNLike = (config: any, options: any) => any;
-interface NextConfigLike {
-  webpack?: null | undefined | NextWebpackFNLike;
-}
 
-export const withSaltyCss = <T extends NextConfigLike>(nextConfig: T): T => {
+type AnyRecord = Record<string, unknown>;
+
+type NextConfigLikeResult = {
+  webpack?: null | undefined | NextWebpackFNLike;
+};
+
+export const withSaltyCss = <T extends AnyRecord & NextConfigLikeResult>(nextConfig: T): T & NextConfigLikeResult => {
   const { webpack: incomingWebpack, ...rest } = nextConfig;
   return {
     ...rest,
@@ -17,7 +20,7 @@ export const withSaltyCss = <T extends NextConfigLike>(nextConfig: T): T => {
       }
       return config;
     },
-  } as T;
+  } as T & NextConfigLikeResult;
 };
 
 export default withSaltyCss;

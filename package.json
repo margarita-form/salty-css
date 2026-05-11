@@ -13,6 +13,7 @@
     "test:vite": "nx run vite:test",
     "test:react": "nx run react:test",
     "test:webpack": "nx run webpack:test",
+    "test:next": "nx run next:test",
     "build:react-testing": "nx run react-testing:build",
     "build:core": "nx run core:build",
     "build:react": "nx run react:build",
