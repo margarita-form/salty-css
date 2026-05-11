@@ -81,5 +81,8 @@
     "@salty-css/core": "^0.1.0-alpha.2",
     "clsx": ">=2.x",
     "react": ">=19.x || >=18.3.x"
+  },
+  "devDependencies": {
+    "@types/react-dom": "^19.2.3"
   }
 }
