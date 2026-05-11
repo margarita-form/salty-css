@@ -6,7 +6,8 @@ interface StyleFactory {
 
 export const mergeObjects = <T = any>(...styles: any[]): T => {
   return styles.flat().reduce((acc, style: any) => {
-    if (style?._current) return { ...acc, ...style._current };
+    if (!style || typeof style !== 'object') return acc;
+    if ('_current' in style && style._current && typeof style._current === 'object') return { ...acc, ...style._current };
     return { ...acc, ...style };
   }, {} as T);
 };
