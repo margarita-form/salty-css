@@ -25,5 +25,5 @@ export const styled = <const PROPS extends StyledComponentProps, const TAG exten
     props: CreateElementProps & Ref & Merge<ParentComponentProps<TAG> | VariantProps<STYLE_PARAMS>> & ValueProps & Omit<TagAttributes, keyof CreateElementProps>
   ) => ReactNode;
 
-  return fn as unknown as ComponentType & string;
+  return fn as unknown as ComponentType & string & { generator: StyledGenerator };
 };
