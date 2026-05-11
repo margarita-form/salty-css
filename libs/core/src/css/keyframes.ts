@@ -53,7 +53,7 @@ export const keyframes = ({ animationName: _name, params: _params, appendInitial
     const promises = entries.map(async ([key, value]) => {
       if (!value) return '';
       const styles = await parseAndJoinStyles(value, '');
-      const keyStr = typeof key === 'number' ? `${key}%` : key;
+      const keyStr = /^-?\d+$/.test(key) ? `${key}%` : key;
       return `${keyStr}{${styles}}`;
     });
 
