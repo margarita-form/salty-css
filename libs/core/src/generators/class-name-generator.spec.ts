@@ -23,3 +23,22 @@ describe('ClassNameGenerator', () => {
     expect(a.hash).toBe(b.hash);
   });
 });
+
+describe('ClassNameGenerator edge cases', () => {
+  it('coerces priority: 0 to 0 (sanity check around the truthy fallback)', () => {
+    const gen = new ClassNameGenerator({ priority: 0 });
+    expect(gen.priority).toBe(0);
+  });
+
+  it('does not clamp negative priorities (passes through unchanged)', () => {
+    const gen = new ClassNameGenerator({ priority: -3 });
+    expect(gen.priority).toBe(-3);
+  });
+
+  it('produces a stable hash even with empty params', () => {
+    const a = new ClassNameGenerator({});
+    const b = new ClassNameGenerator({});
+    expect(a.hash).toBeTruthy();
+    expect(a.hash).toBe(b.hash);
+  });
+});

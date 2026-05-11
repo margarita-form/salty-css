@@ -62,3 +62,38 @@ describe('MediaQueryFactory', () => {
     expect(String(factory.minWidth(100))).toBe('@media (min-width: 100px)');
   });
 });
+
+describe('MediaQueryFactory edge cases', () => {
+  it('emits 0px for a literal zero', () => {
+    expect(String(media.minWidth(0))).toBe('@media (min-width: 0px)');
+  });
+
+  it('does not validate NaN — emits NaNpx (documented quirk)', () => {
+    expect(String(media.minWidth(NaN))).toContain('NaNpx');
+  });
+
+  it('does not validate negative values — emits -100px (documented quirk)', () => {
+    expect(String(media.minWidth(-100))).toContain('-100px');
+  });
+
+  it('produces a trailing space when custom() receives an empty string', () => {
+    expect(String(media.custom(''))).toBe('@media ');
+  });
+
+  it('mixes .and and .or in a single chain', () => {
+    const result = String(media.dark.and.minWidth(700).or.maxWidth(400));
+    expect(result).toContain('(prefers-color-scheme: dark) and (min-width: 700px)');
+    expect(result).toContain(', (max-width: 400px)');
+  });
+
+  it('joins consecutive .and chains', () => {
+    const result = String(media.dark.and.minWidth(700).and.maxWidth(1200));
+    expect(result).toContain('and (min-width: 700px)');
+    expect(result).toContain('and (max-width: 1200px)');
+  });
+
+  it('returns a boxed String, so === against a primitive is false', () => {
+    expect((media.minWidth(768) as unknown) === '@media (min-width: 768px)').toBe(false);
+    expect(String(media.minWidth(768))).toBe('@media (min-width: 768px)');
+  });
+});

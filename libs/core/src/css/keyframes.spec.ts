@@ -68,3 +68,52 @@ describe('keyframes', () => {
     expect(animation.replace(/\s/g, '')).toContain('opacity:0');
   });
 });
+
+describe('keyframes edge cases', () => {
+  it('emits numeric integer keys as percentages (Bug 2 fix)', async () => {
+    const factory = keyframes({
+      animationName: 'pulse',
+      0: { opacity: 0 },
+      50: { opacity: 0.5 },
+      100: { opacity: 1 },
+    } as never);
+    const fn = (await factory()) as unknown as { css: string };
+    const css = fn.css.replace(/\s/g, '');
+    expect(css).toContain('0%{');
+    expect(css).toContain('50%{');
+    expect(css).toContain('100%{');
+  });
+
+  it('produces an empty @keyframes block for empty input', async () => {
+    const factory = keyframes({} as never);
+    const fn = (await factory()) as unknown as { css: string; animationName: string };
+    expect(fn.animationName).toBeTruthy();
+    expect(fn.css.replace(/\s/g, '')).toBe(`@keyframes${fn.animationName}{}`);
+  });
+
+  it('skips entries whose value is null', async () => {
+    const factory = keyframes({
+      animationName: 'fade',
+      from: null as never,
+      to: { opacity: 1 },
+    });
+    const fn = (await factory()) as unknown as { css: string };
+    const css = fn.css.replace(/\s/g, '');
+    expect(css).not.toContain('from{');
+    expect(css).toContain('to{');
+  });
+
+  it('falls back to a hash when animationName is an empty string', async () => {
+    const factory = keyframes({ animationName: '', from: { opacity: 0 } });
+    const fn = (await factory()) as unknown as { animationName: string };
+    expect(fn.animationName).toBeTruthy();
+    expect(fn.animationName).not.toBe('');
+  });
+
+  it('passes empty-string params through verbatim (documented quirk)', async () => {
+    const factory = keyframes({ animationName: 'fade', from: { opacity: 0 }, to: { opacity: 1 } });
+    const fn = (await factory({ duration: '' })) as unknown as () => Promise<string>;
+    const animation = await fn();
+    expect(animation).toBe('fade  ease-in-out 0s 1 normal forwards running');
+  });
+});

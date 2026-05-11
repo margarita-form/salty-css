@@ -42,3 +42,34 @@ describe('mergeFactories', () => {
     expect(mergeFactories([a, b])).toEqual({ foo: 9 });
   });
 });
+
+describe('mergeObjects edge cases', () => {
+  it('does not leak factory internals when _current is undefined', () => {
+    const factory = { _current: undefined, _children: { foo: 1 } };
+    expect(mergeObjects(factory, { y: 2 })).toEqual({ y: 2 });
+  });
+
+  it('does not leak factory internals when _current is null', () => {
+    const factory = { _current: null, _children: {} };
+    expect(mergeObjects(factory, { y: 2 })).toEqual({ y: 2 });
+  });
+
+  it('treats later factories as overrides', () => {
+    expect(mergeObjects({ _current: { x: 1 } }, { _current: { x: 9 } })).toEqual({ x: 9 });
+  });
+
+  it('returns an empty object with no inputs', () => {
+    expect(mergeObjects()).toEqual({});
+  });
+});
+
+describe('mergeFactories edge cases', () => {
+  it('returns an empty object with no inputs', () => {
+    expect(mergeFactories()).toEqual({});
+  });
+
+  it('does not throw when _children is undefined', () => {
+    const broken = [{ _current: {}, _children: undefined } as never];
+    expect(mergeFactories(broken)).toEqual({});
+  });
+});

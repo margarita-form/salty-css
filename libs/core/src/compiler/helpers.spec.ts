@@ -47,3 +47,39 @@ describe('isSaltyFile', () => {
     expect(isSaltyFile('baz.vanilla.ts')).toBe(false);
   });
 });
+
+describe('isSaltyFile edge cases', () => {
+  it('rejects a filename that ends in .salty with no trailing extension', () => {
+    expect(isSaltyFile('foo.salty')).toBe(false);
+  });
+
+  it('is case-sensitive', () => {
+    expect(isSaltyFile('FOO.SALTY.TS')).toBe(false);
+  });
+
+  it('matches anywhere in the filename', () => {
+    expect(isSaltyFile('foo.bar.salty.ts')).toBe(true);
+  });
+
+  it('matches when the salty segment starts the filename', () => {
+    expect(isSaltyFile('.salty.ts')).toBe(true);
+  });
+
+  it('requires a leading dot before the extension keyword', () => {
+    expect(isSaltyFile('foosalty.ts')).toBe(false);
+  });
+});
+
+describe('saltyFileRegExp escaping (Bug 4 fix)', () => {
+  it('does not interpret regex metacharacters in additional extensions (.*)', () => {
+    expect(saltyFileRegExp(['.*']).test('index.ts')).toBe(false);
+  });
+
+  it('does not let dots in additional extensions match arbitrary characters', () => {
+    expect(saltyFileRegExp(['foo.bar']).test('thing.fooXbar.ts')).toBe(false);
+  });
+
+  it('still matches the literal extension after escaping', () => {
+    expect(saltyFileRegExp(['foo.bar']).test('thing.foo.bar.ts')).toBe(true);
+  });
+});

@@ -84,3 +84,52 @@ describe('StylesGenerator', () => {
     expect(classes[0]?.length).toBe(2 + 4);
   });
 });
+
+describe('StylesGenerator edge cases', () => {
+  it('produces a stable hash even when params is empty', () => {
+    const a = new StylesGenerator({});
+    const b = new StylesGenerator({});
+    expect(a.hash).toBeTruthy();
+    expect(a.hash).toBe(b.hash);
+    expect(a.cssClassName).toBe(a.hash);
+    expect(a.classNames).toBe(a.hash);
+  });
+
+  it('returns no template classes when base is missing', () => {
+    const gen = new StylesGenerator({});
+    expect(gen.getTemplateClasses({ templates: { color: {} } } as never)).toEqual([]);
+  });
+
+  it('ignores className when it is not a string or array', () => {
+    const gen = new StylesGenerator({ base: { color: 'red' }, className: 42 as never });
+    expect(gen.classNames).toBe(gen.hash);
+  });
+
+  it('_withBuildContext fully replaces the previous context', () => {
+    const gen = new StylesGenerator({ base: { color: 'red' } });
+    gen._withBuildContext({ callerName: 'Old' });
+    gen._withBuildContext({});
+    expect(gen.buildContext.callerName).toBeUndefined();
+    expect(gen.cssFileName).toBe(`${gen.hash}.css`);
+  });
+
+  it('falls back to {hash}.css when callerName is an empty string', () => {
+    const gen = new StylesGenerator({ base: { color: 'red' } });
+    gen._withBuildContext({ callerName: '' });
+    expect(gen.cssFileName).toBe(`${gen.hash}.css`);
+  });
+
+  it('dash-cases unusual callerNames without throwing', () => {
+    const gen = new StylesGenerator({ base: { color: 'red' } });
+    gen._withBuildContext({ callerName: '__weird__Name' });
+    expect(gen.cssFileName.endsWith(`-${gen.hash}.css`)).toBe(true);
+    expect(gen.cssFileName.startsWith('cl_')).toBe(true);
+  });
+
+  it('honors an explicit override config in getTemplateClasses', () => {
+    const gen = new StylesGenerator({ base: { color: 'red' } });
+    gen._withBuildContext({ config: { templates: {} } as never });
+    const classes = gen.getTemplateClasses({ templates: { color: {} } } as never);
+    expect(classes).toHaveLength(1);
+  });
+});

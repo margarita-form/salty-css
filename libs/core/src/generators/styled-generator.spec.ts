@@ -95,3 +95,38 @@ describe('StyledGenerator clientProps', () => {
     expect(prod.clientProps.attr?.['data-component-name']).toBeUndefined();
   });
 });
+
+describe('StyledGenerator edge cases', () => {
+  it('treats null tagName as priority 0 (Bug 3 fix)', () => {
+    const gen = new StyledGenerator(null as never, {});
+    expect(gen.priority).toBe(0);
+  });
+
+  it('treats undefined tagName as priority 0', () => {
+    const gen = new StyledGenerator(undefined as never, {});
+    expect(gen.priority).toBe(0);
+  });
+
+  it('still increments priority for a function tagName with no .generator', () => {
+    const gen = new StyledGenerator((() => null) as never, {});
+    expect(gen.priority).toBe(1);
+  });
+
+  it('returns no propValueKeys for {props.} with no name after the dot', () => {
+    const gen = new StyledGenerator('div', { base: { color: '{props.}' } as never });
+    expect(gen.clientProps.propValueKeys).toEqual([]);
+  });
+
+  it('extracts multiple {props.X} references in a single base value', () => {
+    const gen = new StyledGenerator('div', { base: { color: '{props.fooBar}{props.bazQux}' } as never });
+    const keys = gen.clientProps.propValueKeys ?? [];
+    expect(keys).toContain('foo-bar');
+    expect(keys).toContain('baz-qux');
+  });
+
+  it('emits no data-component-name when callerName is missing in dev mode', () => {
+    const gen = new StyledGenerator('div', {});
+    gen._withBuildContext({ isProduction: false });
+    expect(gen.clientProps.attr?.['data-component-name']).toBeUndefined();
+  });
+});
