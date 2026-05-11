@@ -14,6 +14,7 @@
     "test:react": "nx run react:test",
     "test:webpack": "nx run webpack:test",
     "test:next": "nx run next:test",
+    "test:all": "nx run-many --target=test --projects core vite react webpack next",
     "build:react-testing": "nx run react-testing:build",
     "build:core": "nx run core:build",
     "build:react": "nx run react:build",
