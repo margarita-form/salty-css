@@ -17,6 +17,9 @@ export const resolveExportValue = async <T>(value: unknown, maxLevel = 10, _leve
 
 export const saltyFileExtensions = ['salty', 'css', 'styles', 'styled'];
 
-export const saltyFileRegExp = (additional: string[] = []) => new RegExp(`\\.(${[...saltyFileExtensions, ...additional].join('|')})\\.`);
+const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+export const saltyFileRegExp = (additional: string[] = []) =>
+  new RegExp(`\\.(${[...saltyFileExtensions, ...additional].map(escapeRegExp).join('|')})\\.`);
 
 export const isSaltyFile = (file: string, additional: string[] = []) => saltyFileRegExp(additional).test(file);
