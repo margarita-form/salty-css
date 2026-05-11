@@ -1,0 +1,10 @@
+{
+  "defaultProject": ".",
+  "projects": [
+    {
+      "dir": ".",
+      "framework": "react",
+      "components": "components"
+    }
+  ]
+}

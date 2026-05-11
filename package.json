@@ -12,7 +12,7 @@
     "test:core": "nx run core:test",
     "test:vite": "nx run vite:test",
     "test:react": "nx run react:test",
-    "test:all": "nx run-many --target=test --projects core vite react",
+    "test:webpack": "nx run webpack:test",
     "build:react-testing": "nx run react-testing:build",
     "build:core": "nx run core:build",
     "build:react": "nx run react:build",
