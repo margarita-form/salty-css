@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/webpack",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -34,7 +34,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.1.0-alpha.1",
+    "@salty-css/core": "^0.1.0-alpha.2",
     "webpack": ">=5.x"
   },
   "peerDependencies": {
