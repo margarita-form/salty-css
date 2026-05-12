@@ -5,6 +5,7 @@ interface ClassNameMethods<STYLE_PARAMS extends StyledParams> {
   generator: ClassNameGenerator<STYLE_PARAMS>;
   isClassName: boolean;
   variant: (name: string, value: string) => string & ClassNameFunction<STYLE_PARAMS>;
+  variants: (variants: Record<string, string>) => string & ClassNameFunction<STYLE_PARAMS>;
 }
 
 type ClassNameFunction<STYLE_PARAMS extends StyledParams> = string & ClassNameMethods<STYLE_PARAMS>;
@@ -20,6 +21,14 @@ export const className = <const STYLE_PARAMS extends StyledParams>(params: STYLE
       variant: (name: string, value: string) => {
         const variantClass = `${name}-${value}`;
         const combinedClass = `${str} ${variantClass}`;
+        return createClass(combinedClass);
+      },
+      variants: (variants: Record<string, string>) => {
+        const variantClasses = Object.entries(variants).reduce((acc, [name, value]) => {
+          acc += ` ${name}-${value}`;
+          return acc;
+        }, '');
+        const combinedClass = `${str}${variantClasses}`.trim();
         return createClass(combinedClass);
       },
       generator,

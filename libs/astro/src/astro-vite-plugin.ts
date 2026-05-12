@@ -37,30 +37,18 @@ export const saltyPlugin = (dir: string): PluginOption => {
             const config = JSON.parse(configFileContent);
             const { clientProps = {}, classNames = '', tagIsComponent, tagName = 'div' } = config;
 
-            const imports: string[] = config.imports || [];
-            const element = tagIsComponent ? tagName : `props.element || "${clientProps.element || tagName}"`;
+            const userImports: string[] = config.imports || [];
+            const imports = ["import { resolveAstroProps } from '@salty-css/astro/element-props';", ...userImports];
 
-            let propsAttr = '';
-            if (clientProps.element && tagIsComponent) propsAttr += ` element="${clientProps.element}"`;
-            if (clientProps.attr) for (const [key, value] of Object.entries<string>(clientProps.attr)) propsAttr += ` ${key}="${value}"`;
-            propsAttr = propsAttr.trim();
-
-            const variantKeys = clientProps.variantKeys || [];
+            const elementExpr = tagIsComponent ? tagName : `__r.element || ${JSON.stringify(clientProps.element || tagName)}`;
 
             const result = `---
             ${imports.join('\n')}
-            const { props } = Astro;
-            const Element = ${element};
-            const variantClasses = [
-              ${variantKeys
-                .map((key: string) => {
-                  const [name, defaultValue] = key.split('=');
-                  return `props.${name} !== undefined ? "${name}-" + props.${name} : ${defaultValue !== undefined ? `"${name}-${defaultValue}"` : '""'}`;
-                })
-                .join(',\n')}
-            ]
+            const __gp = ${JSON.stringify(clientProps)};
+            const __r = resolveAstroProps(Astro.props, __gp, ${JSON.stringify(classNames)});
+            const Element = ${elementExpr};
             ---
-            <Element class:list={["${classNames}", ...variantClasses, props.class]} ${propsAttr} {...props}><slot/></Element>`;
+            <Element class:list={__r.class} style={__r.style} {...__r.rest}><slot/></Element>`;
             return result;
           } catch (error) {
             console.error('Error parsing config file:', error);

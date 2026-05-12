@@ -48,6 +48,18 @@
       "import": "./class-name.js",
       "require": "./class-name.cjs"
     },
+    "./element-props": {
+      "import": "./element-props.js",
+      "require": "./element-props.cjs"
+    },
+    "./dynamic-styles": {
+      "import": "./dynamic-styles.js",
+      "require": "./dynamic-styles.cjs"
+    },
+    "./runtime": {
+      "import": "./runtime.js",
+      "require": "./runtime.cjs"
+    },
     "./keyframes": {
       "import": "./keyframes.js",
       "require": "./keyframes.cjs"
