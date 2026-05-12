@@ -57,6 +57,7 @@ export default defineConfig({
         'css/media': 'src/css/media.ts',
         'css/token': 'src/css/token.ts',
         'css/merge': 'src/css/merge.ts',
+        'css/dynamic-styles': 'src/css/dynamic-styles.ts',
         'helpers/index': 'src/helpers/index.ts',
         'generators/index': 'src/generators/index.ts',
         'parsers/index': 'src/parsers/index.ts',
