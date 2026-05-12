@@ -91,3 +91,57 @@ export const DifferentElement = styled('section', {
     },
   },
 });
+
+// Exercises defaultVariants + variant key stripping (mood should not leak as a HTML attr)
+export const DefaultVariantBox = styled('div', {
+  base: {
+    padding: '10px',
+    border: '1px solid currentColor',
+  },
+  variants: {
+    mood: {
+      warm: { color: 'tomato' },
+      cool: { color: 'steelblue' },
+    },
+  },
+  defaultVariants: {
+    mood: 'cool',
+  },
+});
+
+// Exercises propValueKeys: consumer passes css-spacing and it becomes --props-spacing
+export const SpacingBox = styled('div', {
+  base: {
+    padding: '{props.spacing}',
+    background: 'lightyellow',
+    color: 'black',
+  },
+});
+
+// Exercises passProps: data-foo should be the only variant-like key that survives
+export const PassPropsBox = styled('div', {
+  base: { padding: '10px', background: 'lavender' },
+  passProps: ['data-foo'],
+  variants: {
+    tone: {
+      a: { color: 'darkred' },
+      b: { color: 'darkblue' },
+    },
+  },
+});
+
+// Exercises a nested styled chain: outer's `size` and inner's `mood` must both
+// be stripped at their own levels so neither shows up as a raw HTML attribute.
+export const ChainedBox = styled(DefaultVariantBox, {
+  base: {
+    margin: '10px',
+    background: '#222',
+    color: 'white',
+  },
+  variants: {
+    size: {
+      sm: { padding: '4px' },
+      lg: { padding: '24px' },
+    },
+  },
+});

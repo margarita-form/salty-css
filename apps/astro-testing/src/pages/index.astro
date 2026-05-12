@@ -1,6 +1,6 @@
 ---
 import '../saltygen/index.css';
-import { Button, Container, justClass, RandomValue, CyanContainer, UrlBox, Wrapper, DifferentElement } from '../components/wrapper.css';
+import { Button, Container, justClass, RandomValue, CyanContainer, UrlBox, Wrapper, DifferentElement, DefaultVariantBox, SpacingBox, PassPropsBox, ChainedBox } from '../components/wrapper.css';
 
 Astro.locals.random = Math.random();
 
@@ -26,5 +26,10 @@ const cyanClass = justClass.variant('color', 'cyan');
     <div class={cyanClass}>Cyan class works</div>
     <DifferentElement> Different Element works </DifferentElement>
     <DifferentElement element="div"> Different Element as div works </DifferentElement>
+    <DefaultVariantBox> Default variant box (cool by default) </DefaultVariantBox>
+    <DefaultVariantBox mood="warm"> Default variant box (warm explicit) </DefaultVariantBox>
+    <SpacingBox css-spacing="20px"> SpacingBox with css-spacing=20px </SpacingBox>
+    <PassPropsBox tone="a" data-foo="kept"> PassPropsBox: data-foo kept, tone stripped </PassPropsBox>
+    <ChainedBox size="lg" mood="warm"> Chained styled: both size and mood stripped </ChainedBox>
   </body>
 </html>
