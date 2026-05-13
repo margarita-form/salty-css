@@ -1,0 +1,13 @@
+---
+import { <%- styledComponentName %> } from './<%- fileName %>.css';
+
+interface Props {
+  text?: string;
+}
+
+const { text = 'Lorem ipsum' } = Astro.props;
+---
+
+<<%- styledComponentName %>>
+  {text}
+</<%- styledComponentName %>>

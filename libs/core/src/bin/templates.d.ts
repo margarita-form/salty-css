@@ -6,3 +6,7 @@ declare module '*.css__template' {
   const content: string;
   export default content;
 }
+declare module '*.astro__template' {
+  const content: string;
+  export default content;
+}

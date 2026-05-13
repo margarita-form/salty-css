@@ -1,0 +1,8 @@
+import { styled } from "@salty-css/astro/styled";
+
+export const <%- name %> = styled('<%- tag %>', {
+  <% if(className) { %>className: '<%- className %>',<% } %>
+  base: {
+    // Add your styles here
+  }
+})
