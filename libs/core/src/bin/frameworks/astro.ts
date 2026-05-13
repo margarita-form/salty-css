@@ -22,6 +22,7 @@ const hasAstroDependency = (ctx: ProjectContext): boolean => {
 
 export const astroFramework: FrameworkAdapter = {
   name: 'astro',
+  srcDirectory: 'src',
   detect: (ctx) => Boolean(findAstroConfig(ctx.projectDir)) || hasAstroDependency(ctx),
   runtimePackage: (version) => `@salty-css/astro@${version}`,
   templates: {

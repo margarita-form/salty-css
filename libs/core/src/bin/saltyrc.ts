@@ -3,6 +3,7 @@ import { join } from 'path';
 import { RCFile } from '../types/cli-types';
 import { formatWithPrettier } from './prettier';
 import { logger } from './logger';
+import { FrameworkAdapter } from './frameworks';
 
 export const SALTYRC_FILENAME = '.saltyrc.json';
 export const SALTYRC_SCHEMA = './node_modules/@salty-css/core/.saltyrc.schema.json';
@@ -42,23 +43,24 @@ export const getDefaultProject = async (rootDir: string = process.cwd()): Promis
 export const upsertProjectInRc = (
   existingRaw: string | undefined,
   relativeProjectPath: string,
-  framework: string
+  framework: FrameworkAdapter
 ): { content: string; changed: boolean; created: boolean } => {
+  const projectPath = join(relativeProjectPath, framework.srcDirectory);
   if (existingRaw === undefined) {
     const fresh = {
       $schema: SALTYRC_SCHEMA,
       info: SALTYRC_INFO,
-      defaultProject: relativeProjectPath,
-      projects: [{ dir: relativeProjectPath, framework } satisfies ProjectEntry],
+      defaultProject: projectPath,
+      projects: [{ dir: projectPath, framework: framework.name } satisfies ProjectEntry],
     };
     return { content: JSON.stringify(fresh, null, 2), changed: true, created: true };
   }
 
   const rc = JSON.parse(existingRaw) as RCFile;
   const projects = (rc.projects || []) as ProjectEntry[];
-  const exists = projects.some((p) => p.dir === relativeProjectPath);
+  const exists = projects.some((p) => p.dir === projectPath);
   if (exists) return { content: existingRaw, changed: false, created: false };
-  projects.push({ dir: relativeProjectPath, framework });
+  projects.push({ dir: projectPath, framework: framework.name });
   rc.projects = [...projects];
   const next = JSON.stringify(rc, null, 2);
   return { content: next, changed: next !== existingRaw, created: false };
@@ -68,9 +70,9 @@ export const upsertProjectInRc = (
  * Writes the saltyrc file, creating or updating the project entry for the given dir.
  * Returns true when a write occurred.
  */
-export const writeProjectToRc = async (rootDir: string, relativeProjectPath: string, framework: string): Promise<boolean> => {
-  const path = saltyrcPath(rootDir);
-  const existing = await readRawRc(rootDir);
+export const writeProjectToRc = async (cwd: string, relativeProjectPath: string, framework: FrameworkAdapter): Promise<boolean> => {
+  const path = saltyrcPath(cwd);
+  const existing = await readRawRc(cwd);
   const { content, changed, created } = upsertProjectInRc(existing, relativeProjectPath, framework);
   if (!changed) return false;
   if (created) logger.info('Creating file: ' + path);

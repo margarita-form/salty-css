@@ -17,7 +17,7 @@ import {
 } from '../integrations';
 
 const makeCtx = (projectDir: string): ProjectContext => ({
-  rootDir: projectDir,
+  cwd: projectDir,
   projectDir,
   relativeProjectPath: '.',
   packageJson: undefined,
@@ -56,8 +56,8 @@ describe('vite integration', () => {
     const input = `import { defineConfig } from 'vite';\nexport default defineConfig({ plugins: [react()] })\n`;
     const { content } = editViteConfig(input);
     expect(content).not.toBeNull();
-    expect(content!).toContain("import { saltyPlugin } from '@salty-css/vite';");
-    expect(content!).toContain('saltyPlugin(__dirname),');
+    expect(content).toContain("import { saltyPlugin } from '@salty-css/vite';");
+    expect(content).toContain('saltyPlugin(__dirname),');
   });
 
   it('editViteConfig is a no-op when saltyPlugin is already present', () => {
@@ -89,23 +89,23 @@ describe('next integration', () => {
     const input = `export default { reactStrictMode: true };\n`;
     const { content } = editNextConfig(input);
     expect(content).not.toBeNull();
-    expect(content!).toContain("import { withSaltyCss } from '@salty-css/next';");
-    expect(content!).toContain('export default withSaltyCss({ reactStrictMode: true })');
+    expect(content).toContain("import { withSaltyCss } from '@salty-css/next';");
+    expect(content).toContain('export default withSaltyCss({ reactStrictMode: true })');
   });
 
   it('wraps a CJS module.exports with withSaltyCss', () => {
     const input = `module.exports = { reactStrictMode: true };\n`;
     const { content } = editNextConfig(input);
     expect(content).not.toBeNull();
-    expect(content!).toContain("const { withSaltyCss } = require('@salty-css/next');");
-    expect(content!).toContain('module.exports = withSaltyCss({ reactStrictMode: true })');
+    expect(content).toContain("const { withSaltyCss } = require('@salty-css/next');");
+    expect(content).toContain('module.exports = withSaltyCss({ reactStrictMode: true })');
   });
 
   it('prepends withSaltyCss to an NX-style plugins array', () => {
     const input = `module.exports = { reactStrictMode: true };\n const plugins = [withNx()];\n`;
     const { content } = editNextConfig(input);
     expect(content).not.toBeNull();
-    expect(content!).toContain('= [withSaltyCss,withNx()]');
+    expect(content).toContain('= [withSaltyCss,withNx()]');
   });
 
   it('is a no-op when withSaltyCss is already present', () => {
@@ -143,9 +143,9 @@ describe('astro integration', () => {
     const { content, warning } = editAstroConfig(input);
     expect(warning).toBeUndefined();
     expect(content).not.toBeNull();
-    expect(content!).toContain("import saltyIntegration from '@salty-css/astro/integration';");
-    expect(content!).toContain('saltyIntegration()');
-    expect(content!).toContain('react()');
+    expect(content).toContain("import saltyIntegration from '@salty-css/astro/integration';");
+    expect(content).toContain('saltyIntegration()');
+    expect(content).toContain('react()');
   });
 
   it('editAstroConfig injects an integrations array when none exists', () => {
@@ -153,7 +153,7 @@ describe('astro integration', () => {
     const { content, warning } = editAstroConfig(input);
     expect(warning).toBeUndefined();
     expect(content).not.toBeNull();
-    expect(content!).toContain('integrations: [saltyIntegration()]');
+    expect(content).toContain('integrations: [saltyIntegration()]');
   });
 
   it('editAstroConfig is a no-op when @salty-css/astro is already imported', () => {
@@ -199,15 +199,16 @@ describe('eslint integration', () => {
     const { content, warning } = editEslintConfig(input, true);
     expect(warning).toBeUndefined();
     expect(content).not.toBeNull();
-    expect(content!).toContain('import saltyCss from "@salty-css/eslint-config-core/flat";');
-    expect(content!).toContain('export default [ saltyCss,');
+    expect(content).toContain('import saltyCss from "@salty-css/eslint-config-core/flat";');
+    expect(content).toContain('export default [ saltyCss,');
   });
 
   it('editEslintConfig (json) appends @salty-css/core to extends', () => {
     const input = JSON.stringify({ extends: ['other'] });
     const { content } = editEslintConfig(input, false);
     expect(content).not.toBeNull();
-    const parsed = JSON.parse(content!);
+    if (!content) throw new Error('Expected content to be non-null');
+    const parsed = JSON.parse(content);
     expect(parsed.extends).toEqual(['other', '@salty-css/core']);
   });
 

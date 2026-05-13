@@ -14,6 +14,8 @@ export interface ComponentTemplates {
 
 export interface FrameworkAdapter {
   name: FrameworkName;
+  /** The path to the framework's source files. */
+  srcDirectory: string;
   /** True when this framework matches the project. Adapters are evaluated in registry order. */
   detect(ctx: ProjectContext): Promise<boolean> | boolean;
   /** The runtime npm spec to install for this framework, e.g. `@salty-css/react@1.2.3`. */

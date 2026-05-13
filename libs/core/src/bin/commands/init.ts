@@ -97,8 +97,8 @@ export const registerInitCommand = (program: Command): void => {
         await mkdir(ctx.projectDir, { recursive: true });
         await Promise.all(projectFiles.map(({ fileName, content }) => writeProjectFile(ctx.projectDir, fileName, content)));
 
-        await writeProjectToRc(ctx.rootDir, ctx.relativeProjectPath, framework.name);
-        await ensureGitignoreSaltygen(ctx.rootDir);
+        await writeProjectToRc(ctx.cwd, ctx.relativeProjectPath, framework);
+        await ensureGitignoreSaltygen(ctx.cwd);
         await importSaltygenIntoCss(ctx.projectDir, opts.cssFile);
 
         await detectAndApplyIntegrations(ctx);

@@ -64,7 +64,7 @@ export const editEslintConfig = (existing: string, isJsFlat: boolean): ConfigEdi
 export const eslintIntegration: BuildIntegrationAdapter = {
   name: 'eslint',
   detect: (ctx) => {
-    const candidates = eslintConfigCandidates(ctx.projectDir, ctx.rootDir);
+    const candidates = eslintConfigCandidates(ctx.projectDir, ctx.cwd);
     return candidates.find((p) => existsSync(p)) ?? null;
   },
   apply: async (ctx, configPath) => {

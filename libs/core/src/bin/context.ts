@@ -4,7 +4,7 @@ import { PackageJson, readPackageJson, readThisPackageJson } from './package-jso
 import { readRc } from './saltyrc';
 
 export interface ProjectContext {
-  rootDir: string;
+  cwd: string;
   projectDir: string;
   relativeProjectPath: string;
   packageJson?: PackageJson;
@@ -26,20 +26,20 @@ export interface BuildContextOptions {
 }
 
 export const buildContext = async (opts: BuildContextOptions): Promise<ProjectContext> => {
-  const rootDir = process.cwd();
-  const projectDir = resolveProjectDir(opts.dir, rootDir);
-  const relativeProjectPath = relative(rootDir, projectDir) || '.';
+  const cwd = process.cwd();
+  const projectDir = resolveProjectDir(opts.dir, cwd);
+  const relativeProjectPath = relative(cwd, projectDir) || '.';
 
   const packageJson = await readPackageJson().catch(() => undefined);
   if (opts.requirePackageJson !== false && !packageJson) {
     throw new Error('Salty CSS project must be initialized in a directory with a package.json file.');
   }
 
-  const rcFile = await readRc(rootDir);
+  const rcFile = await readRc(cwd);
   const cliPackageJson = await readThisPackageJson();
 
   return {
-    rootDir,
+    cwd,
     projectDir,
     relativeProjectPath,
     packageJson,
