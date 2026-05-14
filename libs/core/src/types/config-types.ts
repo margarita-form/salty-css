@@ -87,6 +87,15 @@ export interface SaltyConfig {
   externalModules?: ('react' | 'react-dom' | OrString)[];
 
   /**
+   * Controls how the parser reacts to suspicious or malformed input
+   * (typos, invalid value types, malformed selectors, etc.).
+   * - `true` — throw on issues (recommended for new projects)
+   * - `'warn'` — log a warning and continue
+   * - `false` / undefined — silent, behave like prior versions
+   */
+  strict?: boolean | 'warn';
+
+  /**
    * default unit for px based properties when providing a number value. Default is 'px'.
    */
   defaultUnit?:
@@ -116,6 +125,7 @@ export interface CachedConfig {
   staticVariables: Record<string, any>;
   mediaQueries: Record<string, string>;
   modifiers?: CssModifiers;
+  strict?: boolean | 'warn';
 
   // Testing
   templatePaths: { [key: string]: string };

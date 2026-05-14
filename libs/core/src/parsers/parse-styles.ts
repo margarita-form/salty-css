@@ -6,6 +6,8 @@ import { parseValueTokens } from './parse-tokens';
 import { addUnit } from './unit-check';
 import { propertyNameCheck } from './property-name-check';
 import { StyleValueModifierFunction } from './parser-types';
+import { reportParserIssue, StrictMode } from './strict';
+import { bareAtRuleRegex, pseudoTypoRegex, templateLiteralLeftoverRegex } from './parser-regexes';
 
 /**
  * Transform styles object to css string with or without scope
@@ -26,6 +28,7 @@ export const parseStyles = async <T extends object>(
   if (!styles) throw new Error('No styles provided to parseStyles function!');
   const cssStyles = new Set<string>();
   const entries = Object.entries(styles);
+  const strict: StrictMode = (config as { strict?: StrictMode } | undefined)?.strict;
 
   const processStyleEntry = async ([key, value]: [key: string, any]) => {
     const _key = key.trim().replace(/^\?+/g, '');
@@ -34,7 +37,14 @@ export const parseStyles = async <T extends object>(
     const toString = (val: unknown, eol = ';') => `${propertyName}:${val}${eol}`;
     const context = { scope: currentScope, config }; // todo, add typing and add custom context options
 
-    if (typeof value === 'function') return processStyleEntry([key, value(context)]);
+    if (typeof value === 'function') {
+      try {
+        return await processStyleEntry([key, value(context)]);
+      } catch (error) {
+        reportParserIssue(strict, `Function value for "${_key}" threw: ${(error as Error)?.message ?? error}`);
+        return undefined;
+      }
+    }
     if (value instanceof Promise) return processStyleEntry([key, await value]);
 
     if (config?.templates && config.templatePaths?.[_key]) {
@@ -66,6 +76,13 @@ export const parseStyles = async <T extends object>(
       }
       console.warn(`Template "${_key}" with path of "${value}" was not found in config!`);
       return undefined;
+    }
+
+    // Array values — coerce by comma-joining so e.g. `boxShadow: ['a', 'b']`
+    // becomes "a, b" instead of being iterated as a numeric-keyed object.
+    if (Array.isArray(value)) {
+      if (value.length === 0) return undefined;
+      return processStyleEntry([key, value.join(', ')]);
     }
 
     if (typeof value === 'object') {
@@ -108,7 +125,6 @@ export const parseStyles = async <T extends object>(
             return `.${prop}-${val}`;
           });
           const scope = `${currentScope}:where(${scopes.join(', ')})`;
-          console.log(`Union variant scope: ${scope}`);
           const results = await parseStyles(css as T, scope, config);
           results.forEach((res) => cssStyles.add(res));
         }
@@ -116,11 +132,21 @@ export const parseStyles = async <T extends object>(
       }
 
       if (_key.startsWith('@')) {
+        if (bareAtRuleRegex.test(_key)) reportParserIssue(strict, `At-rule "${_key}" is missing its condition (e.g. "@media (min-width: 600px)").`);
+
         const mediaQuery = config?.mediaQueries?.[_key] || _key;
         const results = await parseAndJoinStyles(value, currentScope, config);
         const query = `${mediaQuery} { ${results} }`;
         cssStyles.add(query);
         return undefined;
+      }
+
+      // Empty nested object — nothing to emit; avoid recursing to keep the
+      // output clean and prevent an empty `selector { }` rule.
+      if (Object.keys(value).length === 0) return undefined;
+
+      if (pseudoTypoRegex.test(_key)) {
+        reportParserIssue(strict, `Selector "${_key}" looks like a missing-colon typo (did you mean "&:${_key.slice(1)}"?).`);
       }
 
       const scope = combineSelectors(currentScope, _key);
@@ -129,13 +155,45 @@ export const parseStyles = async <T extends object>(
       return undefined;
     }
 
+    // Property-name sanity check (these only ever produce broken CSS, so we
+    // skip emission in addition to reporting under strict mode).
+    if (_key.startsWith('$')) {
+      reportParserIssue(strict, `Property key "${_key}" looks like a SCSS variable — Salty does not support those.`);
+      return undefined;
+    }
+    if (_key.includes(':')) {
+      reportParserIssue(strict, `Property key "${_key}" contains a colon — did you accidentally paste a whole declaration as a key?`);
+      return undefined;
+    }
+
+    if (value === undefined || value === null) {
+      reportParserIssue(strict, `Property "${_key}" has a ${value === undefined ? 'undefined' : 'null'} value — skipping.`);
+      return undefined;
+    }
+    if (typeof value === 'boolean') {
+      reportParserIssue(strict, `Property "${_key}" has a boolean value (${value}) — skipping.`);
+      return undefined;
+    }
+    if (value === '') return undefined;
+
     if (typeof value === 'number') {
+      if (!Number.isFinite(value)) {
+        reportParserIssue(strict, `Property "${_key}" has a non-finite numeric value (${value}) — skipping.`);
+        return undefined;
+      }
       const withUnit = addUnit(propertyName, value, config);
       return toString(withUnit);
     }
     if (typeof value !== 'string') {
-      if ('toString' in value) value = value.toString();
-      else throw new Error(`Invalid value type for property ${propertyName}`);
+      if (value && typeof value === 'object' && 'toString' in value) value = (value as { toString(): string }).toString();
+      else {
+        reportParserIssue(strict, `Property "${_key}" has an unsupported value type (${typeof value}) — skipping.`);
+        return undefined;
+      }
+    }
+
+    if (typeof value === 'string' && templateLiteralLeftoverRegex.test(value)) {
+      reportParserIssue(strict, `Property "${_key}" value "${value}" contains an unresolved \`\${...}\` — did you forget to interpolate?`);
     }
 
     return toString(value);
@@ -221,8 +279,9 @@ const combineSelectors = (currentScope: string, key: string): string => {
   if (!currentScope) return key;
   const parents = splitTopLevelCommas(currentScope);
   const children = splitTopLevelCommas(key);
+  if (!children.length) return currentScope;
   if (parents.length <= 1 && children.length <= 1) {
-    return joinSelector(currentScope, key);
+    return joinSelector(parents[0] ?? currentScope, children[0]);
   }
   const combos: string[] = [];
   for (const p of parents) {

@@ -8,7 +8,7 @@ export const parseValueTokens =
     const hasToken = /\{[^{}]+\}/g.test(value);
     if (!hasToken) return undefined;
     const transformed = value.replace(/\{([^{}]+)\}/g, (...args) => {
-      const variable = dashCase(args[1].replaceAll('.', '-'));
+      const variable = dashCase(args[1].trim().replaceAll('.', '-'));
       if (tokenNames && !tokenNames.includes(variable)) console.warn(`Token ${variable} might not exist`);
       if (variable.startsWith('-')) return `-${variable}`;
       return `var(--${variable})`;
