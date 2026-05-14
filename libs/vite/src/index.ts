@@ -1,9 +1,16 @@
 import { isSaltyFile } from '@salty-css/core/compiler/helpers';
-import { SaltyCompiler } from '@salty-css/core/compiler/salty-compiler';
+import { SaltyCompiler, SaltyCompilerMode } from '@salty-css/core/compiler/salty-compiler';
 import { checkShouldRestart } from '@salty-css/core/server';
 import { PluginOption } from 'vite';
 
 type SaltyFileTransform = (compiler: SaltyCompiler, file: string) => Promise<string | undefined>;
+
+export interface SaltyVitePluginOptions {
+  /**
+   * Explicit build mode. Defaults to NODE_ENV-based detection.
+   */
+  mode?: SaltyCompilerMode;
+}
 
 const loadFrameworkTransform = async (framework: string | undefined): Promise<SaltyFileTransform> => {
   if (framework === 'react' || framework === undefined) {
@@ -14,8 +21,8 @@ const loadFrameworkTransform = async (framework: string | undefined): Promise<Sa
   throw new Error(`@salty-css/vite: framework "${framework}" is not supported. Supported: react.`);
 };
 
-export const saltyPlugin = (dir: string): PluginOption => {
-  const saltyCompiler = new SaltyCompiler(dir);
+export const saltyPlugin = (dir: string, options: SaltyVitePluginOptions = {}): PluginOption => {
+  const saltyCompiler = new SaltyCompiler(dir, { mode: options.mode });
 
   let transformPromise: Promise<SaltyFileTransform> | undefined;
   const getTransform = () => {

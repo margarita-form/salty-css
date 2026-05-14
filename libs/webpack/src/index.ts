@@ -3,17 +3,24 @@ import { resolve } from 'path';
 import { checkShouldRestart } from '@salty-css/core/server';
 import { watch } from 'fs';
 import { isSaltyFile, saltyFileRegExp } from '@salty-css/core/compiler/helpers';
-import { SaltyCompiler } from '@salty-css/core/compiler/salty-compiler';
+import { SaltyCompiler, SaltyCompilerMode } from '@salty-css/core/compiler/salty-compiler';
 
-export const saltyPlugin = (config: Configuration, dir: string, isServer = false, cjs = false) => {
-  const saltyCompiler = new SaltyCompiler(dir);
+export interface SaltyWebpackPluginOptions {
+  /**
+   * Explicit build mode. Defaults to NODE_ENV-based detection.
+   */
+  mode?: SaltyCompilerMode;
+}
+
+export const saltyPlugin = (config: Configuration, dir: string, isServer = false, cjs = false, options: SaltyWebpackPluginOptions = {}) => {
+  const saltyCompiler = new SaltyCompiler(dir, { mode: options.mode });
 
   config.module?.rules?.push({
     test: saltyFileRegExp(),
     use: [
       {
         loader: resolve(__dirname, cjs ? './loader.cjs' : './loader.js'),
-        options: { dir },
+        options: { dir, mode: options.mode },
       },
     ],
   });

@@ -1,15 +1,22 @@
 import { isSaltyFile } from '@salty-css/core/compiler/helpers';
 import { getFunctionRange } from '@salty-css/core/compiler/get-function-range';
 import { resolveExportValue } from '@salty-css/core/compiler/helpers';
-import { SaltyCompiler } from '@salty-css/core/compiler/salty-compiler';
+import { SaltyCompiler, SaltyCompilerMode } from '@salty-css/core/compiler/salty-compiler';
 import { checkShouldRestart } from '@salty-css/core/server';
 import { toHash } from '@salty-css/core/util';
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { PluginOption } from 'vite';
 
-export const saltyPlugin = (dir: string): PluginOption => {
-  const saltyCompiler = new SaltyCompiler(dir);
+export interface SaltyAstroPluginOptions {
+  /**
+   * Explicit build mode. Defaults to NODE_ENV-based detection.
+   */
+  mode?: SaltyCompilerMode;
+}
+
+export const saltyPlugin = (dir: string, options: SaltyAstroPluginOptions = {}): PluginOption => {
+  const saltyCompiler = new SaltyCompiler(dir, { mode: options.mode });
 
   return {
     name: 'stylegen',
@@ -78,7 +85,7 @@ export const saltyPlugin = (dir: string): PluginOption => {
             if (resolved.isClassName) {
               const generator = resolved.generator._withBuildContext({
                 callerName: name,
-                isProduction: false,
+                isProduction: saltyCompiler.isProduction,
                 config: {},
               });
 
@@ -97,7 +104,7 @@ export const saltyPlugin = (dir: string): PluginOption => {
 
             const generator = resolved.generator._withBuildContext({
               callerName: name,
-              isProduction: false,
+              isProduction: saltyCompiler.isProduction,
               config: {},
             });
 

@@ -1,8 +1,9 @@
 import type { LoaderContext } from 'webpack';
-import { SaltyCompiler } from '@salty-css/core/compiler/salty-compiler';
+import { SaltyCompiler, SaltyCompilerMode } from '@salty-css/core/compiler/salty-compiler';
 
 interface SaltyLoaderOptions {
   dir: string;
+  mode?: SaltyCompilerMode;
 }
 
 type WebpackLoaderThis = LoaderContext<SaltyLoaderOptions>;
@@ -21,11 +22,12 @@ const loadFrameworkTransform = async (framework: string | undefined): Promise<Sa
   throw new Error(`@salty-css/webpack: framework "${framework}" is not supported. Supported: react.`);
 };
 
-const getCompiler = (dir: string) => {
-  let compiler = dirCompilerCache.get(dir);
+const getCompiler = (dir: string, mode?: SaltyCompilerMode) => {
+  const cacheKey = `${dir}|${mode ?? ''}`;
+  let compiler = dirCompilerCache.get(cacheKey);
   if (!compiler) {
-    compiler = new SaltyCompiler(dir);
-    dirCompilerCache.set(dir, compiler);
+    compiler = new SaltyCompiler(dir, { mode });
+    dirCompilerCache.set(cacheKey, compiler);
   }
   return compiler;
 };
@@ -40,9 +42,9 @@ const getTransform = (compiler: SaltyCompiler) => {
 };
 
 export default async function (this: WebpackLoaderThis) {
-  const { dir } = this.getOptions();
+  const { dir, mode } = this.getOptions();
   const { resourcePath } = this;
-  const saltyCompiler = getCompiler(dir);
+  const saltyCompiler = getCompiler(dir, mode);
   await saltyCompiler.generateFile(resourcePath);
   const transform = await getTransform(saltyCompiler);
   return await transform(saltyCompiler, resourcePath);

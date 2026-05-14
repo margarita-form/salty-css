@@ -37,6 +37,12 @@ interface ConfigGenerationResults {
   templates: TemplatesFactory[];
 }
 
+export type SaltyCompilerMode = 'production' | 'development';
+
+export interface SaltyCompilerOptions {
+  mode?: SaltyCompilerMode;
+}
+
 interface StylesGenerationResults {
   components: GeneratorResult<StyledGenerator>[];
   classNames: GeneratorResult<ClassNameGenerator>[];
@@ -55,13 +61,14 @@ export class SaltyCompiler {
     externalModules: [] as string[],
   };
 
-  constructor(public projectRootDir: string) {
+  constructor(public projectRootDir: string, private options: SaltyCompilerOptions = {}) {
     if (typeof process === 'undefined') {
       throw new Error('SaltyServer can only be used in a Node.js environment.');
     }
   }
 
   public get isProduction(): boolean {
+    if (this.options.mode) return this.options.mode === 'production';
     try {
       return process.env['NODE_ENV'] !== 'development';
     } catch {
