@@ -123,7 +123,7 @@ export const parseStyles = async <T extends object>(
         return undefined;
       }
 
-      const scope = key.includes('&') ? _key.replaceAll('&', currentScope) : _key.startsWith(':') ? `${currentScope}${_key}` : `${currentScope} ${_key}`;
+      const scope = combineSelectors(currentScope, _key);
       const results = await parseStyles(value, scope, config);
       results.forEach((result) => cssStyles.add(result));
       return undefined;
@@ -187,4 +187,48 @@ export const parseAndJoinStyles = async <T extends object>(
 ): Promise<string> => {
   const css = await parseStyles(styles, currentClass, config, omitTemplates);
   return css.join('\n');
+};
+
+// Helper functions
+
+const splitTopLevelCommas = (selector: string): string[] => {
+  const parts: string[] = [];
+  let depth = 0;
+  let buf = '';
+  for (const ch of selector) {
+    if (ch === '(' || ch === '[') depth++;
+    else if (ch === ')' || ch === ']') depth = Math.max(0, depth - 1);
+    if (ch === ',' && depth === 0) {
+      const trimmed = buf.trim();
+      if (trimmed) parts.push(trimmed);
+      buf = '';
+    } else {
+      buf += ch;
+    }
+  }
+  const trimmed = buf.trim();
+  if (trimmed) parts.push(trimmed);
+  return parts;
+};
+
+const joinSelector = (parent: string, child: string): string => {
+  if (child.includes('&')) return child.replaceAll('&', parent);
+  if (child.startsWith(':')) return `${parent}${child}`;
+  return `${parent} ${child}`;
+};
+
+const combineSelectors = (currentScope: string, key: string): string => {
+  if (!currentScope) return key;
+  const parents = splitTopLevelCommas(currentScope);
+  const children = splitTopLevelCommas(key);
+  if (parents.length <= 1 && children.length <= 1) {
+    return joinSelector(currentScope, key);
+  }
+  const combos: string[] = [];
+  for (const p of parents) {
+    for (const c of children) {
+      combos.push(joinSelector(p, c));
+    }
+  }
+  return combos.join(', ');
 };
