@@ -24,6 +24,7 @@ const makeCtx = (projectDir: string): ProjectContext => ({
   rcFile: {},
   cliVersion: '0.0.0',
   skipInstall: true,
+  yes: true,
 });
 
 describe('buildIntegrationRegistry', () => {

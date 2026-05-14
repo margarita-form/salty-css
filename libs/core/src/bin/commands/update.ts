@@ -1,12 +1,14 @@
 import { Command } from 'commander';
 import { join } from 'path';
 import { npmInstall } from '../bin-util';
+import { confirmInstall } from '../confirm-install';
 import { logError, logger } from '../logger';
 import { readPackageJson, readThisPackageJson } from '../package-json';
 
 interface UpdateOptions {
   version?: string;
   legacyPeerDeps: boolean;
+  yes?: boolean;
 }
 
 const getSaltyCssPackages = async () => {
@@ -30,8 +32,9 @@ export const registerUpdateCommand = (program: Command): void => {
     .description('Update Salty-CSS packages to the latest or specified version.')
     .option('-v, --version <version>', 'Version to update to.')
     .option('--legacy-peer-deps <legacyPeerDeps>', 'Use legacy peer dependencies (not recommended).', false)
+    .option('-y, --yes', 'Skip the install confirmation prompt.')
     .action(async function (this: Command, _version = 'latest') {
-      const { legacyPeerDeps, version = _version } = this.opts<UpdateOptions>();
+      const { legacyPeerDeps, version = _version, yes = false } = this.opts<UpdateOptions>();
       const saltyCssPackages = await getSaltyCssPackages();
       if (!saltyCssPackages) return logError('Could not update Salty-CSS packages as any were found in package.json.');
       const cli = await readThisPackageJson();
@@ -40,6 +43,12 @@ export const registerUpdateCommand = (program: Command): void => {
         if (version === '@') return `${name}@${cli.version}`;
         return `${name}@${version.replace(/^@/, '')}`;
       });
+
+      try {
+        await confirmInstall(packagesToUpdate, yes);
+      } catch (err) {
+        return logError(err instanceof Error ? err.message : String(err));
+      }
 
       if (legacyPeerDeps) {
         logger.warn('Using legacy peer dependencies to update packages.');

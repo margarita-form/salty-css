@@ -1,7 +1,6 @@
 import { existsSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { npmInstall } from '../bin-util';
 import { logger } from '../logger';
 import { formatWithPrettier } from '../prettier';
 import { BuildIntegrationAdapter, ConfigEdit } from './types';
@@ -46,16 +45,20 @@ export const nextIntegration: BuildIntegrationAdapter = {
     const found = nextConfigFiles.map((file) => join(ctx.projectDir, file)).find((p) => existsSync(p));
     return found ?? null;
   },
-  apply: async (ctx, configPath) => {
+  plan: async (ctx, configPath) => {
     const existing = await readFile(configPath, 'utf-8').catch(() => undefined);
-    if (existing === undefined) return { changed: false };
+    if (existing === undefined) return null;
     const { content } = editNextConfig(existing);
-    if (content === null) return { changed: false };
+    if (content === null) return null;
 
-    if (!ctx.skipInstall) await npmInstall(`-D ${nextPackage(ctx.cliVersion)}`);
-    logger.info('Adding Salty-CSS plugin to Next.js config...');
-    await writeFile(configPath, content);
-    await formatWithPrettier(configPath);
-    return { changed: true };
+    return {
+      packages: [`-D ${nextPackage(ctx.cliVersion)}`],
+      execute: async () => {
+        logger.info('Adding Salty-CSS plugin to Next.js config...');
+        await writeFile(configPath, content);
+        await formatWithPrettier(configPath);
+        return { changed: true };
+      },
+    };
   },
 };

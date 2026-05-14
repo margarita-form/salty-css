@@ -1,5 +1,4 @@
 import { readFile, writeFile } from 'fs/promises';
-import { npmInstall } from '../bin-util';
 import { findAstroConfig } from '../frameworks/astro';
 import { logger } from '../logger';
 import { formatWithPrettier } from '../prettier';
@@ -43,17 +42,22 @@ export const editAstroConfig = (existing: string): ConfigEdit & { warning?: stri
 export const astroIntegration: BuildIntegrationAdapter = {
   name: 'astro',
   detect: (ctx) => findAstroConfig(ctx.projectDir),
-  apply: async (ctx, configPath) => {
+  plan: async (ctx, configPath) => {
     const existing = await readFile(configPath, 'utf-8').catch(() => undefined);
-    if (existing === undefined) return { changed: false };
+    if (existing === undefined) return null;
     const result = editAstroConfig(existing);
     if (result.warning) logger.warn(result.warning);
-    if (result.content === null) return { changed: false };
+    if (result.content === null) return null;
 
-    if (!ctx.skipInstall) await npmInstall(`-D ${astroPackage(ctx.cliVersion)}`);
-    logger.info('Adding Salty-CSS integration to Astro config: ' + configPath);
-    await writeFile(configPath, result.content);
-    await formatWithPrettier(configPath);
-    return { changed: true };
+    const newContent = result.content;
+    return {
+      packages: [`-D ${astroPackage(ctx.cliVersion)}`],
+      execute: async () => {
+        logger.info('Adding Salty-CSS integration to Astro config: ' + configPath);
+        await writeFile(configPath, newContent);
+        await formatWithPrettier(configPath);
+        return { changed: true };
+      },
+    };
   },
 };

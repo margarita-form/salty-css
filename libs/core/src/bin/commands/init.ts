@@ -4,10 +4,11 @@ import { mkdir, readFile, writeFile } from 'fs/promises';
 import { join, relative as relativePath } from 'path';
 import { SaltyCompiler } from '../../compiler/salty-compiler';
 import { npmInstall } from '../bin-util';
+import { confirmInstall } from '../confirm-install';
 import { buildContext } from '../context';
 import { findGlobalCssFile } from '../detection/css-file';
 import { detectFramework } from '../frameworks';
-import { detectAndApplyIntegrations } from '../integrations';
+import { applyIntegrationPlans, planIntegrations } from '../integrations';
 import { logError, logger } from '../logger';
 import { addPrepareScript, corePackages, readPackageJson, updatePackageJson } from '../package-json';
 import { formatWithPrettier } from '../prettier';
@@ -18,6 +19,7 @@ interface InitOptions {
   dir: string;
   cssFile?: string;
   skipInstall?: boolean;
+  yes?: boolean;
 }
 
 const writeProjectFile = async (projectDir: string, fileName: string, content: string) => {
@@ -76,21 +78,30 @@ export const registerInitCommand = (program: Command): void => {
     .option('-d, --dir <dir>', 'Project directory to initialize the project in.')
     .option('--css-file <css-file>', 'Existing CSS file where to import the generated CSS. Path must be relative to the given project directory.')
     .option('--skip-install', 'Skip installing dependencies.')
+    .option('-y, --yes', 'Skip the install confirmation prompt.')
     .action(async function (this: Command, _dir = '.') {
       try {
         const opts = this.opts<InitOptions>();
         const dir = opts.dir ?? _dir;
         if (!dir) return logError('Project directory must be provided. Add it as the first argument after init command or use the --dir option.');
 
-        const ctx = await buildContext({ dir, skipInstall: opts.skipInstall });
+        const ctx = await buildContext({ dir, skipInstall: opts.skipInstall, yes: opts.yes });
 
         logger.info('Initializing a new Salty-CSS project!');
 
         const framework = await detectFramework(ctx);
         logger.info(`Detected framework: ${framework.name}`);
 
+        const plannedIntegrations = await planIntegrations(ctx);
+
         if (!ctx.skipInstall) {
-          await npmInstall(corePackages.core(ctx.cliVersion), framework.runtimePackage(ctx.cliVersion));
+          const packages = [
+            corePackages.core(ctx.cliVersion),
+            framework.runtimePackage(ctx.cliVersion),
+            ...plannedIntegrations.flatMap((p) => p.plan.packages),
+          ];
+          await confirmInstall(packages, ctx.yes);
+          await npmInstall(...packages);
         }
 
         const projectFiles = await Promise.all([readTemplate('salty.config.ts'), readTemplate('saltygen/index.css')]);
@@ -101,7 +112,7 @@ export const registerInitCommand = (program: Command): void => {
         await ensureGitignoreSaltygen(ctx.cwd);
         await importSaltygenIntoCss(ctx.projectDir, opts.cssFile);
 
-        await detectAndApplyIntegrations(ctx);
+        await applyIntegrationPlans(plannedIntegrations);
 
         await wirePrepareScript();
 

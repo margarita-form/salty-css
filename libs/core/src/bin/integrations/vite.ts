@@ -1,7 +1,6 @@
 import { existsSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { npmInstall } from '../bin-util';
 import { logger } from '../logger';
 import { formatWithPrettier } from '../prettier';
 import { BuildIntegrationAdapter, ConfigEdit } from './types';
@@ -26,17 +25,21 @@ export const viteIntegration: BuildIntegrationAdapter = {
     const path = join(ctx.projectDir, 'vite.config.ts');
     return existsSync(path) ? path : null;
   },
-  apply: async (ctx, configPath) => {
+  plan: async (ctx, configPath) => {
     const existing = await readFile(configPath, 'utf-8').catch(() => undefined);
-    if (existing === undefined) return { changed: false };
+    if (existing === undefined) return null;
     const { content } = editViteConfig(existing);
-    if (content === null) return { changed: false };
+    if (content === null) return null;
 
-    logger.info('Edit file: ' + configPath);
-    if (!ctx.skipInstall) await npmInstall(`-D ${vitePackage(ctx.cliVersion)}`);
-    logger.info('Adding Salty-CSS plugin to Vite config...');
-    await writeFile(configPath, content);
-    await formatWithPrettier(configPath);
-    return { changed: true };
+    return {
+      packages: [`-D ${vitePackage(ctx.cliVersion)}`],
+      execute: async () => {
+        logger.info('Edit file: ' + configPath);
+        logger.info('Adding Salty-CSS plugin to Vite config...');
+        await writeFile(configPath, content);
+        await formatWithPrettier(configPath);
+        return { changed: true };
+      },
+    };
   },
 };

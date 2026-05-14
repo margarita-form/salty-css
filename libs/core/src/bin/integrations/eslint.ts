@@ -1,7 +1,6 @@
 import { existsSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { npmInstall } from '../bin-util';
 import { corePackages } from '../package-json';
 import { logger } from '../logger';
 import { formatWithPrettier } from '../prettier';
@@ -67,22 +66,26 @@ export const eslintIntegration: BuildIntegrationAdapter = {
     const candidates = eslintConfigCandidates(ctx.projectDir, ctx.cwd);
     return candidates.find((p) => existsSync(p)) ?? null;
   },
-  apply: async (ctx, configPath) => {
+  plan: async (ctx, configPath) => {
     const existing = await readFile(configPath, 'utf-8').catch(() => undefined);
     if (existing === undefined) {
       logger.error('Could not read ESLint config file.');
-      return { changed: false };
+      return null;
     }
-
-    if (!ctx.skipInstall) await npmInstall(corePackages.eslintConfigCore(ctx.cliVersion));
 
     const result = editEslintConfig(existing, configPath.endsWith('js'));
     if (result.warning) logger.warn(result.warning);
-    if (result.content === null) return { changed: false };
+    if (result.content === null) return null;
 
-    logger.info('Edit file: ' + configPath);
-    await writeFile(configPath, result.content);
-    await formatWithPrettier(configPath);
-    return { changed: true };
+    const newContent = result.content;
+    return {
+      packages: [corePackages.eslintConfigCore(ctx.cliVersion)],
+      execute: async () => {
+        logger.info('Edit file: ' + configPath);
+        await writeFile(configPath, newContent);
+        await formatWithPrettier(configPath);
+        return { changed: true };
+      },
+    };
   },
 };
