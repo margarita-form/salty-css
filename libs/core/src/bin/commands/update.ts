@@ -1,14 +1,18 @@
 import { Command } from 'commander';
 import { join } from 'path';
+import { SaltyCompiler } from '../../compiler/salty-compiler';
 import { npmInstall } from '../bin-util';
-import { confirmInstall } from '../confirm-install';
+import { confirmInstall, confirmYesNo } from '../confirm-install';
+import { resolveProjectDir } from '../context';
 import { logError, logger } from '../logger';
 import { readPackageJson, readThisPackageJson } from '../package-json';
+import { getDefaultProject } from '../saltyrc';
 
 interface UpdateOptions {
   version?: string;
   legacyPeerDeps: boolean;
   yes?: boolean;
+  dir?: string;
 }
 
 const getSaltyCssPackages = async () => {
@@ -32,9 +36,10 @@ export const registerUpdateCommand = (program: Command): void => {
     .description('Update Salty-CSS packages to the latest or specified version.')
     .option('-v, --version <version>', 'Version to update to.')
     .option('--legacy-peer-deps <legacyPeerDeps>', 'Use legacy peer dependencies (not recommended).', false)
-    .option('-y, --yes', 'Skip the install confirmation prompt.')
+    .option('-y, --yes', 'Skip confirmation prompts (install and rebuild).')
+    .option('-d, --dir <dir>', 'Project directory to rebuild after updating.')
     .action(async function (this: Command, _version = 'latest') {
-      const { legacyPeerDeps, version = _version, yes = false } = this.opts<UpdateOptions>();
+      const { legacyPeerDeps, version = _version, yes = false, dir } = this.opts<UpdateOptions>();
       const saltyCssPackages = await getSaltyCssPackages();
       if (!saltyCssPackages) return logError('Could not update Salty-CSS packages as any were found in package.json.');
       const cli = await readThisPackageJson();
@@ -76,5 +81,19 @@ export const registerUpdateCommand = (program: Command): void => {
           logger.info(`Updated to ${v.replace(/^\^/, '')}: ${names.join(', ')}`);
         }
       }
+
+      const project = dir ?? (await getDefaultProject());
+      if (!project) {
+        logger.warn('Skipping rebuild: no project directory configured. Run `salty-css build [dir]` manually.');
+        return;
+      }
+
+      const shouldRebuild = await confirmYesNo('Rebuild Salty CSS now?', { yes });
+      if (!shouldRebuild) return;
+
+      const projectDir = resolveProjectDir(project);
+      logger.info('Rebuilding Salty-CSS project...');
+      await new SaltyCompiler(projectDir).generateCss();
+      logger.info('Rebuild complete.');
     });
 };

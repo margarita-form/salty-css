@@ -1,5 +1,5 @@
 import { PassThrough } from 'stream';
-import { confirmInstall, formatPackageForDisplay, renderPackageList } from '../confirm-install';
+import { confirmInstall, confirmYesNo, formatPackageForDisplay, renderPackageList } from '../confirm-install';
 
 const drainOutput = (stream: PassThrough): string => {
   const chunks: Buffer[] = [];
@@ -42,9 +42,7 @@ describe('confirmInstall', () => {
 
   it('throws a --yes-mentioning error in non-TTY environments', async () => {
     const out = new PassThrough();
-    await expect(
-      confirmInstall(['a@1'], false, { input: new PassThrough(), output: out, isTTY: false })
-    ).rejects.toThrow(/--yes/);
+    await expect(confirmInstall(['a@1'], false, { input: new PassThrough(), output: out, isTTY: false })).rejects.toThrow(/--yes/);
   });
 
   it('resolves when the user answers `y`', async () => {
@@ -74,5 +72,55 @@ describe('confirmInstall', () => {
     const promise = confirmInstall(['a@1'], false, { input, output, isTTY: true });
     input.write('\n');
     await expect(promise).rejects.toThrow(/cancelled/i);
+  });
+});
+
+describe('confirmYesNo', () => {
+  it('resolves true when yes=true without prompting', async () => {
+    const out = new PassThrough();
+    const result = await confirmYesNo('Rebuild?', { yes: true, input: new PassThrough(), output: out, isTTY: true });
+    expect(result).toBe(true);
+    expect(drainOutput(out)).toBe('');
+  });
+
+  it('resolves false in non-TTY without yes (no throw)', async () => {
+    const out = new PassThrough();
+    const result = await confirmYesNo('Rebuild?', { input: new PassThrough(), output: out, isTTY: false });
+    expect(result).toBe(false);
+    expect(drainOutput(out)).toBe('');
+  });
+
+  it('resolves true when the user answers `y`', async () => {
+    const input = new PassThrough();
+    const output = new PassThrough();
+    const promise = confirmYesNo('Rebuild?', { input, output, isTTY: true });
+    input.write('y\n');
+    await expect(promise).resolves.toBe(true);
+    expect(drainOutput(output)).toContain('Rebuild? (y/N)');
+  });
+
+  it('resolves false when the user answers `n`', async () => {
+    const input = new PassThrough();
+    const output = new PassThrough();
+    const promise = confirmYesNo('Rebuild?', { input, output, isTTY: true });
+    input.write('n\n');
+    await expect(promise).resolves.toBe(false);
+  });
+
+  it('resolves false on empty answer when defaultYes is unset', async () => {
+    const input = new PassThrough();
+    const output = new PassThrough();
+    const promise = confirmYesNo('Rebuild?', { input, output, isTTY: true });
+    input.write('\n');
+    await expect(promise).resolves.toBe(false);
+  });
+
+  it('resolves true on empty answer when defaultYes is true', async () => {
+    const input = new PassThrough();
+    const output = new PassThrough();
+    const promise = confirmYesNo('Rebuild?', { input, output, isTTY: true, defaultYes: true });
+    input.write('\n');
+    await expect(promise).resolves.toBe(true);
+    expect(drainOutput(output)).toContain('Rebuild? (Y/n)');
   });
 });

@@ -55,3 +55,34 @@ export const confirmInstall = async (packages: string[], yes: boolean, options: 
     rl.close();
   }
 };
+
+export interface ConfirmYesNoOptions extends ConfirmInstallOptions {
+  /** When true, resolves true without prompting. */
+  yes?: boolean;
+  /** When true, an empty answer counts as yes. Defaults to false (empty = no). */
+  defaultYes?: boolean;
+}
+
+/**
+ * Generic yes/no prompt. Unlike `confirmInstall`, non-TTY without `yes`
+ * resolves `false` instead of throwing — callers can choose policy.
+ */
+export const confirmYesNo = async (question: string, options: ConfirmYesNoOptions = {}): Promise<boolean> => {
+  if (options.yes) return true;
+
+  const input = options.input ?? process.stdin;
+  const output = options.output ?? process.stdout;
+  const isTTY = options.isTTY ?? process.stdin.isTTY ?? false;
+
+  if (!isTTY) return false;
+
+  const suffix = options.defaultYes ? '(Y/n)' : '(y/N)';
+  const rl = createInterface({ input: input as NodeJS.ReadableStream, output, terminal: false });
+  try {
+    const answer = (await rl.question(`${question} ${suffix} `)).trim().toLowerCase();
+    if (answer === '') return !!options.defaultYes;
+    return answer === 'y' || answer === 'yes';
+  } finally {
+    rl.close();
+  }
+};
