@@ -593,7 +593,8 @@ export class SaltyCompiler {
     currentFile = this.replaceStyledTag(currentFile);
     currentFile = this.addConfigCache(currentFile);
 
-    const outputFilePath = join(outputDirectory, 'js', hashedName + '.js');
+    const currentFileHash = toHash(currentFile);
+    const outputFilePath = join(outputDirectory, 'js', `${hashedName}-${currentFileHash}.js`);
     const rcProject = await this.getRCProjectConfig(this.projectRootDir);
     const coreConfigPath = join(this.projectRootDir, rcProject?.configDir || '', 'salty.config.ts');
     const externalModules = this.getExternalModules(coreConfigPath);
