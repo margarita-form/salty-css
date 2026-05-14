@@ -23,17 +23,25 @@ describe('withSaltyCss', () => {
     expect(typeof result.webpack).toBe('function');
   });
 
-  it('calls saltyPlugin with (config, dir, isServer) on each webpack invocation', () => {
+  it('calls saltyPlugin with (config, dir, isServer, cjs, options) on each webpack invocation', () => {
     const wrapped = withSaltyCss({});
     const config = { module: { rules: [] }, plugins: [] };
 
     (wrapped as { webpack: (c: unknown, o: unknown) => unknown }).webpack(config, { dir: '/tmp/app', isServer: false });
     expect(saltyPluginMock).toHaveBeenCalledTimes(1);
-    expect(saltyPluginMock).toHaveBeenCalledWith(config, '/tmp/app', false);
+    expect(saltyPluginMock).toHaveBeenCalledWith(config, '/tmp/app', false, false, { mode: undefined });
 
     (wrapped as { webpack: (c: unknown, o: unknown) => unknown }).webpack(config, { dir: '/tmp/app', isServer: true });
     expect(saltyPluginMock).toHaveBeenCalledTimes(2);
-    expect(saltyPluginMock).toHaveBeenLastCalledWith(config, '/tmp/app', true);
+    expect(saltyPluginMock).toHaveBeenLastCalledWith(config, '/tmp/app', true, false, { mode: undefined });
+  });
+
+  it('forwards the mode option through to saltyPlugin', () => {
+    const wrapped = withSaltyCss({}, { mode: 'production' });
+    const config = { module: { rules: [] }, plugins: [] };
+
+    (wrapped as { webpack: (c: unknown, o: unknown) => unknown }).webpack(config, { dir: '/tmp/app', isServer: false });
+    expect(saltyPluginMock).toHaveBeenCalledWith(config, '/tmp/app', false, false, { mode: 'production' });
   });
 
   it('chains the incoming webpack function after saltyPlugin', () => {
