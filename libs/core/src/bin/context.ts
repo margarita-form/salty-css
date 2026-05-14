@@ -11,6 +11,7 @@ export interface ProjectContext {
   rcFile: RCFile;
   cliVersion: string;
   skipInstall: boolean;
+  yes: boolean;
 }
 
 export const resolveProjectDir = (dir: string, rootDir: string = process.cwd()) => {
@@ -21,6 +22,8 @@ export const resolveProjectDir = (dir: string, rootDir: string = process.cwd()) 
 export interface BuildContextOptions {
   dir: string;
   skipInstall?: boolean;
+  /** Skip the install confirmation prompt and install without asking. */
+  yes?: boolean;
   /** When false, build context even if package.json is missing (used by commands that should not require one). */
   requirePackageJson?: boolean;
 }
@@ -46,5 +49,6 @@ export const buildContext = async (opts: BuildContextOptions): Promise<ProjectCo
     rcFile,
     cliVersion: cliPackageJson.version || '0.0.0',
     skipInstall: !!opts.skipInstall,
+    yes: !!opts.yes,
   };
 };
