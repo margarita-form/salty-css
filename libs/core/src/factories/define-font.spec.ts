@@ -156,8 +156,20 @@ describe('defineFont', () => {
     expect(() => defineFont({ variable: '--font-inter', variants: [baseVariant] } as never)).toThrow(/name/);
   });
 
-  it('throws when variable is missing', () => {
-    expect(() => defineFont({ name: 'Inter', variants: [baseVariant] } as never)).toThrow(/variable/);
+  it('derives a deterministic variable name from the inputs when variable is omitted', () => {
+    const a = defineFont({ name: 'Inter', variants: [baseVariant] } as never);
+    const b = defineFont({ name: 'Inter', variants: [baseVariant] } as never);
+    expect(a.variable).toMatch(/^--font-inter-[a-z]{6}$/i);
+    expect(a.variable).toBe(b.variable);
+  });
+
+  it('produces a different derived variable when the inputs change', () => {
+    const a = defineFont({ name: 'Inter', variants: [baseVariant] } as never);
+    const b = defineFont({
+      name: 'Inter',
+      variants: [{ weight: 400, style: 'normal', src: { url: '/fonts/inter-400-DIFFERENT.woff2', format: 'woff2' } }],
+    } as never);
+    expect(a.variable).not.toBe(b.variable);
   });
 
   it('throws when a variant has no src entries', () => {

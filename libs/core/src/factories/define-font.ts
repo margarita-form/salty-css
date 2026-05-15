@@ -1,4 +1,4 @@
-import { dashCase } from '../util';
+import { dashCase, toHash } from '../util';
 import { DefineFontOptions, FontDisplay, FontFormat, FontSrc, FontVariant } from '../types/font-types';
 
 const FONT_FORMAT_BY_EXTENSION: Record<string, FontFormat> = {
@@ -30,11 +30,15 @@ const normalizeSources = (src: FontVariant['src']): FontSrc[] => {
 };
 
 const normalizeVariable = (variable: string): string => {
-  if (!variable) throw new Error('defineFont: `variable` is required.');
   const trimmed = variable.trim();
   const stripped = trimmed.replace(/^--/, '');
   if (!stripped) throw new Error(`defineFont: invalid \`variable\` value "${variable}".`);
   return `--${dashCase(stripped)}`;
+};
+
+const deriveVariable = (options: DefineFontOptions): string => {
+  const hashSource = [options.name, options.fallback, 'variants' in options ? options.variants : undefined, 'import' in options ? options.import : undefined];
+  return `--font-${dashCase(options.name)}-${toHash(hashSource, 6)}`;
 };
 
 const quoteFamily = (name: string): string => {
@@ -99,7 +103,7 @@ export class FontFactory {
       throw new Error('defineFont: must provide either `variants` or `import`.');
     }
 
-    this.variable = normalizeVariable(_options.variable);
+    this.variable = _options.variable ? normalizeVariable(_options.variable) : deriveVariable(_options);
     this.fontFamily = buildFontFamilyValue(_options.name, _options.fallback);
     this.className = `font-${dashCase(_options.name)}`;
   }

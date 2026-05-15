@@ -35,8 +35,12 @@ export interface FontVariant {
 interface DefineFontBase {
   /** CSS `font-family` value users will see in styles. */
   name: string;
-  /** CSS variable name. Accepts `--font-inter` or `font-inter`; we normalize. */
-  variable: string;
+  /**
+   * CSS variable name. Accepts `--font-inter` or `font-inter`; we normalize.
+   * Optional — when omitted, a deterministic name is derived from the other
+   * inputs as `--font-<name>-<hash>`.
+   */
+  variable?: string;
   /** Default `font-display` applied to variants that don't set their own. */
   display?: FontDisplay;
   /** Family fallbacks appended after `name` in the generated `font-family` string. */

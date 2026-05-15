@@ -339,7 +339,7 @@ import { defineFont } from '@salty-css/core/factories';
 //    URLs are passed through as-is (use a public-folder path or a CDN URL).
 export const Inter = defineFont({
   name: 'Inter', // CSS font-family value
-  variable: '--font-inter', // Accepts 'font-inter' too — we normalize to '--font-inter'
+  variable: '--font-inter', // Optional — accepts 'font-inter' too; if omitted we derive `--font-<name>-<hash>` from the inputs
   display: 'swap', // Optional default applied to variants without their own `display`
   fallback: ['system-ui', 'sans-serif'], // Optional family fallbacks appended after `name`
   variants: [
