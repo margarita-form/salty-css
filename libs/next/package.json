@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/next",
-  "version": "0.1.0-alpha.20",
+  "version": "0.1.0-alpha.21",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -34,7 +34,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.1.0-alpha.20",
-    "@salty-css/webpack": "^0.1.0-alpha.20"
+    "@salty-css/core": "^0.1.0-alpha.21",
+    "@salty-css/webpack": "^0.1.0-alpha.21"
   }
 }
