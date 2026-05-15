@@ -57,6 +57,7 @@ To get help with problems, [Join Salty CSS Discord server](https://discord.gg/R6
 - [defineVariables](#variables) - create CSS variables (tokens) that can be used in any styling function
 - [defineMediaQuery](#media-queries) - create CSS media queries and use them in any styling function
 - [defineTemplates](#templates) - create reusable templates that can be applied when same styles are used over and over again
+- [defineFont](#custom-fonts) - register custom fonts via `@font-face` (or a remote stylesheet) and expose them as a CSS variable
 - [keyframes](#keyframes-animations) - create CSS keyframes animation that can be used and imported in any styling function
 
 ### Styling helpers & utility
@@ -317,6 +318,88 @@ Example usage:
 
 ```ts
 styled('div', { base: { textStyle: 'headline.large', card: '20px' } });
+```
+
+## Custom fonts
+
+Register custom fonts that will be emitted as `@font-face` declarations and exposed as a CSS variable. Mirrors the developer experience of Next.js / Astro font loaders, but generated at build time alongside the rest of your Salty CSS output.
+
+The returned object stringifies to its `font-family` value and exposes helpers for explicit usage:
+
+- `Font.variable` → CSS variable name (e.g. `--font-inter`)
+- `Font.fontFamily` → final `font-family` string with fallbacks
+- `Font.className` → class that sets the variable + applies the font on a subtree
+- `Font.style` → object you can spread on a React `style` prop
+
+```ts
+// /styles/fonts.css.ts
+import { defineFont } from '@salty-css/core/factories';
+
+// 1. Local or self-hosted @font-face sources.
+//    URLs are passed through as-is (use a public-folder path or a CDN URL).
+export const Inter = defineFont({
+  name: 'Inter', // CSS font-family value
+  variable: '--font-inter', // Accepts 'font-inter' too — we normalize to '--font-inter'
+  display: 'swap', // Optional default applied to variants without their own `display`
+  fallback: ['system-ui', 'sans-serif'], // Optional family fallbacks appended after `name`
+  variants: [
+    {
+      weight: 400,
+      style: 'normal',
+      // Shorthand: pass a string and the `format()` descriptor is auto-detected
+      // from the file extension (woff2, woff, ttf, otf, eot, svg, ttc).
+      src: '/fonts/inter-400.woff2',
+    },
+    {
+      weight: 700,
+      style: 'normal',
+      // Multiple sources can be a string array — first entry is preferred;
+      // the browser picks the first format it supports.
+      src: ['/fonts/inter-700.woff2', '/fonts/inter-700.ttf'],
+    },
+    {
+      weight: 400,
+      style: 'italic',
+      // Use the `{ url, format }` object form when the URL has no recognisable
+      // extension (signed CDN URLs, query-only endpoints, etc.). You can also
+      // mix strings and objects in the same array.
+      src: ['/fonts/inter-400-italic.woff2', { url: 'https://cdn.example.com/inter-italic', format: 'woff' }],
+    },
+  ],
+});
+
+// 2. Remote stylesheet (Google Fonts, etc.). Emits `@import url(...)` and still
+//    registers the CSS variable so usage stays the same as the @font-face flow.
+export const InterCdn = defineFont({
+  name: 'Inter',
+  variable: '--font-inter',
+  import: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap',
+});
+```
+
+Example usage:
+
+```tsx
+import { Inter } from './fonts.css';
+import { styled } from '@salty-css/react/styled';
+
+// Apply the font globally by attaching its className high up in the tree.
+// This sets `--font-inter` on the subtree and applies `font-family: var(--font-inter)`.
+export const App = ({ children }) => <div className={Inter.className}>{children}</div>;
+
+// `Inter` stringifies to its font-family value (with fallbacks), so it can be used directly.
+export const Heading = styled('h1', {
+  base: {
+    fontFamily: `${Inter}`,
+  },
+});
+
+// Or reference the CSS variable explicitly.
+export const Body = styled('p', {
+  base: {
+    fontFamily: `var(${Inter.variable})`,
+  },
+});
 ```
 
 ## Keyframes animations
