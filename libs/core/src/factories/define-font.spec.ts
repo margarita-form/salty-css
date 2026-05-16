@@ -42,7 +42,7 @@ describe('defineFont', () => {
     const font = defineFont({
       name: 'Inter',
       variable: '--font-inter',
-      fallback: ['system-ui', 'sans-serif'],
+      fallback: 'system-ui, sans-serif',
       variants: [baseVariant],
     });
     expect(font.fontFamily).toBe('Inter, system-ui, sans-serif');
@@ -185,7 +185,7 @@ describe('defineFont', () => {
     const Inter = defineFont({
       name: 'Inter',
       variable: '--font-inter',
-      fallback: ['system-ui', 'sans-serif'],
+      fallback: 'system-ui, sans-serif',
       variants: [baseVariant],
     });
     const [direct] = await parseStyles({ fontFamily: Inter });
@@ -233,15 +233,7 @@ describe('defineFont', () => {
         {
           weight: 400,
           style: 'normal',
-          src: [
-            '/fonts/a.woff2',
-            '/fonts/a.woff',
-            '/fonts/a.ttf',
-            '/fonts/a.otf',
-            '/fonts/a.eot',
-            '/fonts/a.svg',
-            '/fonts/a.ttc',
-          ],
+          src: ['/fonts/a.woff2', '/fonts/a.woff', '/fonts/a.ttf', '/fonts/a.otf', '/fonts/a.eot', '/fonts/a.svg', '/fonts/a.ttc'],
         },
       ],
     });
@@ -278,9 +270,7 @@ describe('defineFont', () => {
       ],
     });
     const { body } = font._toCss();
-    expect(body).toContain(
-      'src: url("/fonts/inter-700.woff2") format("woff2"), url("https://cdn.example.com/inter-700") format("woff");'
-    );
+    expect(body).toContain('src: url("/fonts/inter-700.woff2") format("woff2"), url("https://cdn.example.com/inter-700") format("woff");');
   });
 
   it('emits optional @font-face descriptors when provided', () => {

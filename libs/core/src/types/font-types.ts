@@ -43,8 +43,8 @@ interface DefineFontBase {
   variable?: string;
   /** Default `font-display` applied to variants that don't set their own. */
   display?: FontDisplay;
-  /** Family fallbacks appended after `name` in the generated `font-family` string. */
-  fallback?: string[];
+  /** Family fallback(s) appended after `name` in the generated `font-family` string. */
+  fallback?: string;
 }
 
 export interface DefineFontVariantsOptions extends DefineFontBase {

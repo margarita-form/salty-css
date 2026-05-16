@@ -47,10 +47,10 @@ const quoteFamily = (name: string): string => {
   return name;
 };
 
-const buildFontFamilyValue = (name: string, fallback?: string[]): string => {
+const buildFontFamilyValue = (name: string, fallback?: string): string => {
   const head = quoteFamily(name);
   if (!fallback || fallback.length === 0) return head;
-  return [head, ...fallback].join(', ');
+  return [head, fallback].join(', ');
 };
 
 const formatSrc = (src: FontSrc): string => {
@@ -139,10 +139,7 @@ export class FontFactory {
       }
     }
 
-    blocks.push(
-      `:root { ${this.variable}: ${this.fontFamily}; }`,
-      `.${this.className} { ${this.variable}: ${this.fontFamily}; font-family: var(${this.variable}); }`
-    );
+    blocks.push(`:root { ${this.variable}: ${this.fontFamily}; }`, `.${this.className} { font-family: var(${this.variable}); }`);
 
     return { imports, body: blocks.join(' ') };
   }
