@@ -88,6 +88,7 @@ export const parseStyles = async <T extends object>(
     if (typeof value === 'object') {
       if (!value) return undefined;
       if (value.isColor) return toString(value.toString());
+      if (value.isDefineFont) return toString(value.toString());
 
       if (_key === 'defaultVariants') return undefined;
 
