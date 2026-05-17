@@ -14,7 +14,7 @@ import { CachedConfig, CssConditionalVariables, CssResponsiveVariables, CssTempl
 import { detectCurrentModuleType } from '../util/module-type';
 import { StylesGenerator } from '../generators/styles-generator';
 import { dotCase } from '../util/dot-case';
-import { getTemplateTypes, parseAndJoinStyles, parseTemplates, parseVariableTokens } from '../parsers';
+import { getTemplateTypes, getTemplateVariantMaps, parseAndJoinStyles, parseTemplates, parseVariableTokens } from '../parsers';
 import { saltyReset } from '../templates/salty-reset';
 import console from 'console';
 
@@ -547,6 +547,7 @@ export class SaltyCompiler {
 
     const templateStylesString = await parseTemplates(templates);
     const templateTokens = getTemplateTypes(templates);
+    const templateVariantMaps = getTemplateVariantMaps(templates as Record<string, any>);
 
     writeFileSync(templateStylesPath, `@layer templates { ${templateStylesString} }`);
     configCacheContent.templates = templates;
@@ -561,18 +562,59 @@ export class SaltyCompiler {
     const tsTokensPath = join(destDir, 'types/css-tokens.d.ts');
     const tsVariableTokens = [...variableTokens].join('|');
 
+    const pascal = (str: string) =>
+      str
+        .split(/[.\-_]/)
+        .filter(Boolean)
+        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+        .join('');
+
+    const templateVariantMapEntries = Object.entries(templateVariantMaps);
+    const hasVariantMaps = templateVariantMapEntries.some(([, pathMap]) => Object.keys(pathMap).length > 0);
+
+    const tsTemplateVariantMap = hasVariantMaps
+      ? `type TemplateVariantTokens = {
+        ${templateVariantMapEntries
+          .filter(([, pathMap]) => Object.keys(pathMap).length > 0)
+          .map(([templateKey, pathMap]) => {
+            const pathEntries = Object.entries(pathMap)
+              .map(
+                ([dotPath, axes]) =>
+                  `'${dotPath}': { ${Object.entries(axes)
+                    .map(([axis, valueType]) => `${axis}?: ${valueType}`)
+                    .join('; ')} }`
+              )
+              .join(';\n          ');
+            return `${templateKey}: {\n          ${pathEntries}\n        }`;
+          })
+          .join(';\n        ')}
+      }`
+      : `type TemplateVariantTokens = Record<string, Record<string, Record<string, never>>>;`;
+
+    const tsTemplateVariantAliases = templateVariantMapEntries
+      .flatMap(([templateKey, pathMap]) =>
+        Object.keys(pathMap).map(
+          (dotPath) => `type ${pascal(templateKey)}${pascal(dotPath)}Variants = TemplateVariantTokens['${templateKey}']['${dotPath}'];`
+        )
+      )
+      .join('\n      ');
+
     const tsTokensTypes = `
       // Variable types
-      type VariableTokens = ${tsVariableTokens || `''`}; 
+      type VariableTokens = ${tsVariableTokens || `''`};
       type PropertyValueToken = \`{\${VariableTokens}}\`;
-    
+
       // Template types
       type TemplateTokens = {
         ${Object.entries(templateTokens)
           .map(([key, value]) => `${key}?: ${value}`)
           .join('\n')}
       }
-    
+
+      // Template variant types (per docs/template-variants-spec.md §7)
+      ${tsTemplateVariantMap}
+      ${tsTemplateVariantAliases}
+
       // Media query types
       type MediaQueryKeys = ${mediaQueryKeys || `''`};
       `;
