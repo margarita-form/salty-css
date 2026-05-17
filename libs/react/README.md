@@ -408,6 +408,8 @@ And note: steps 2 & 3 are just to show how get new components up and running, st
 - **Next.js 15:** In `next.config.ts` add import for salty plugin `import { withSaltyCss } from '@salty-css/next';` and then add `withSaltyCss` to wrap your nextConfig export like so `export default withSaltyCss(nextConfig);`
 - **Next.js 14 and older:** In `next.config.js` add import for salty plugin `const { withSaltyCss } = require('@salty-css/next');` and then add `withSaltyCss` to wrap your nextConfig export like so `module.exports = withSaltyCss(nextConfig);`
 
+Both Webpack and Turbopack are supported. `withSaltyCss` auto-detects which bundler Next.js is using (`next dev --turbopack` sets `process.env.TURBOPACK=1`), so no extra config is required. To force a specific bundler, pass `{ bundler: 'webpack' | 'turbopack' }` as the second argument.
+
 4. Make sure that `salty.config.ts` and `next.config.ts` are in the same folder!
 5. Build `saltygen` directory by running your app once or with cli `npx salty-css build [directory]`
 6. Import global styles from `saltygen/index.css` to some global css file with `@import 'insert_path_to_index_css';`.
