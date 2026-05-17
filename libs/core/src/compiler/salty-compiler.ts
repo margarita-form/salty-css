@@ -126,6 +126,15 @@ export class SaltyCompiler {
     return destDir;
   };
 
+  /**
+   * Absolute path to the `config-cache.json` written during `generateCss()`.
+   * Plugins read this to copy the file into the production bundle output.
+   */
+  public getConfigCachePath = async () => {
+    const destDir = await this.getDestDir();
+    return join(destDir, 'cache/config-cache.json');
+  };
+
   private generateConfig = async () => {
     const rcProject = await this.getRCProjectConfig(this.projectRootDir);
     const destDir = await this.getDestDir();
@@ -159,8 +168,7 @@ export class SaltyCompiler {
   };
 
   private getConfigCache = async () => {
-    const destDir = await this.getDestDir();
-    const coreConfigDest = join(destDir, 'cache/config-cache.json');
+    const coreConfigDest = await this.getConfigCachePath();
     const contents = readFileSync(coreConfigDest, 'utf8');
     if (!contents) throw new Error('Could not find config cache file');
     return JSON.parse(contents);
@@ -580,7 +588,7 @@ export class SaltyCompiler {
     writeFileSync(tsTokensPath, tsTokensTypes);
 
     // Save config cache file
-    const configCachePath = join(destDir, 'cache/config-cache.json');
+    const configCachePath = await this.getConfigCachePath();
     writeFileSync(configCachePath, JSON.stringify(configCacheContent, null, 2));
 
     const corePackageRoot = getCorePackageRoot();

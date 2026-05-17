@@ -63,6 +63,10 @@
       "import": "./compiler/helpers.js",
       "require": "./compiler/helpers.cjs"
     },
+    "./compiler/copy-config-cache": {
+      "import": "./compiler/copy-config-cache.js",
+      "require": "./compiler/copy-config-cache.cjs"
+    },
     "./factories": {
       "import": "./factories/index.js",
       "require": "./factories/index.cjs"

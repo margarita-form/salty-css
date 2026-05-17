@@ -64,6 +64,7 @@ export default defineConfig({
         //
         /@salty-css\/.+/,
         /fs.*/,
+        /url.*/,
         /path.*/,
         /esbuild.*/,
         /winston.*/,

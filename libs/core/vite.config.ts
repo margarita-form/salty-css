@@ -51,6 +51,7 @@ export default defineConfig({
         'compiler/get-files': 'src/compiler/get-files.ts',
         'compiler/get-function-range': 'src/compiler/get-function-range.ts',
         'compiler/helpers': 'src/compiler/helpers.ts',
+        'compiler/copy-config-cache': 'src/compiler/copy-config-cache.ts',
         'factories/index': 'src/factories/index.ts',
         'css/index': 'src/css/index.ts',
         'css/keyframes': 'src/css/keyframes.ts',

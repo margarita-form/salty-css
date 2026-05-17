@@ -13,10 +13,14 @@ export interface SaltyAstroPluginOptions {
    * Explicit build mode. Defaults to NODE_ENV-based detection.
    */
   mode?: SaltyCompilerMode;
+  /**
+   * Reuse an existing SaltyCompiler instance instead of creating a new one.
+   */
+  compiler: SaltyCompiler;
 }
 
-export const saltyPlugin = (dir: string, options: SaltyAstroPluginOptions = {}): PluginOption => {
-  const saltyCompiler = new SaltyCompiler(dir, { mode: options.mode });
+export const saltyPlugin = (options: SaltyAstroPluginOptions): PluginOption => {
+  const saltyCompiler = options.compiler;
 
   return {
     name: 'stylegen',
