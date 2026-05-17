@@ -80,7 +80,10 @@ export const parseStyles = async <T extends object>(
 
     // Array values — coerce by comma-joining so e.g. `boxShadow: ['a', 'b']`
     // becomes "a, b" instead of being iterated as a numeric-keyed object.
-    if (Array.isArray(value)) {
+    // `compoundVariants` / `anyOfVariants` are arrays too but have dedicated
+    // branches in the object-handler below; skip the coercion for them.
+    const isVariantArrayKey = _key === 'compoundVariants' || _key === 'anyOfVariants';
+    if (!isVariantArrayKey && Array.isArray(value)) {
       if (value.length === 0) return undefined;
       return processStyleEntry([key, value.join(', ')]);
     }
