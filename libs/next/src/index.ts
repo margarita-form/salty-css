@@ -2,7 +2,7 @@
 import { saltyPlugin } from '@salty-css/webpack';
 import type { SaltyCompilerMode } from '@salty-css/core/compiler/salty-compiler';
 
-type AnyRecord = Record<string, unknown>;
+type AnyRecord = Record<any, any>;
 
 export interface SaltyNextOptions {
   /**
