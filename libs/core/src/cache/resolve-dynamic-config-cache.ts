@@ -20,30 +20,18 @@ export interface ResolveDynamicConfigCacheOptions {
 const CACHE_FILENAME = 'config-cache.json';
 const ENV_VAR = 'SALTY_CONFIG_CACHE_PATH';
 
-const defaultPatterns = [
-  '',
-  'saltygen',
-  'src',
-  'src/saltygen',
-  'cache',
-  'src/cache',
-  'saltygen/cache',
-  'src/saltygen/cache',
-  'dist',
-  'dist/cache',
-  'dist/saltygen/cache',
-  'build',
-  'build/cache',
-  'build/saltygen/cache',
-  'public/saltygen/cache',
-  '.next',
-  '.next/server',
-  '.next/server/cache',
-  '.vercel/output/functions',
-];
+const defaultRoots = ['', 'src', 'dist', 'build', 'public', '.next', '.next/server', '.vercel/output/functions'];
 
-const memo = new Map<string, Record<string, unknown>>();
+const memo = new Map<string, Record<string, unknown> | null>();
 let warned = false;
+
+const isProduction = () => {
+  try {
+    return process.env['NODE_ENV'] === 'production';
+  } catch {
+    return false;
+  }
+};
 
 const toAbsolute = (p: string, cwd: string) => (isAbsolute(p) ? p : join(cwd, p));
 
@@ -54,14 +42,19 @@ const candidatePathsFrom = (entry: string, cwd: string) => {
 };
 
 const tryRead = async (path: string): Promise<Record<string, unknown> | undefined> => {
-  if (memo.has(path)) return memo.get(path);
+  const useMemo = isProduction();
+  if (useMemo && memo.has(path)) return memo.get(path) ?? undefined;
   try {
     const contents = await readFile(path, 'utf8');
-    if (!contents) return undefined;
+    if (!contents) {
+      if (useMemo) memo.set(path, null);
+      return undefined;
+    }
     const parsed = JSON.parse(contents) as Record<string, unknown>;
-    memo.set(path, parsed);
+    if (useMemo) memo.set(path, parsed);
     return parsed;
   } catch {
+    if (useMemo) memo.set(path, null);
     return undefined;
   }
 };
@@ -74,7 +67,7 @@ export const resolveDynamicConfigCache = async (options: ResolveDynamicConfigCac
   if (options.primaryPath) ordered.push(...candidatePathsFrom(options.primaryPath, cwd));
   if (envPath) ordered.push(...candidatePathsFrom(envPath, cwd));
   if (options.extraPaths) for (const p of options.extraPaths) ordered.push(...candidatePathsFrom(p, cwd));
-  for (const pattern of defaultPatterns) ordered.push(join(cwd, pattern, CACHE_FILENAME));
+  for (const root of defaultRoots) ordered.push(...candidatePathsFrom(root, cwd));
 
   for (const candidate of ordered) {
     const result = await tryRead(candidate);
