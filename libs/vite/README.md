@@ -58,6 +58,7 @@ To get help with problems, [Join Salty CSS Discord server](https://discord.gg/R6
 - [defineMediaQuery](#media-queries) - create CSS media queries and use them in any styling function
 - [defineTemplates](#templates) - create reusable templates that can be applied when same styles are used over and over again
 - [defineFont](#custom-fonts) - register custom fonts via `@font-face` (or a remote stylesheet) and expose them as a CSS variable
+- [defineImport](#importing-additional-css) - pull in external CSS files (relative, public, node_modules, or URL)
 - [keyframes](#keyframes-animations) - create CSS keyframes animation that can be used and imported in any styling function
 
 ### Styling helpers & utility
@@ -400,6 +401,49 @@ export const Body = styled('p', {
     fontFamily: `var(${Inter.variable})`,
   },
 });
+```
+
+## Importing additional CSS
+
+Use `defineImport` to pull in CSS that lives outside of Salty's authoring API — a reset stylesheet from npm, a Google Fonts URL, an asset in your app's `public/` folder, or a sibling `.css` file. The compiler turns each spec into an `@import` rule in the generated `saltygen/index.css`, so the imported stylesheets travel with the rest of your build.
+
+```ts
+// /styles/imports.css.ts
+import { defineImport } from '@salty-css/core/factories';
+
+export default defineImport(
+  // Relative to this file
+  './reset.css',
+  // From node_modules (bare specifier — same as Vite / native CSS @import)
+  'modern-normalize/modern-normalize.css',
+  // From node_modules (~ prefix — same resolver, webpack-style)
+  '~normalize.css/normalize.css',
+  // From your app's public/ folder (served at the host root)
+  '/fonts/inter.css',
+  // External URL
+  'https://fonts.googleapis.com/css2?family=Inter&display=swap',
+  // Object form — attach media or supports() conditions
+  { url: './print.css', media: 'print' },
+  { url: './p3.css', supports: 'color(display-p3 1 1 1)' }
+);
+```
+
+Path resolution:
+
+| Pattern                     | Behaviour                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| `http://`, `https://`, `//` | Emitted verbatim                                                                         |
+| Starts with `/`             | Public-folder URL — emitted verbatim, the browser resolves it against your host          |
+| Starts with `./` or `../`   | Resolved at build time relative to the file that called `defineImport`                   |
+| `~package/file.css`         | Stripped of the leading `~`, then resolved from `node_modules` and copied into the build |
+| `package/file.css` (bare)   | Same `node_modules` resolution as the `~` form                                           |
+
+All imports are placed inside a new `imports` cascade layer that sits **before** `reset`, `global`, `templates`, and your component styles. This means your own styles always win over third-party CSS you pull in — which is what most teams expect when they drop in something like `modern-normalize`.
+
+The full layer order in the generated `index.css` is:
+
+```css
+@layer imports, reset, global, templates, l0, l1, l2, l3, l4, l5, l6, l7, l8;
 ```
 
 ## Keyframes animations
