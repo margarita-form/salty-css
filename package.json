@@ -85,6 +85,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@astrojs/react": "^4.4.2",
     "@types/child-process-promise": "^2.2.6",
     "astro": "^5.18.1",
     "clsx": "^2.1.1",

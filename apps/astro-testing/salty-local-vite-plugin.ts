@@ -8,15 +8,19 @@ import { toHash } from '../../libs/core/src/util';
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { getFunctionRange } from '../../libs/core/src/compiler/get-function-range';
+import { detectFramework, getFrameworkTransform } from '../../libs/astro/src/framework-registry';
 
 export const saltyLocalVitePlugin = (dir: string): PluginOption => {
-  const saltyCompiler = new SaltyCompiler(dir);
+  type Importer = undefined | ((path: string) => Promise<any>);
+  let importer: Importer = undefined;
 
+  const saltyCompiler = new SaltyCompiler(dir);
   return {
     name: 'stylegen',
     configureServer(_server) {
       saltyCompiler.importFile = async (path: string) => {
         const now = Date.now();
+        importer = _server.ssrLoadModule;
         return _server.ssrLoadModule(`${path}?t=${now}`);
       };
     },
@@ -57,11 +61,18 @@ export const saltyLocalVitePlugin = (dir: string): PluginOption => {
           }
         }
 
+        const originalContents = await readFile(filePath, 'utf-8');
+
+        const framework = detectFramework(originalContents);
+        if (framework) {
+          const transform = await getFrameworkTransform(framework, importer);
+          return await transform(saltyCompiler, filePath);
+        }
+
         const imports: string[] = ["import { classNameInstance } from '@salty-css/core/instances/classname-instance';"];
         const consts: string[] = [];
         const exports: string[] = [];
 
-        const originalContents = await readFile(filePath, 'utf-8');
         const compiled = await saltyCompiler.compileSaltyFile(filePath, destDir);
 
         const components = Object.entries(compiled.contents);
