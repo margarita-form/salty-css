@@ -2,6 +2,9 @@
 import { BaseStyles, CssStyles, MediaQueryStyles } from '../types';
 import { OrString } from '../types/util-types';
 
+// Re-export types from other files for easier imports.
+export * from './font-types';
+
 export type GlobalStyles = Record<string, BaseStyles>;
 
 export type CssVariableTokensObject = Record<string, unknown>;
