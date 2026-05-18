@@ -321,6 +321,88 @@ Example usage:
 styled('div', { base: { textStyle: 'headline.large', card: '20px' } });
 ```
 
+### Template variants
+
+Static templates can opt into named variants by switching a node from a plain styles object to a "rich" shape with `base` and `variants` keys — the same authoring API as `styled`. Variants declared at a parent node are inherited by every descendant leaf, so one declaration of `weight` on `heading` flows down to `heading.large`, `heading.small`, etc.
+
+```ts
+// /styles/templates.css.ts
+import { defineTemplates } from '@salty-css/core/factories';
+
+export default defineTemplates({
+  textStyle: {
+    heading: {
+      // Rich node: variants declared here are available to every child leaf.
+      base: {
+        fontFamily: '{fontFamily.heading}',
+        lineHeight: '1.1em',
+      },
+      variants: {
+        weight: {
+          light: { fontWeight: 300 },
+          regular: { fontWeight: 500 },
+          heavy: { fontWeight: 800 },
+        },
+        italic: {
+          true: { fontStyle: 'italic' },
+        },
+      },
+      defaultVariants: {
+        weight: 'regular',
+      },
+      compoundVariants: [
+        // Applied when ALL listed axes match.
+        { weight: 'heavy', italic: true, css: { letterSpacing: '-0.01em' } },
+      ],
+      // Leaves can be plain styles…
+      small: { fontSize: '{fontSize.heading.small}' },
+      regular: { fontSize: '{fontSize.heading.regular}' },
+      // …or rich, with their own additional variants / overrides.
+      large: {
+        base: { fontSize: '{fontSize.heading.large}' },
+        variants: {
+          weight: {
+            // Override the inherited bundle just for `large`.
+            heavy: { fontWeight: 900, letterSpacing: '-0.02em' },
+          },
+        },
+      },
+    },
+  },
+});
+```
+
+Apply variants at the call site in either of two equivalent forms — string query or object:
+
+```ts
+styled('h1', {
+  base: {
+    // String form: `path@axis=value&axis=value&boolFlag`
+    textStyle: 'heading.large@weight=heavy&italic',
+  },
+});
+
+styled('h2', {
+  base: {
+    // Object form: `name` is the dot-path, the rest are axis values.
+    textStyle: { name: 'heading.large', weight: 'heavy', italic: true },
+  },
+});
+
+// No variants — existing simple usage still works.
+styled('p', { base: { textStyle: 'heading.regular' } });
+```
+
+Behaviour worth knowing:
+
+- **Inheritance is parent → leaf only.** A leaf sees variants from its ancestors; siblings and children are invisible.
+- **Closest wins.** If the same axis/value bundle is declared at multiple levels, the deepest one replaces (not merges) the ancestor's bundle for that single call.
+- **`defaultVariants` apply when the call site omits an axis.** Walked bottom-up, same closest-wins rule.
+- **`compoundVariants` (AND) and `anyOfVariants` (OR) are accumulated top-down** across the path — every matching rule contributes.
+- **Boolean axes accept a shorthand.** `@italic` is equivalent to `@italic=true`; in object form pass `italic: true`.
+- **Reserved keys** inside a rich node: `base`, `variants`, `defaultVariants`, `compoundVariants`, `anyOfVariants`. Don't use `name` as an axis (reserved for the object call-site form).
+- **Function templates** (e.g. `card: (v) => ({ … })`) don't support variants — keep them as plain functions.
+
 ## Custom fonts
 
 Register custom fonts that will be emitted as `@font-face` declarations and exposed as a CSS variable. Mirrors the developer experience of Next.js / Astro font loaders, but generated at build time alongside the rest of your Salty CSS output.
