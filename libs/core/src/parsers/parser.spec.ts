@@ -438,3 +438,152 @@ describe('Parser testing', () => {
     });
   });
 });
+
+describe('Template variants', () => {
+  const compact = (s: string) => s.replace(/\s/g, '');
+
+  const richTemplate = {
+    textStyle: {
+      caption: {
+        fontSize: '12px',
+        lineHeight: '1.4',
+      },
+      heading: {
+        base: {
+          fontFamily: 'serif',
+          lineHeight: '1.2',
+        },
+        variants: {
+          weight: {
+            light: { fontWeight: '300' },
+            regular: { fontWeight: '600' },
+            heavy: { fontWeight: '900' },
+          },
+          emphasis: {
+            muted: { color: '#888' },
+            loud: { color: '#f00', textTransform: 'uppercase' },
+          },
+          italic: {
+            true: { fontStyle: 'italic' },
+          },
+        },
+        defaultVariants: {
+          weight: 'regular',
+        },
+        compoundVariants: [{ weight: 'heavy', italic: true, css: { letterSpacing: '-0.005em' } }],
+        anyOfVariants: [{ weight: 'heavy', emphasis: 'loud', css: { textShadow: '0 1px 0 #0001' } }],
+        small: { base: { fontSize: '14px' } },
+        large: {
+          base: { fontSize: '32px', lineHeight: '1.1' },
+          variants: {
+            weight: {
+              heavy: { fontWeight: '950', letterSpacing: '-0.01em' },
+            },
+          },
+          defaultVariants: {
+            weight: 'heavy',
+          },
+        },
+      },
+    },
+  };
+
+  const config = { templates: richTemplate };
+
+  it('backward-compat: flat-shape template path resolves unchanged', async () => {
+    const [rule] = await parseStyles({ textStyle: 'caption' }, '.X', config);
+    const c = compact(rule);
+    expect(c).toContain('font-size:12px');
+    expect(c).toContain('line-height:1.4');
+  });
+
+  it('parent ref resolves to base only', async () => {
+    const [rule] = await parseStyles({ textStyle: 'heading' }, '.X', config);
+    const c = compact(rule);
+    expect(c).toContain('font-family:serif');
+    expect(c).toContain('line-height:1.2');
+    // No size leaf applied.
+    expect(c).not.toContain('font-size:');
+  });
+
+  it('leaf inherits parent base and adds its own', async () => {
+    const [rule] = await parseStyles({ textStyle: 'heading.small' }, '.X', config);
+    const c = compact(rule);
+    expect(c).toContain('font-family:serif');
+    expect(c).toContain('font-size:14px');
+  });
+
+  it('defaultVariants fires at the parent when call site omits the axis', async () => {
+    const [rule] = await parseStyles({ textStyle: 'heading.small' }, '.X', config);
+    const c = compact(rule);
+    // weight=regular default -> fontWeight 600
+    expect(c).toContain('font-weight:600');
+  });
+
+  it('leaf defaultVariants override parent defaultVariants (closest-wins)', async () => {
+    const [rule] = await parseStyles({ textStyle: 'heading.large' }, '.X', config);
+    const c = compact(rule);
+    // heading.large.defaultVariants.weight = 'heavy' overrides parent's 'regular'
+    // Plus heading.large.variants.weight.heavy = fontWeight 950 (replace semantics)
+    expect(c).toContain('font-weight:950');
+    expect(c).toContain('letter-spacing:-0.01em');
+  });
+
+  it('string call-site form picks up named variant', async () => {
+    const [rule] = await parseStyles({ textStyle: 'heading.small@weight=light' }, '.X', config);
+    const c = compact(rule);
+    expect(c).toContain('font-weight:300');
+  });
+
+  it('object call-site form is equivalent to string form', async () => {
+    const [a] = await parseStyles({ textStyle: 'heading.small@weight=light&emphasis=muted' }, '.X', config);
+    const [b] = await parseStyles({ textStyle: { name: 'heading.small', weight: 'light', emphasis: 'muted' } }, '.X', config);
+    expect(compact(a)).toBe(compact(b));
+  });
+
+  it('boolean shorthand maps to true value', async () => {
+    const [a] = await parseStyles({ textStyle: 'heading.small@italic' }, '.X', config);
+    const [b] = await parseStyles({ textStyle: { name: 'heading.small', italic: true } }, '.X', config);
+    expect(compact(a)).toBe(compact(b));
+    expect(compact(a)).toContain('font-style:italic');
+  });
+
+  it('replace semantics: leaf variant override does not inherit sibling properties from parent bundle', async () => {
+    // heading.large overrides weight.heavy with { fontWeight: 950, letterSpacing: -0.01em }.
+    // The parent's heavy bundle was just { fontWeight: 900 } — fontWeight 900 must NOT appear.
+    const [rule] = await parseStyles({ textStyle: 'heading.large@weight=heavy' }, '.X', config);
+    const c = compact(rule);
+    expect(c).toContain('font-weight:950');
+    expect(c).not.toContain('font-weight:900');
+  });
+
+  it('compound variant fires only when ALL axes match', async () => {
+    const [hit] = await parseStyles({ textStyle: { name: 'heading.small', weight: 'heavy', italic: true } }, '.X', config);
+    expect(compact(hit)).toContain('letter-spacing:-0.005em');
+
+    const [miss] = await parseStyles({ textStyle: { name: 'heading.small', weight: 'heavy' } }, '.X', config);
+    expect(compact(miss)).not.toContain('letter-spacing:-0.005em');
+  });
+
+  it('any-of variant fires when at least one axis matches', async () => {
+    const [hit] = await parseStyles({ textStyle: { name: 'heading.small', weight: 'heavy' } }, '.X', config);
+    expect(compact(hit)).toContain('text-shadow:0 1px 0 #0001'.replace(/\s/g, ''));
+
+    const [otherAxis] = await parseStyles({ textStyle: { name: 'heading.small', emphasis: 'loud' } }, '.X', config);
+    expect(compact(otherAxis)).toContain('text-shadow:0 1px 0 #0001'.replace(/\s/g, ''));
+
+    const [miss] = await parseStyles({ textStyle: { name: 'heading.small', emphasis: 'muted' } }, '.X', config);
+    expect(compact(miss)).not.toContain('text-shadow:');
+  });
+
+  it('unknown axis at call site is ignored (and warns)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    try {
+      const [rule] = await parseStyles({ textStyle: { name: 'heading.small', nonexistent: 'whatever' } }, '.X', config);
+      expect(compact(rule)).toContain('font-family:serif');
+      expect(warn).toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+    }
+  });
+});
