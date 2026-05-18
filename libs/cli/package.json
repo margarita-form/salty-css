@@ -1,6 +1,6 @@
 {
   "name": "salty-css",
-  "version": "0.1.0-feat-template-variants.0",
+  "version": "0.1.0-alpha.27",
   "type": "module",
   "license": "MIT",
   "private": false,
@@ -25,7 +25,7 @@
     "name": "cli"
   },
   "dependencies": {
-    "@salty-css/core": "^0.1.0-feat-template-variants.0"
+    "@salty-css/core": "^0.1.0-alpha.27"
   },
   "bin": {
     "salty-css": "./index.js"
