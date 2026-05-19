@@ -87,10 +87,6 @@
       "import": "./css/merge.js",
       "require": "./css/merge.cjs"
     },
-    "./css/dynamic-styles": {
-      "import": "./css/dynamic-styles.js",
-      "require": "./css/dynamic-styles.cjs"
-    },
     "./helpers": {
       "import": "./helpers/index.js",
       "require": "./helpers/index.cjs"
@@ -118,10 +114,6 @@
     "./server": {
       "import": "./server/index.js",
       "require": "./server/index.cjs"
-    },
-    "./cache/resolve-dynamic-config-cache": {
-      "import": "./cache/resolve-dynamic-config-cache.js",
-      "require": "./cache/resolve-dynamic-config-cache.cjs"
     },
     "./instances/classname-instance": {
       "import": "./instances/classname-instance.js",

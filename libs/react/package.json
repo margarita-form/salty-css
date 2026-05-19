@@ -64,10 +64,6 @@
       "import": "./helpers.js",
       "require": "./helpers.cjs"
     },
-    "./dynamic-styles": {
-      "import": "./dynamic-styles.js",
-      "require": "./dynamic-styles.cjs"
-    },
     "./runtime": {
       "import": "./runtime.js",
       "require": "./runtime.cjs"
@@ -79,9 +75,9 @@
   },
   "dependencies": {
     "@salty-css/core": "0.1.0-feat-turbopack.1",
-    "@testing-library/react": "^16.3.2",
     "clsx": ">=2.x",
-    "react": ">=19.x || >=18.3.x"
+    "react": ">=19.x || >=18.3.x",
+    "@testing-library/react": "^16.3.2"
   },
   "devDependencies": {
     "@types/react-dom": "^19.2.3"

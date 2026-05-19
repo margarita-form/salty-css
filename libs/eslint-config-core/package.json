@@ -38,6 +38,7 @@
     }
   },
   "dependencies": {
+    "@salty-css/core": "0.1.0-feat-turbopack.1",
     "@salty-css/eslint-plugin-core": "0.1.0-feat-turbopack.1",
     "eslint": ">=9.x || >=8.x || >=7.x"
   }
