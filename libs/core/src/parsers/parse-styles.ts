@@ -8,6 +8,7 @@ import { propertyNameCheck } from './property-name-check';
 import { StyleValueModifierFunction } from './parser-types';
 import { reportParserIssue, StrictMode } from './strict';
 import { bareAtRuleRegex, pseudoTypoRegex, templateLiteralLeftoverRegex } from './parser-regexes';
+import { parseTemplateCallSite, pathHasRichNode, resolveRichTemplate } from './resolve-template-variants';
 
 /**
  * Transform styles object to css string with or without scope
@@ -68,13 +69,30 @@ export const parseStyles = async <T extends object>(
 
     if (config?.templates && config.templates[_key]) {
       if (omitTemplates) return undefined;
-      const path = value.split('.');
-      const templateStyles = path.reduce((acc: Record<string, any>, key: string) => acc[key], config.templates[_key]);
-      if (templateStyles) {
-        const [result] = await parseStyles(templateStyles, '');
-        return result;
+      const root = config.templates[_key];
+      const callSite = parseTemplateCallSite(value);
+      if (callSite) {
+        const { path, variants } = callSite;
+        const hasCallSiteVariants = Object.keys(variants).length > 0;
+        if (hasCallSiteVariants || pathHasRichNode(root, path)) {
+          const resolved = resolveRichTemplate(root, path, variants, _key);
+          if (resolved) {
+            const [result] = await parseStyles(resolved, '');
+            return result;
+          }
+          console.warn(`Template "${_key}" with path of "${path.join('.')}" was not found in config!`);
+          return undefined;
+        }
+        // Legacy flat path — unchanged from prior behavior.
+        const templateStyles = path.reduce((acc: Record<string, any>, key: string) => acc?.[key], root as Record<string, any>);
+        if (templateStyles) {
+          const [result] = await parseStyles(templateStyles, '');
+          return result;
+        }
+        console.warn(`Template "${_key}" with path of "${path.join('.')}" was not found in config!`);
+        return undefined;
       }
-      console.warn(`Template "${_key}" with path of "${value}" was not found in config!`);
+      console.warn(`Template "${_key}" received an unsupported call-site value.`);
       return undefined;
     }
 
@@ -91,6 +109,7 @@ export const parseStyles = async <T extends object>(
     if (typeof value === 'object') {
       if (!value) return undefined;
       if (value.isColor) return toString(value.toString());
+      if (value.isDefineFont) return toString(value.toString());
 
       if (_key === 'defaultVariants') return undefined;
 

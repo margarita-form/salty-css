@@ -83,6 +83,37 @@ describe('StylesGenerator', () => {
     expect(classes[0]?.startsWith('t_')).toBe(true);
     expect(classes[0]?.length).toBe(2 + 4);
   });
+
+  it('getTemplateClasses emits one hash per dot-path segment for nested template values', () => {
+    const gen = new StylesGenerator({ base: { textStyle: 'headline.regular' } });
+    const classes = gen.getTemplateClasses({ templates: { textStyle: {} } } as never);
+    // headline + headline.regular → 2 base hashes
+    expect(classes).toHaveLength(2);
+    classes.forEach((c) => {
+      expect(c.startsWith('t_')).toBe(true);
+      expect(c.length).toBe(2 + 4);
+    });
+    // Each hash must be distinct.
+    expect(new Set(classes).size).toBe(classes.length);
+  });
+
+  it('getTemplateClasses adds variant hashes for `@axis=value` call sites at every ancestor level', () => {
+    const gen = new StylesGenerator({ base: { textStyle: 'headline.regular@color=pink' } });
+    const classes = gen.getTemplateClasses({ templates: { textStyle: {} } } as never);
+    // 2 base hashes + 2 variant hashes (one per ancestor level).
+    expect(classes).toHaveLength(4);
+    expect(new Set(classes).size).toBe(classes.length);
+  });
+
+  it('getTemplateClasses serializes a boolean variant as `axis` without a value suffix', () => {
+    const withValue = new StylesGenerator({ base: { textStyle: 'headline@italic=true' } });
+    const asFlag = new StylesGenerator({ base: { textStyle: 'headline@italic' } });
+    const classesA = withValue.getTemplateClasses({ templates: { textStyle: {} } } as never);
+    const classesB = asFlag.getTemplateClasses({ templates: { textStyle: {} } } as never);
+    // Same emitted hashes: 1 base + 1 variant.
+    expect(classesA).toEqual(classesB);
+    expect(classesA).toHaveLength(2);
+  });
 });
 
 describe('StylesGenerator edge cases', () => {

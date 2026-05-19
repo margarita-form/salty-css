@@ -1,4 +1,5 @@
 import { parseAndJoinStyles } from '../parsers/parse-styles';
+import { parseTemplateCallSite } from '../parsers/resolve-template-variants';
 import { StyledParams, Styles } from '../types';
 import { CachedConfig, SaltyConfig } from '../types/config-types';
 import { dashCase, toHash } from '../util';
@@ -64,7 +65,24 @@ export class StylesGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
     if (!config?.templates || !this.params.base || this.priority > 0) return [];
     const templateKeys = Object.keys(config.templates);
     return Object.entries(this.params.base).reduce((acc, [key, value]) => {
-      if (templateKeys.includes(key)) acc.push('t_' + toHash(dashCase(`${key}-${value}`), 4));
+      if (!templateKeys.includes(key)) return acc;
+      const callSite = parseTemplateCallSite(value);
+      if (!callSite || callSite.path.length === 0) return acc;
+      const { path, variants } = callSite;
+
+      const cumulative: string[] = [];
+      for (const part of path) {
+        cumulative.push(part);
+        const baseClassName = dashCase(`${key}-${cumulative.join('.')}`);
+        acc.push('t_' + toHash(baseClassName, 4));
+
+        for (const [axis, axisValue] of Object.entries(variants)) {
+          if (axisValue === false || axisValue === undefined) continue;
+          const valueSuffix = axisValue === true ? '' : `-${dashCase(String(axisValue))}`;
+          const variantClassName = `${baseClassName}-${dashCase(axis)}${valueSuffix}`;
+          acc.push('tv_' + toHash(variantClassName, 4));
+        }
+      }
       return acc;
     }, [] as string[]);
   }
