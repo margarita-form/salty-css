@@ -3,6 +3,13 @@ import { spawn, spawnSync } from 'node:child_process';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output, exit, argv } from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve as resolvePath } from 'node:path';
+
+const readLernaVersion = () => {
+  const lernaPath = resolvePath(dirname(fileURLToPath(import.meta.url)), '..', 'lerna.json');
+  return JSON.parse(readFileSync(lernaPath, 'utf8')).version;
+};
 
 const PACKAGES = ['cli', 'npm-create', 'core', 'react', 'astro', 'vite', 'next', 'webpack', 'eslint-config-core', 'eslint-plugin-core'];
 const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;
@@ -49,19 +56,19 @@ const MODES = {
     requireBranch: (b) => !!b && !['HEAD', 'main', 'master'].includes(b),
     requireBranchMsg: 'refusing to run "branch" mode on main/master/detached HEAD. Switch to a feature branch first.',
     deriveTag: (b) => `branch-${slugify(b)}`,
-    lernaArgs: (b) => ['version', 'prerelease', '--preid', slugify(b), '--force-publish', '-m', 'chore(release-branch): version %v'],
+    lernaArgs: (b) => ['version', 'prerelease', '--preid', slugify(b), '--exact', '--force-publish', '-m', 'chore(release-branch): version %v'],
   },
   dev: {
     requireBranch: (b) => b === 'main',
     requireBranchMsg: '"dev" mode must be run from "main".',
     deriveTag: () => 'dev',
-    lernaArgs: () => ['version', '--force-publish', '-m', 'chore(release-dev): version %v'],
+    lernaArgs: () => ['version', '--exact', '--force-publish', '-m', 'chore(release-dev): version %v'],
   },
   release: {
     requireBranch: (b) => b === 'main',
     requireBranchMsg: '"release" mode must be run from "main".',
     deriveTag: () => null,
-    lernaArgs: () => ['version', '--force-publish', '-m', 'chore(release): version %v'],
+    lernaArgs: () => ['version', '--exact', '--force-publish', '-m', 'chore(release): version %v'],
   },
 };
 
@@ -96,6 +103,21 @@ const main = async () => {
   await run('npm', ['run', 'test:all']);
   await run('npm', ['run', 'build:all']);
   await run('npm', ['run', 'lerna', '--', ...mode.lernaArgs(branch)]);
+
+  await run('node', ['./scripts/sync-peer-deps.mjs']);
+  const syncDiff = spawnSync('git', ['diff', '--name-only', 'HEAD', '--', 'libs'], { encoding: 'utf8' });
+  if (syncDiff.status !== 0) fail(`git diff failed: ${syncDiff.stderr.trim()}`);
+  const syncChangedFiles = syncDiff.stdout.split('\n').map((s) => s.trim()).filter(Boolean);
+  if (syncChangedFiles.length) {
+    const tagName = `v${readLernaVersion()}`;
+    console.log(`sync-peer-deps changed ${syncChangedFiles.length} file(s); creating chore commit and moving ${tagName}.`);
+    git(['add', '--', ...syncChangedFiles]);
+    git(['commit', '-m', `chore(release): pin @salty-css/* deps to ${readLernaVersion()}`]);
+    git(['tag', '-f', tagName]);
+  } else {
+    console.log('sync-peer-deps produced no changes; skipping extra commit.');
+  }
+
   await run('npm', ['run', 'build:all']);
 
   const rl = createInterface({ input, output });
