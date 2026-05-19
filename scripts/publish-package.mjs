@@ -19,6 +19,12 @@ const git = (args) => {
   return res.stdout.trim();
 };
 
+const npmWhoami = () => {
+  const res = spawnSync('npm', ['whoami'], { encoding: 'utf8' });
+  if (res.status !== 0) fail('not logged in to npm. Run "npm login" first.');
+  return res.stdout.trim();
+};
+
 const run = (cmd, args) =>
   new Promise((resolve, reject) => {
     const child = spawn(cmd, args, { stdio: 'inherit' });
@@ -73,6 +79,9 @@ const main = async () => {
   if (modeName === 'release' && git(['status', '--porcelain'])) {
     fail('working tree is dirty; commit or stash changes before publishing.');
   }
+
+  const npmUser = npmWhoami();
+  if (!npmUser) fail('unable to determine npm user. Run "npm login" first.');
 
   let tag;
   try {
