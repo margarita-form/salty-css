@@ -64,10 +64,6 @@
       "import": "./helpers.js",
       "require": "./helpers.cjs"
     },
-    "./dynamic-styles": {
-      "import": "./dynamic-styles.js",
-      "require": "./dynamic-styles.cjs"
-    },
     "./runtime": {
       "import": "./runtime.js",
       "require": "./runtime.cjs"
