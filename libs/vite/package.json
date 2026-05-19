@@ -38,7 +38,7 @@
     "vite": "^6.4.1"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.1.0-alpha.33"
+    "@salty-css/react": "0.1.0-refactor-remove-dynamic-styles-in-favor-of-runtime.0"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
