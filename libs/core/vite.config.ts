@@ -90,7 +90,7 @@ export default defineConfig({
         /node:.*/,
         /fs.*/,
         /readline.*/,
-        /module.*/,
+        /^module$/,
         'esbuild',
         'winston',
         'child_process',
