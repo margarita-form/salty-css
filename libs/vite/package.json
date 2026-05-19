@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/vite",
-  "version": "0.1.0-refactor-remove-dynamic-styles-in-favor-of-runtime.0",
+  "version": "0.1.0-alpha.34",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -34,11 +34,11 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "0.1.0-refactor-remove-dynamic-styles-in-favor-of-runtime.0",
+    "@salty-css/core": "0.1.0-alpha.34",
     "vite": "^6.4.1"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.1.0-refactor-remove-dynamic-styles-in-favor-of-runtime.0"
+    "@salty-css/react": "0.1.0-alpha.33"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {

@@ -1,6 +1,6 @@
 {
   "name": "create-salty-css",
-  "version": "0.1.0-refactor-remove-dynamic-styles-in-favor-of-runtime.0",
+  "version": "0.1.0-alpha.34",
   "type": "module",
   "license": "MIT",
   "private": false,
@@ -25,7 +25,7 @@
     "name": "npm-create"
   },
   "dependencies": {
-    "@salty-css/core": "0.1.0-refactor-remove-dynamic-styles-in-favor-of-runtime.0"
+    "@salty-css/core": "0.1.0-alpha.34"
   },
   "bin": {
     "create-salty-css": "./index.js"
