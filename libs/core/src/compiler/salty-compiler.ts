@@ -638,9 +638,7 @@ export class SaltyCompiler {
 
     const tsTemplateVariantAliases = templateVariantMapEntries
       .flatMap(([templateKey, pathMap]) =>
-        Object.keys(pathMap).map(
-          (dotPath) => `type ${pascal(templateKey)}${pascal(dotPath)}Variants = TemplateVariantTokens['${templateKey}']['${dotPath}'];`
-        )
+        Object.keys(pathMap).map((dotPath) => `type ${pascal(templateKey)}${pascal(dotPath)}Variants = TemplateVariantTokens['${templateKey}']['${dotPath}'];`)
       )
       .join('\n      ');
 
@@ -652,7 +650,10 @@ export class SaltyCompiler {
       // Template types
       type TemplateTokens = {
         ${Object.entries(templateTokens)
-          .map(([key, value]) => `${key}?: ${value}`)
+          .map(([key, value]) => {
+            if (!value || value === 'any') return `${key}?: ${value || 'any'}`;
+            return `${key}?: ${value} | \`\${${value}}@\${string}\``;
+          })
           .join('\n')}
       }
 

@@ -17,11 +17,23 @@ export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey
 
   if (isRichTemplateNode(obj)) {
     const rich = obj as RichTemplateNode;
+    const baseClassName = path.map((p) => dashCase(String(p))).join('-');
     if (rich.base) {
-      const className = path.map((p) => dashCase(String(p))).join('-');
-      const hashClass = 't_' + toHash(className, 4);
-      const result = await parseAndJoinStyles(rich.base as Record<string, any>, `.${className}, .${hashClass}`);
+      const hashClass = 't_' + toHash(baseClassName, 4);
+      const result = await parseAndJoinStyles(rich.base as Record<string, any>, `.${baseClassName}, .${hashClass}`);
       classes.push(result);
+    }
+    if (rich.variants) {
+      for (const [axis, valueMap] of Object.entries(rich.variants as Record<string, Record<string, any>>)) {
+        if (!valueMap || typeof valueMap !== 'object') continue;
+        for (const [value, styles] of Object.entries(valueMap)) {
+          if (!styles || typeof styles !== 'object') continue;
+          const variantClassName = `${baseClassName}-${dashCase(axis)}-${dashCase(value)}`;
+          const variantHashClass = 'tv_' + toHash(variantClassName, 4);
+          const result = await parseAndJoinStyles(styles as Record<string, any>, `.${variantClassName}, .${variantHashClass}`);
+          classes.push(result);
+        }
+      }
     }
     for (const [key, value] of Object.entries(rich)) {
       if (!isChildEntry(key, value)) continue;
@@ -104,9 +116,7 @@ export const getTemplateTokens = <T extends object>(templates: T, parent = '', t
  * same axis. Matches the resolver's bottom-up lookup semantics — anything reachable via fallback is a
  * valid call-site value.
  */
-export const getTemplateVariantMaps = (
-  templates: Record<string, any>
-): Record<string, Record<string, Record<string, string>>> => {
+export const getTemplateVariantMaps = (templates: Record<string, any>): Record<string, Record<string, Record<string, string>>> => {
   const result: Record<string, Record<string, Record<string, string>>> = {};
   if (!templates) return result;
 
@@ -117,10 +127,7 @@ export const getTemplateVariantMaps = (
   return result;
 };
 
-const mergeAxes = (
-  inherited: Record<string, Record<string, true>>,
-  node: any
-): Record<string, Record<string, true>> => {
+const mergeAxes = (inherited: Record<string, Record<string, true>>, node: any): Record<string, Record<string, true>> => {
   const next: Record<string, Record<string, true>> = {};
   for (const [axis, vals] of Object.entries(inherited)) {
     next[axis] = { ...vals };
@@ -134,12 +141,7 @@ const mergeAxes = (
   return next;
 };
 
-const walk = (
-  node: any,
-  path: string[],
-  out: Record<string, Record<string, string>>,
-  inheritedAxes: Record<string, Record<string, true>>
-) => {
+const walk = (node: any, path: string[], out: Record<string, Record<string, string>>, inheritedAxes: Record<string, Record<string, true>>) => {
   if (!node || typeof node !== 'object' || Array.isArray(node)) return;
   const axes = mergeAxes(inheritedAxes, node);
   const dot = path.join('.');
