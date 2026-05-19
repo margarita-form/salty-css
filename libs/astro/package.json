@@ -78,7 +78,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "0.1.0-alpha.31",
+    "@salty-css/core": "0.1.0-feat-turbopack.1",
     "astro": "^5.13.2",
     "vite": "^6.3.5"
   }

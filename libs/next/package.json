@@ -34,7 +34,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "0.1.0-alpha.31",
-    "@salty-css/webpack": "0.1.0-alpha.31"
+    "@salty-css/core": "0.1.0-feat-turbopack.1",
+    "@salty-css/webpack": "0.1.0-feat-turbopack.1"
   }
 }

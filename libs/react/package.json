@@ -78,7 +78,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "0.1.0-alpha.31",
+    "@salty-css/core": "0.1.0-feat-turbopack.1",
     "@testing-library/react": "^16.3.2",
     "clsx": ">=2.x",
     "react": ">=19.x || >=18.3.x"
