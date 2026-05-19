@@ -5,7 +5,7 @@ import { RCFile } from '../types/cli-types';
 import { readFile } from 'fs/promises';
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';
-import { getCorePackageRoot, isSaltyFile, resolveExportValue, saltyFileExtensions } from './helpers';
+import { isSaltyFile, resolveExportValue, saltyFileExtensions } from './helpers';
 import { defineTemplates, GlobalStylesFactory, FontFactory, ImportFactory, TemplatesFactory, VariablesFactory } from '../factories';
 import { resolveImport } from './resolve-import';
 import { ClassNameGenerator, StyledGenerator } from '../generators';
@@ -670,10 +670,6 @@ export class SaltyCompiler {
     // Save config cache file
     const configCachePath = join(destDir, 'cache/config-cache.json');
     writeFileSync(configCachePath, JSON.stringify(configCacheContent, null, 2));
-
-    const corePackageRoot = getCorePackageRoot();
-    const configCacheSecondaryPath = join(corePackageRoot, 'cache/config-cache.json');
-    writeFileSync(configCacheSecondaryPath, JSON.stringify(configCacheContent, null, 2));
   };
 
   public compileSaltyFile = async (sourceFilePath: string, outputDirectory: string) => {

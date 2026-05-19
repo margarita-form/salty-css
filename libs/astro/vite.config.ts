@@ -37,7 +37,6 @@ export default defineConfig({
         styled: 'src/styled.ts',
         'class-name': 'src/class-name.ts',
         'element-props': 'src/element-props.ts',
-        'dynamic-styles': 'src/dynamic-styles.ts',
         runtime: 'src/runtime.ts',
         keyframes: 'src/keyframes.ts',
         media: 'src/media.ts',

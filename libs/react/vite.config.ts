@@ -41,7 +41,6 @@ export default defineConfig({
         config: 'src/config.ts',
         helpers: 'src/helpers.ts',
         runtime: 'src/runtime.ts',
-        'dynamic-styles': 'src/dynamic-styles.tsx',
         'transform-salty-file': 'src/transform-salty-file.ts',
       },
       fileName: (format, entryName) => {
