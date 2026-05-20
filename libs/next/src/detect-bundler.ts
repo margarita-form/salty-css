@@ -18,8 +18,8 @@ export const buildSaltyTurbopackRules = (dir: string, mode?: SaltyCompilerMode):
   const rules: Record<string, TurbopackLoaderRule> = {};
   const loader = { loader: '@salty-css/webpack/loader', options: { dir, mode } };
   for (const ext of saltyFileExtensions) {
-    rules[`*.${ext}.ts`] = { loaders: [loader], as: '*.ts' };
-    rules[`*.${ext}.tsx`] = { loaders: [loader], as: '*.tsx' };
+    rules[`**/*.${ext}.ts`] = { loaders: [loader], as: '*.ts' };
+    rules[`**/*.${ext}.tsx`] = { loaders: [loader], as: '*.tsx' };
   }
   return rules;
 };

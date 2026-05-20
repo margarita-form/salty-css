@@ -30,15 +30,15 @@ describe('buildSaltyTurbopackRules', () => {
     const rules = buildSaltyTurbopackRules('/x');
     const expectedExts = ['salty', 'css', 'styles', 'styled'];
     for (const ext of expectedExts) {
-      expect(rules[`*.${ext}.ts`]).toEqual({ loaders: [{ loader: '@salty-css/webpack/loader', options: { dir: '/x', mode: undefined } }], as: '*.ts' });
-      expect(rules[`*.${ext}.tsx`]).toEqual({ loaders: [{ loader: '@salty-css/webpack/loader', options: { dir: '/x', mode: undefined } }], as: '*.tsx' });
+      expect(rules[`**/*.${ext}.ts`]).toEqual({ loaders: [{ loader: '@salty-css/webpack/loader', options: { dir: '/x', mode: undefined } }], as: '*.ts' });
+      expect(rules[`**/*.${ext}.tsx`]).toEqual({ loaders: [{ loader: '@salty-css/webpack/loader', options: { dir: '/x', mode: undefined } }], as: '*.tsx' });
     }
     expect(Object.keys(rules)).toHaveLength(expectedExts.length * 2);
   });
 
   it('threads mode into loader options', () => {
     const rules = buildSaltyTurbopackRules('/x', 'production');
-    expect(rules['*.salty.ts'].loaders[0].options).toEqual({ dir: '/x', mode: 'production' });
+    expect(rules['**/*.salty.ts'].loaders[0].options).toEqual({ dir: '/x', mode: 'production' });
   });
 });
 
@@ -57,13 +57,10 @@ describe('withSaltyTurbopack', () => {
 
   it('merges salty rules into nextConfig.turbopack.rules without clobbering user rules', () => {
     const userRule = { loaders: [{ loader: 'other', options: {} }], as: '*.ts' };
-    const result = withSaltyTurbopack(
-      { turbopack: { rules: { '*.foo': userRule } }, reactStrictMode: true },
-      { dir: '/x' },
-    );
+    const result = withSaltyTurbopack({ turbopack: { rules: { '*.foo': userRule } }, reactStrictMode: true }, { dir: '/x' });
     expect(result.reactStrictMode).toBe(true);
     expect(result.turbopack.rules['*.foo']).toBe(userRule);
-    expect(result.turbopack.rules['*.salty.ts']).toBeDefined();
+    expect(result.turbopack.rules['**/*.salty.ts']).toBeDefined();
   });
 
   it('does not mutate the input config', () => {
