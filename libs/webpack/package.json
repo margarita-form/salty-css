@@ -38,11 +38,11 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "0.1.0-feat-turbopack.2",
+    "@salty-css/core": "0.1.0-feat-turbopack.5",
     "webpack": ">=5.x"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.1.0-feat-turbopack.2"
+    "@salty-css/react": "0.1.0-feat-turbopack.5"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
