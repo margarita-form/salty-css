@@ -1,6 +1,6 @@
 {
   "name": "create-salty-css",
-  "version": "0.1.0-feat-turbopack.3",
+  "version": "0.1.0-feat-turbopack.4",
   "type": "module",
   "license": "MIT",
   "private": false,
@@ -25,7 +25,7 @@
     "name": "npm-create"
   },
   "dependencies": {
-    "@salty-css/core": "0.1.0-feat-turbopack.3"
+    "@salty-css/core": "0.1.0-feat-turbopack.4"
   },
   "bin": {
     "create-salty-css": "./index.js"
