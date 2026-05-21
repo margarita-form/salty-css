@@ -41,7 +41,7 @@ export const saltyPlugin = (dir: string, options: SaltyAstroPluginOptions = {}):
     },
     load: async function (filePath) {
       try {
-        const saltyFile = isSaltyFile(filePath);
+        const saltyFile = isSaltyFile(filePath, [], !filePath.includes('configFile='));
         if (saltyFile) {
           const destDir = await saltyCompiler.getDestDir();
           if (/.+\?configFile=(\w+).+/.test(filePath)) {
