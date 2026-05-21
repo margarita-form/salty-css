@@ -20,8 +20,12 @@ export const tsFileExtensions = ['ts', 'tsx', 'js', 'jsx', 'mjs', 'cjs'];
 
 const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-export const saltyFileRegExp = (additional: string[] = []) => {
-  return new RegExp(`\\.(${[...saltyFileExtensions, ...additional].map(escapeRegExp).join('|')})\\.(${tsFileExtensions.map(escapeRegExp).join('|')})$`);
+export const saltyFileRegExp = (additional: string[] = [], testExtension = true) => {
+  const extensions = [...saltyFileExtensions, ...additional].map(escapeRegExp).join('|');
+  if (testExtension) {
+    return new RegExp(`\\.(${extensions})\\.(${tsFileExtensions.map(escapeRegExp).join('|')})$`);
+  }
+  return new RegExp(`\\.(${extensions})\\.`);
 };
 
-export const isSaltyFile = (file: string, additional: string[] = []) => saltyFileRegExp(additional).test(file);
+export const isSaltyFile = (file: string, additional: string[] = [], testExtension = true) => saltyFileRegExp(additional, testExtension).test(file);
