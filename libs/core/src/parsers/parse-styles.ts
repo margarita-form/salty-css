@@ -7,7 +7,7 @@ import { addUnit } from './unit-check';
 import { propertyNameCheck } from './property-name-check';
 import { StyleValueModifierFunction } from './parser-types';
 import { reportParserIssue, StrictMode } from './strict';
-import { bareAtRuleRegex, pseudoTypoRegex, templateLiteralLeftoverRegex } from './parser-regexes';
+import { bareAtRuleRegex, keyframesAtRuleRegex, pseudoTypoRegex, templateLiteralLeftoverRegex } from './parser-regexes';
 import { parseTemplateCallSite, pathHasRichNode, resolveRichTemplate } from './resolve-template-variants';
 
 /**
@@ -156,8 +156,12 @@ export const parseStyles = async <T extends object>(
       if (_key.startsWith('@')) {
         if (bareAtRuleRegex.test(_key)) reportParserIssue(strict, `At-rule "${_key}" is missing its condition (e.g. "@media (min-width: 600px)").`);
 
+        // Keyframes are inherently global: their children (`0%`, `from`, `to`)
+        // are pseudo-selectors, not nested rules. Reset scope so they emit
+        // as standalone blocks instead of being combined with the parent.
+        const innerScope = keyframesAtRuleRegex.test(_key) ? '' : currentScope;
         const mediaQuery = config?.mediaQueries?.[_key] || _key;
-        const results = await parseAndJoinStyles(value, currentScope, config);
+        const results = await parseAndJoinStyles(value, innerScope, config);
         const query = `${mediaQuery} { ${results} }`;
         cssStyles.add(query);
         return undefined;
