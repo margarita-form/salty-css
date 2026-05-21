@@ -13,7 +13,7 @@ export const mustBeExported: Rule.RuleModule = {
       recommended: true,
     },
     messages: {
-      mustBeExported: 'ipsum',
+      mustBeExported: 'Salty CSS function calls (styled, className, keyframes, defineX) must be exported — the compiler only picks up exports from .css.ts / .salty.ts / .styles.ts / .styled.ts files.',
     },
   },
   create(context) {
