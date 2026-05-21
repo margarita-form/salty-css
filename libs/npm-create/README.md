@@ -57,6 +57,8 @@ To get help with problems, [Join Salty CSS Discord server](https://discord.gg/R6
 - [defineVariables](#variables) - create CSS variables (tokens) that can be used in any styling function
 - [defineMediaQuery](#media-queries) - create CSS media queries and use them in any styling function
 - [defineTemplates](#templates) - create reusable templates that can be applied when same styles are used over and over again
+- [defineFont](#custom-fonts) - register custom fonts via `@font-face` (or a remote stylesheet) and expose them as a CSS variable
+- [defineImport](#importing-additional-css) - pull in external CSS files (relative, public, node_modules, or URL)
 - [keyframes](#keyframes-animations) - create CSS keyframes animation that can be used and imported in any styling function
 
 ### Styling helpers & utility
@@ -319,6 +321,213 @@ Example usage:
 styled('div', { base: { textStyle: 'headline.large', card: '20px' } });
 ```
 
+### Template variants
+
+Static templates can opt into named variants by switching a node from a plain styles object to a "rich" shape with `base` and `variants` keys — the same authoring API as `styled`. Variants declared at a parent node are inherited by every descendant leaf, so one declaration of `weight` on `heading` flows down to `heading.large`, `heading.small`, etc.
+
+```ts
+// /styles/templates.css.ts
+import { defineTemplates } from '@salty-css/core/factories';
+
+export default defineTemplates({
+  textStyle: {
+    heading: {
+      // Rich node: variants declared here are available to every child leaf.
+      base: {
+        fontFamily: '{fontFamily.heading}',
+        lineHeight: '1.1em',
+      },
+      variants: {
+        weight: {
+          light: { fontWeight: 300 },
+          regular: { fontWeight: 500 },
+          heavy: { fontWeight: 800 },
+        },
+        italic: {
+          true: { fontStyle: 'italic' },
+        },
+      },
+      defaultVariants: {
+        weight: 'regular',
+      },
+      compoundVariants: [
+        // Applied when ALL listed axes match.
+        { weight: 'heavy', italic: true, css: { letterSpacing: '-0.01em' } },
+      ],
+      // Leaves can be plain styles…
+      small: { fontSize: '{fontSize.heading.small}' },
+      regular: { fontSize: '{fontSize.heading.regular}' },
+      // …or rich, with their own additional variants / overrides.
+      large: {
+        base: { fontSize: '{fontSize.heading.large}' },
+        variants: {
+          weight: {
+            // Override the inherited bundle just for `large`.
+            heavy: { fontWeight: 900, letterSpacing: '-0.02em' },
+          },
+        },
+      },
+    },
+  },
+});
+```
+
+Apply variants at the call site in either of two equivalent forms — string query or object:
+
+```ts
+styled('h1', {
+  base: {
+    // String form: `path@axis=value&axis=value&boolFlag`
+    textStyle: 'heading.large@weight=heavy&italic',
+  },
+});
+
+styled('h2', {
+  base: {
+    // Object form: `name` is the dot-path, the rest are axis values.
+    textStyle: { name: 'heading.large', weight: 'heavy', italic: true },
+  },
+});
+
+// No variants — existing simple usage still works.
+styled('p', { base: { textStyle: 'heading.regular' } });
+```
+
+Behaviour worth knowing:
+
+- **Inheritance is parent → leaf only.** A leaf sees variants from its ancestors; siblings and children are invisible.
+- **Closest wins.** If the same axis/value bundle is declared at multiple levels, the deepest one replaces (not merges) the ancestor's bundle for that single call.
+- **`defaultVariants` apply when the call site omits an axis.** Walked bottom-up, same closest-wins rule.
+- **`compoundVariants` (AND) and `anyOfVariants` (OR) are accumulated top-down** across the path — every matching rule contributes.
+- **Boolean axes accept a shorthand.** `@italic` is equivalent to `@italic=true`; in object form pass `italic: true`.
+- **Reserved keys** inside a rich node: `base`, `variants`, `defaultVariants`, `compoundVariants`, `anyOfVariants`. Don't use `name` as an axis (reserved for the object call-site form).
+- **Function templates** (e.g. `card: (v) => ({ … })`) don't support variants — keep them as plain functions.
+
+## Custom fonts
+
+Register custom fonts that will be emitted as `@font-face` declarations and exposed as a CSS variable. Mirrors the developer experience of Next.js / Astro font loaders, but generated at build time alongside the rest of your Salty CSS output.
+
+The returned object stringifies to its `font-family` value and exposes helpers for explicit usage:
+
+- `Font.variable` → CSS variable name (e.g. `--font-inter`)
+- `Font.fontFamily` → final `font-family` string with fallbacks
+- `Font.className` → class that sets the variable + applies the font on a subtree
+- `Font.style` → object you can spread on a React `style` prop
+
+```ts
+// /styles/fonts.css.ts
+import { defineFont } from '@salty-css/core/factories';
+
+// 1. Local or self-hosted @font-face sources.
+//    URLs are passed through as-is (use a public-folder path or a CDN URL).
+export const Inter = defineFont({
+  name: 'Inter', // CSS font-family value
+  variable: '--font-inter', // Optional — accepts 'font-inter' too; if omitted we derive `--font-<name>-<hash>` from the inputs
+  display: 'swap', // Optional default applied to variants without their own `display`
+  fallback: ['system-ui', 'sans-serif'], // Optional family fallbacks appended after `name`
+  variants: [
+    {
+      weight: 400,
+      style: 'normal',
+      // Shorthand: pass a string and the `format()` descriptor is auto-detected
+      // from the file extension (woff2, woff, ttf, otf, eot, svg, ttc).
+      src: '/fonts/inter-400.woff2',
+    },
+    {
+      weight: 700,
+      style: 'normal',
+      // Multiple sources can be a string array — first entry is preferred;
+      // the browser picks the first format it supports.
+      src: ['/fonts/inter-700.woff2', '/fonts/inter-700.ttf'],
+    },
+    {
+      weight: 400,
+      style: 'italic',
+      // Use the `{ url, format }` object form when the URL has no recognisable
+      // extension (signed CDN URLs, query-only endpoints, etc.). You can also
+      // mix strings and objects in the same array.
+      src: ['/fonts/inter-400-italic.woff2', { url: 'https://cdn.example.com/inter-italic', format: 'woff' }],
+    },
+  ],
+});
+
+// 2. Remote stylesheet (Google Fonts, etc.). Emits `@import url(...)` and still
+//    registers the CSS variable so usage stays the same as the @font-face flow.
+export const InterCdn = defineFont({
+  name: 'Inter',
+  variable: '--font-inter',
+  import: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap',
+});
+```
+
+Example usage:
+
+```tsx
+import { Inter } from './fonts.css';
+import { styled } from '@salty-css/react/styled';
+
+// Apply the font globally by attaching its className high up in the tree.
+// This sets `--font-inter` on the subtree and applies `font-family: var(--font-inter)`.
+export const App = ({ children }) => <div className={Inter.className}>{children}</div>;
+
+// `Inter` stringifies to its font-family value (with fallbacks), so it can be used directly.
+export const Heading = styled('h1', {
+  base: {
+    fontFamily: `${Inter}`,
+  },
+});
+
+// Or reference the CSS variable explicitly.
+export const Body = styled('p', {
+  base: {
+    fontFamily: `var(${Inter.variable})`,
+  },
+});
+```
+
+## Importing additional CSS
+
+Use `defineImport` to pull in CSS that lives outside of Salty's authoring API — a reset stylesheet from npm, a Google Fonts URL, an asset in your app's `public/` folder, or a sibling `.css` file. The compiler turns each spec into an `@import` rule in the generated `saltygen/index.css`, so the imported stylesheets travel with the rest of your build.
+
+```ts
+// /styles/imports.css.ts
+import { defineImport } from '@salty-css/core/factories';
+
+export default defineImport(
+  // Relative to this file
+  './reset.css',
+  // From node_modules (bare specifier — same as Vite / native CSS @import)
+  'modern-normalize/modern-normalize.css',
+  // From node_modules (~ prefix — same resolver, webpack-style)
+  '~normalize.css/normalize.css',
+  // From your app's public/ folder (served at the host root)
+  '/fonts/inter.css',
+  // External URL
+  'https://fonts.googleapis.com/css2?family=Inter&display=swap',
+  // Object form — attach media or supports() conditions
+  { url: './print.css', media: 'print' },
+  { url: './p3.css', supports: 'color(display-p3 1 1 1)' }
+);
+```
+
+Path resolution:
+
+| Pattern                     | Behaviour                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| `http://`, `https://`, `//` | Emitted verbatim                                                                         |
+| Starts with `/`             | Public-folder URL — emitted verbatim, the browser resolves it against your host          |
+| Starts with `./` or `../`   | Resolved at build time relative to the file that called `defineImport`                   |
+| `~package/file.css`         | Stripped of the leading `~`, then resolved from `node_modules` and copied into the build |
+| `package/file.css` (bare)   | Same `node_modules` resolution as the `~` form                                           |
+
+All imports are placed inside a new `imports` cascade layer that sits **before** `reset`, `global`, `templates`, and your component styles. This means your own styles always win over third-party CSS you pull in — which is what most teams expect when they drop in something like `modern-normalize`.
+
+The full layer order in the generated `index.css` is:
+
+```css
+@layer imports, reset, global, templates, l0, l1, l2, l3, l4, l5, l6, l7, l8;
+```
+
 ## Keyframes animations
 
 ```ts
@@ -407,6 +616,8 @@ And note: steps 2 & 3 are just to show how get new components up and running, st
 
 - **Next.js 15:** In `next.config.ts` add import for salty plugin `import { withSaltyCss } from '@salty-css/next';` and then add `withSaltyCss` to wrap your nextConfig export like so `export default withSaltyCss(nextConfig);`
 - **Next.js 14 and older:** In `next.config.js` add import for salty plugin `const { withSaltyCss } = require('@salty-css/next');` and then add `withSaltyCss` to wrap your nextConfig export like so `module.exports = withSaltyCss(nextConfig);`
+
+Both Webpack and Turbopack are supported. `withSaltyCss` auto-detects which bundler Next.js is using (`next dev --turbopack` sets `process.env.TURBOPACK=1`), so no extra config is required. To force a specific bundler, pass `{ bundler: 'webpack' | 'turbopack' }` as the second argument.
 
 4. Make sure that `salty.config.ts` and `next.config.ts` are in the same folder!
 5. Build `saltygen` directory by running your app once or with cli `npx salty-css build [directory]`

@@ -7,7 +7,8 @@ import { addUnit } from './unit-check';
 import { propertyNameCheck } from './property-name-check';
 import { StyleValueModifierFunction } from './parser-types';
 import { reportParserIssue, StrictMode } from './strict';
-import { bareAtRuleRegex, pseudoTypoRegex, templateLiteralLeftoverRegex } from './parser-regexes';
+import { bareAtRuleRegex, keyframesAtRuleRegex, pseudoTypoRegex, templateLiteralLeftoverRegex } from './parser-regexes';
+import { parseTemplateCallSite, pathHasRichNode, resolveRichTemplate } from './resolve-template-variants';
 
 /**
  * Transform styles object to css string with or without scope
@@ -68,13 +69,30 @@ export const parseStyles = async <T extends object>(
 
     if (config?.templates && config.templates[_key]) {
       if (omitTemplates) return undefined;
-      const path = value.split('.');
-      const templateStyles = path.reduce((acc: Record<string, any>, key: string) => acc[key], config.templates[_key]);
-      if (templateStyles) {
-        const [result] = await parseStyles(templateStyles, '');
-        return result;
+      const root = config.templates[_key];
+      const callSite = parseTemplateCallSite(value);
+      if (callSite) {
+        const { path, variants } = callSite;
+        const hasCallSiteVariants = Object.keys(variants).length > 0;
+        if (hasCallSiteVariants || pathHasRichNode(root, path)) {
+          const resolved = resolveRichTemplate(root, path, variants, _key);
+          if (resolved) {
+            const [result] = await parseStyles(resolved, '');
+            return result;
+          }
+          console.warn(`Template "${_key}" with path of "${path.join('.')}" was not found in config!`);
+          return undefined;
+        }
+        // Legacy flat path — unchanged from prior behavior.
+        const templateStyles = path.reduce((acc: Record<string, any>, key: string) => acc?.[key], root as Record<string, any>);
+        if (templateStyles) {
+          const [result] = await parseStyles(templateStyles, '');
+          return result;
+        }
+        console.warn(`Template "${_key}" with path of "${path.join('.')}" was not found in config!`);
+        return undefined;
       }
-      console.warn(`Template "${_key}" with path of "${value}" was not found in config!`);
+      console.warn(`Template "${_key}" received an unsupported call-site value.`);
       return undefined;
     }
 
@@ -91,6 +109,7 @@ export const parseStyles = async <T extends object>(
     if (typeof value === 'object') {
       if (!value) return undefined;
       if (value.isColor) return toString(value.toString());
+      if (value.isDefineFont) return toString(value.toString());
 
       if (_key === 'defaultVariants') return undefined;
 
@@ -137,8 +156,12 @@ export const parseStyles = async <T extends object>(
       if (_key.startsWith('@')) {
         if (bareAtRuleRegex.test(_key)) reportParserIssue(strict, `At-rule "${_key}" is missing its condition (e.g. "@media (min-width: 600px)").`);
 
+        // Keyframes are inherently global: their children (`0%`, `from`, `to`)
+        // are pseudo-selectors, not nested rules. Reset scope so they emit
+        // as standalone blocks instead of being combined with the parent.
+        const innerScope = keyframesAtRuleRegex.test(_key) ? '' : currentScope;
         const mediaQuery = config?.mediaQueries?.[_key] || _key;
-        const results = await parseAndJoinStyles(value, currentScope, config);
+        const results = await parseAndJoinStyles(value, innerScope, config);
         const query = `${mediaQuery} { ${results} }`;
         cssStyles.add(query);
         return undefined;

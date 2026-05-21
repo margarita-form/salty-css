@@ -2,6 +2,9 @@
 import { BaseStyles, CssStyles, MediaQueryStyles } from '../types';
 import { OrString } from '../types/util-types';
 
+// Re-export types from other files for easier imports.
+export * from './font-types';
+
 export type GlobalStyles = Record<string, BaseStyles>;
 
 export type CssVariableTokensObject = Record<string, unknown>;
@@ -22,7 +25,33 @@ export interface SaltyVariables {
   [key: string]: undefined | string | number | CssVariableTokensObject;
 }
 
-type CssTemplate = MediaQueryStyles | CssStyles | { [key: PropertyKey]: CssTemplate };
+/**
+ * A variant axis value bundle: a map from axis name to a map from value name (string keys or `'true'`)
+ * to a CSS-in-JS block. `name` is reserved as the call-site object form's path key and cannot be used
+ * as an axis name (build-time error).
+ */
+export type CssVariantAxes = {
+  [axis: string]: { [value: string]: CssStyles };
+} & { name?: never };
+
+export interface CssCompoundVariant {
+  css: CssStyles;
+  [axis: string]: any;
+}
+
+/**
+ * A "rich" template node: declares its own base styles, named variant bundles, defaults, and compound rules.
+ * May coexist with child template nodes (descendants) as additional sibling keys.
+ */
+export type RichTemplateNode = {
+  base?: CssStyles;
+  variants?: CssVariantAxes;
+  defaultVariants?: { [axis: string]: string | boolean };
+  compoundVariants?: CssCompoundVariant[];
+  anyOfVariants?: CssCompoundVariant[];
+} & { [key: PropertyKey]: any };
+
+type CssTemplate = MediaQueryStyles | CssStyles | RichTemplateNode | { [key: PropertyKey]: CssTemplate };
 
 export interface CssTemplateObject {
   [key: PropertyKey]: CssTemplate;

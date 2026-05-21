@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/eslint-plugin-core",
-  "version": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.1",
+  "version": "0.1.0-alpha.35",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -34,7 +34,8 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "^0.1.0-feat-astro-support-for-client-side-lib-salty-packages.1",
+    "@salty-css/core": "0.1.0-alpha.35",
+    "@types/estree": "1.0.8",
     "eslint": ">=9.x || >=8.x || >=7.x"
   }
 }
