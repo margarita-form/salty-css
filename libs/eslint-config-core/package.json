@@ -38,8 +38,8 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.1",
-    "@salty-css/eslint-plugin-core": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.1",
+    "@salty-css/core": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.2",
+    "@salty-css/eslint-plugin-core": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.2",
     "eslint": ">=9.x || >=8.x || >=7.x"
   }
 }
