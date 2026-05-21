@@ -6,7 +6,7 @@ export type BundlerOption = Bundler | 'auto';
 
 export const resolveBundler = (option: BundlerOption | undefined): Bundler => {
   if (option && option !== 'auto') return option;
-  return process.env['TURBOPACK'] === '1' ? 'turbopack' : 'webpack';
+  return process.env['TURBOPACK'] !== undefined ? 'turbopack' : 'webpack';
 };
 
 export type TurbopackLoaderRule = {
@@ -16,7 +16,10 @@ export type TurbopackLoaderRule = {
 
 export const buildSaltyTurbopackRules = (dir: string, mode?: SaltyCompilerMode): Record<string, TurbopackLoaderRule> => {
   const rules: Record<string, TurbopackLoaderRule> = {};
-  const loader = { loader: '@salty-css/webpack/loader', options: { dir, mode } };
+  // Turbopack rejects rule options containing `undefined` values, so only include `mode` when set.
+  const loaderOptions: Record<string, unknown> = { dir };
+  if (mode !== undefined) loaderOptions['mode'] = mode;
+  const loader = { loader: '@salty-css/webpack/loader', options: loaderOptions };
   for (const ext of saltyFileExtensions) {
     rules[`**/*.${ext}.ts`] = { loaders: [loader], as: '*.ts' };
     rules[`**/*.${ext}.tsx`] = { loaders: [loader], as: '*.tsx' };

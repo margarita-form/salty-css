@@ -30,10 +30,15 @@ describe('buildSaltyTurbopackRules', () => {
     const rules = buildSaltyTurbopackRules('/x');
     const expectedExts = ['salty', 'css', 'styles', 'styled'];
     for (const ext of expectedExts) {
-      expect(rules[`**/*.${ext}.ts`]).toEqual({ loaders: [{ loader: '@salty-css/webpack/loader', options: { dir: '/x', mode: undefined } }], as: '*.ts' });
-      expect(rules[`**/*.${ext}.tsx`]).toEqual({ loaders: [{ loader: '@salty-css/webpack/loader', options: { dir: '/x', mode: undefined } }], as: '*.tsx' });
+      expect(rules[`**/*.${ext}.ts`]).toEqual({ loaders: [{ loader: '@salty-css/webpack/loader', options: { dir: '/x' } }], as: '*.ts' });
+      expect(rules[`**/*.${ext}.tsx`]).toEqual({ loaders: [{ loader: '@salty-css/webpack/loader', options: { dir: '/x' } }], as: '*.tsx' });
     }
     expect(Object.keys(rules)).toHaveLength(expectedExts.length * 2);
+  });
+
+  it('omits mode from loader options when undefined (Turbopack rejects undefined values)', () => {
+    const rules = buildSaltyTurbopackRules('/x');
+    expect(rules['**/*.salty.ts'].loaders[0].options).not.toHaveProperty('mode');
   });
 
   it('threads mode into loader options', () => {
