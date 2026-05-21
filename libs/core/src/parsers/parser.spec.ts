@@ -436,6 +436,133 @@ describe('Parser testing', () => {
       const rules = await parseStyles({ '& a, & button': { color: 'red' } }, 'main');
       expectRule(rules, 'main a, main button', { color: 'red' });
     });
+
+    // ──────────────────────────────────────────────────────────────────────
+    // J. @keyframes (inline at-rule form)
+    // ──────────────────────────────────────────────────────────────────────
+
+    /**
+     * Keyframe selectors (`0%`, `100%`, `from`, `to`) are pseudo-selectors,
+     * not nested rules — they must stand alone regardless of the parent scope.
+     */
+    it('inline @keyframes at top scope does not leak the parent selector', async () => {
+      const rules = await parseStyles(
+        {
+          '@keyframes shimmer': {
+            '0%': { backgroundPosition: '0% 0%' },
+            '100%': { backgroundPosition: '200% 0%' },
+          },
+        },
+        '.X'
+      );
+      const kf = rules.find((rule) => strip(rule).startsWith('@keyframes shimmer {'));
+      if (!kf) throw new Error(`@keyframes rule not found in:\n${rules.map((r) => `  ${strip(r)}`).join('\n')}`);
+      const compact = strip(kf);
+      expect(compact).toContain('0% {');
+      expect(compact).toContain('100% {');
+      expect(compact.replace(/\s/g, '')).toContain('background-position:0%0%');
+      expect(compact.replace(/\s/g, '')).toContain('background-position:200%0%');
+      expect(compact).not.toContain('.X 0%');
+      expect(compact).not.toContain('.X 100%');
+    });
+
+    /**
+     * The reported bug: @keyframes inside a variant prepended `.X.variant-rgb`
+     * onto the `0%` / `100%` selectors, producing rules that never matched.
+     */
+    it('inline @keyframes inside a variant emits valid CSS (no variant scope on keyframe selectors)', async () => {
+      const rules = await parseStyles(
+        {
+          variants: {
+            variant: {
+              rgb: {
+                animation: 'shimmer 1s linear infinite',
+                '@keyframes shimmer': {
+                  '0%': { backgroundPosition: '0% 0%' },
+                  '100%': { backgroundPosition: '200% 0%' },
+                },
+              },
+            },
+          },
+        },
+        '.X'
+      );
+      expectRule(rules, '.X.variant-rgb', { animation: 'shimmer1slinearinfinite' });
+      const kf = rules.find((rule) => strip(rule).startsWith('@keyframes shimmer {'));
+      if (!kf) throw new Error(`@keyframes rule not found in:\n${rules.map((r) => `  ${strip(r)}`).join('\n')}`);
+      const compact = strip(kf);
+      expect(compact).not.toContain('.X.variant-rgb');
+      expect(compact).toContain('0% {');
+      expect(compact).toContain('100% {');
+    });
+
+    it('inline @keyframes supports `from` / `to` keys without scope leakage', async () => {
+      const rules = await parseStyles(
+        {
+          variants: {
+            fade: {
+              on: {
+                '@keyframes fade': {
+                  from: { opacity: 0 },
+                  to: { opacity: 1 },
+                },
+              },
+            },
+          },
+        },
+        '.X'
+      );
+      const kf = rules.find((rule) => strip(rule).startsWith('@keyframes fade {'));
+      if (!kf) throw new Error(`@keyframes rule not found in:\n${rules.map((r) => `  ${strip(r)}`).join('\n')}`);
+      const compact = strip(kf);
+      expect(compact).toContain('from {');
+      expect(compact).toContain('to {');
+      expect(compact).not.toContain('.X.fade-on from');
+      expect(compact).not.toContain('.X.fade-on to');
+    });
+
+    it('vendor-prefixed @-webkit-keyframes is treated the same way', async () => {
+      const rules = await parseStyles(
+        {
+          '@-webkit-keyframes spin': {
+            '0%': { transform: 'rotate(0deg)' },
+            '100%': { transform: 'rotate(360deg)' },
+          },
+        },
+        '.X'
+      );
+      const kf = rules.find((rule) => strip(rule).startsWith('@-webkit-keyframes spin {'));
+      if (!kf) throw new Error(`@-webkit-keyframes rule not found in:\n${rules.map((r) => `  ${strip(r)}`).join('\n')}`);
+      const compact = strip(kf);
+      expect(compact).not.toContain('.X 0%');
+      expect(compact).toContain('0% {');
+      expect(compact).toContain('100% {');
+    });
+
+    /**
+     * Regression guard: @media inside a variant must still scope its children
+     * to the variant — keyframes is the *only* at-rule whose children should
+     * shed the parent scope.
+     */
+    it('@media inside a variant still scopes children to the variant', async () => {
+      const rules = await parseStyles(
+        {
+          variants: {
+            variant: {
+              rgb: {
+                '@media (min-width: 600px)': { color: 'red' },
+              },
+            },
+          },
+        },
+        '.X'
+      );
+      const media = rules.find((rule) => strip(rule).startsWith('@media (min-width: 600px) {'));
+      if (!media) throw new Error(`@media rule not found in:\n${rules.map((r) => `  ${strip(r)}`).join('\n')}`);
+      const compact = strip(media);
+      expect(compact).toContain('.X.variant-rgb {');
+      expect(compact.replace(/\s/g, '')).toContain('color:red');
+    });
   });
 });
 
