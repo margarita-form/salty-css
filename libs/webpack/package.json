@@ -42,7 +42,7 @@
     "webpack": ">=5.x"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.1.0-feat-turbopack.6"
+    "@salty-css/react": "0.1.0-feat-turbopack.7"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
