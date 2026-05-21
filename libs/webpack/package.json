@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/webpack",
-  "version": "0.1.0-alpha.35",
+  "version": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.4",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -38,11 +38,11 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "0.1.0-alpha.35",
+    "@salty-css/core": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.4",
     "webpack": ">=5.x"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.1.0-alpha.35"
+    "@salty-css/react": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.4"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
