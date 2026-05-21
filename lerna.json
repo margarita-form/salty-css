@@ -1,5 +1,5 @@
 {
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
-  "version": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.3",
+  "version": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.4",
   "packages": ["libs/*"]
 }
