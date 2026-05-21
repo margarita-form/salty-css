@@ -42,7 +42,7 @@
     "webpack": ">=5.x"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.3"
+    "@salty-css/react": "0.1.0-feat-astro-support-for-client-side-lib-salty-packages.4"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
