@@ -19,5 +19,13 @@ export const config = defineConfig({
         };
       },
     },
+    // Mirrors the README §Modifiers example. Keeps the snippet exercised by `npm run build:react`.
+    spaceShorthand: {
+      pattern: /^space:(\d+)$/,
+      transform: (regexMatch) => {
+        const n = Number(regexMatch.replace('space:', ''));
+        return { value: `${n * 4}px` };
+      },
+    },
   },
 });
