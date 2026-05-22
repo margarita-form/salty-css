@@ -63,4 +63,67 @@ describe('defineRuntime', () => {
       expect(strip(css)).toBe(strip('.override { color: red; }'));
     });
   });
+
+  // Locks the documented feature-support claims in /docs/api/runtime/
+  // through the public defineRuntime entry point. parser.spec.ts covers
+  // these end-to-end via parseStyles; these are the same shapes asserted
+  // through the runtime surface a CMS consumer would actually call.
+  describe('feature support through defineRuntime', () => {
+    it('resolves {token} references against the supplied variables', async () => {
+      const scoped = defineRuntime({ variables: { colors: { brand: 'tomato' } } });
+      const { css } = await scoped.resolve({ color: '{colors.brand}' });
+      expect(css).toContain('var(--colors-brand)');
+    });
+
+    it('preserves @media blocks scoped under the default hash class', async () => {
+      const { className, css } = await runtime.resolve({
+        color: 'red',
+        '@media (min-width: 600px)': { color: 'blue' },
+      });
+      expect(strip(css)).toContain(strip(`.${className} { color: red; }`));
+      const compact = css.replace(/\s/g, '');
+      expect(compact).toContain('@media(min-width:600px){');
+      expect(compact).toContain(`.${className}{color:blue;}`);
+    });
+
+    it('expands ampersand pseudo-class modifiers under the scope', async () => {
+      const { className, css } = await runtime.resolve({
+        color: 'red',
+        '&:hover': { color: 'blue' },
+      });
+      expect(strip(css)).toContain(strip(`.${className}:hover { color: blue; }`));
+    });
+
+    it('expands nested child selectors under the scope', async () => {
+      const { className, css } = await runtime.resolve({
+        '& > svg': { fill: 'red' },
+      });
+      expect(strip(css)).toContain(strip(`.${className} > svg { fill: red; }`));
+    });
+
+    it('expands template references against the supplied templates', async () => {
+      const tpl = defineRuntime({
+        templates: { textStyle: { caption: { fontSize: '12px', lineHeight: '1.4' } } },
+      });
+      const { css } = await tpl.resolve({ textStyle: 'caption' });
+      const compact = css.replace(/\s/g, '');
+      expect(compact).toContain('font-size:12px');
+      expect(compact).toContain('line-height:1.4');
+    });
+
+    it('emits variant selectors but does not pick a branch (no prop mapping)', async () => {
+      const { className, css } = await runtime.resolve({
+        variants: { size: { sm: { padding: '4px' } } },
+      });
+      const compact = css.replace(/\s/g, '');
+      expect(compact).toContain(`.${className}.size-sm{`);
+      expect(compact).toContain('padding:4px');
+    });
+
+    it('hashes structurally-equal objects to the same className', () => {
+      const a = { color: 'red', padding: '4px', '&:hover': { color: 'blue' } };
+      const b = { color: 'red', padding: '4px', '&:hover': { color: 'blue' } };
+      expect(runtime.className(a)).toBe(runtime.className(b));
+    });
+  });
 });
