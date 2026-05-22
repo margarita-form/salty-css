@@ -57,6 +57,12 @@ class Color {
   }
 }
 
+/**
+ * Token references must point to a **static** variable that resolves to a real
+ * CSS color value (e.g. a hex code or named color). Conditional tokens
+ * (`{theme.*}`) and responsive tokens are not in `staticVariables` and will
+ * resolve to `transparent`. `color()` cannot be used inside `defineVariables`.
+ */
 export const color = (value: BaseColor) => {
   return new Color(value) as Color & ColorInstance;
 };
