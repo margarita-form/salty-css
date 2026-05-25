@@ -35,6 +35,12 @@ export default defineConfig({
       name: 'salty-css-next',
       entry: {
         index: 'src/index.ts',
+        config: 'src/config.ts',
+        factories: 'src/factories.ts',
+        helpers: 'src/helpers.ts',
+        keyframes: 'src/keyframes.ts',
+        media: 'src/media.ts',
+        runtime: 'src/runtime.ts',
       },
       fileName: (format, entryName) => {
         const ext = format === 'es' ? 'js' : format;

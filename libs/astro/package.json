@@ -64,6 +64,10 @@
       "import": "./media.js",
       "require": "./media.cjs"
     },
+    "./factories": {
+      "import": "./factories.js",
+      "require": "./factories.cjs"
+    },
     "./config": {
       "import": "./config.js",
       "require": "./config.cjs"

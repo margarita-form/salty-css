@@ -31,6 +31,30 @@
     ".": {
       "import": "./index.js",
       "require": "./index.cjs"
+    },
+    "./config": {
+      "import": "./config.js",
+      "require": "./config.cjs"
+    },
+    "./factories": {
+      "import": "./factories.js",
+      "require": "./factories.cjs"
+    },
+    "./helpers": {
+      "import": "./helpers.js",
+      "require": "./helpers.cjs"
+    },
+    "./keyframes": {
+      "import": "./keyframes.js",
+      "require": "./keyframes.cjs"
+    },
+    "./media": {
+      "import": "./media.js",
+      "require": "./media.cjs"
+    },
+    "./runtime": {
+      "import": "./runtime.js",
+      "require": "./runtime.cjs"
     }
   },
   "dependencies": {

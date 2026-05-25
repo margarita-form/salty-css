@@ -40,6 +40,7 @@ export default defineConfig({
         runtime: 'src/runtime.ts',
         keyframes: 'src/keyframes.ts',
         media: 'src/media.ts',
+        factories: 'src/factories.ts',
         config: 'src/config.ts',
         helpers: 'src/helpers.ts',
       },

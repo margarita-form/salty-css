@@ -38,6 +38,7 @@ export default defineConfig({
         'class-name-client': 'src/class-name-client.ts',
         keyframes: 'src/keyframes.ts',
         media: 'src/media.ts',
+        factories: 'src/factories.ts',
         config: 'src/config.ts',
         helpers: 'src/helpers.ts',
         runtime: 'src/runtime.ts',
