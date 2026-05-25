@@ -42,7 +42,7 @@
     "webpack": ">=5.x"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.1.0"
+    "@salty-css/react": "0.2.0-alpha.0"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
