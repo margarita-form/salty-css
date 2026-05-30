@@ -563,6 +563,61 @@ describe('Parser testing', () => {
       expect(compact).toContain('.X.variant-rgb {');
       expect(compact.replace(/\s/g, '')).toContain('color:red');
     });
+
+    // ──────────────────────────────────────────────────────────────────────
+    // K. `global` key — scope escape hatch
+    // ──────────────────────────────────────────────────────────────────────
+
+    /**
+     * Input:
+     *   parseStyles({ color: 'red', global: { ':root': { '--x': 'y' } } }, '.X')
+     *
+     * Expected CSS (two rules):
+     *   .X { color: red; }
+     *   :root { --x: y; }
+     *
+     * :root must NOT be combined with the parent scope (.X:root would be wrong).
+     */
+    it('global key emits nested selectors without inheriting the parent scope', async () => {
+      const rules = await parseStyles({ color: 'red', global: { ':root': { '--x': 'y' } } }, '.X');
+      expectRule(rules, '.X', { color: 'red' });
+      expectRule(rules, ':root', { '--x': 'y' });
+      for (const rule of rules) {
+        expect(strip(rule)).not.toMatch(/\.X:root/);
+      }
+    });
+
+    /**
+     * Input:
+     *   parseStyles({ global: { 'html': { colorScheme: 'dark' }, 'body': { margin: '0' } } }, '.X')
+     *
+     * Expected CSS:
+     *   html { color-scheme: dark; }
+     *   body { margin: 0; }
+     */
+    it('global key emits html and body as unscoped rules', async () => {
+      const rules = await parseStyles({ global: { html: { colorScheme: 'dark' }, body: { margin: '0' } } }, '.X');
+      expectRule(rules, 'html', { 'color-scheme': 'dark' });
+      expectRule(rules, 'body', { margin: '0' });
+      for (const rule of rules) {
+        expect(strip(rule)).not.toMatch(/\.X html/);
+        expect(strip(rule)).not.toMatch(/\.X body/);
+      }
+    });
+
+    /**
+     * Input:
+     *   parseStyles({ global: { ':root': { '&:has(.dark)': { '--bg': 'black' } } } }, '.X')
+     *
+     * Expected CSS:
+     *   :root:has(.dark) { --bg: black; }
+     *
+     * Nesting inside global still works — it just starts from an empty scope.
+     */
+    it('global key supports nesting inside the unscoped selector', async () => {
+      const rules = await parseStyles({ global: { ':root': { '&:has(.dark)': { '--bg': 'black' } } } }, '.X');
+      expectRule(rules, ':root:has(.dark)', { '--bg': 'black' });
+    });
   });
 });
 

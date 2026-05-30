@@ -125,5 +125,56 @@ describe('defineRuntime', () => {
       const b = { color: 'red', padding: '4px', '&:hover': { color: 'blue' } };
       expect(runtime.className(a)).toBe(runtime.className(b));
     });
+
+    describe('global selector targeting', () => {
+      it('explicit scope ":root" emits a bare :root rule (existing path)', async () => {
+        const css = await runtime.css({ '--brand': 'tomato' }, ':root');
+        expect(strip(css)).toBe(strip(':root { --brand: tomato; }'));
+      });
+
+      it('global key emits :root as an unscoped rule alongside the component class', async () => {
+        const { className, css } = await runtime.resolve({
+          color: 'red',
+          global: {
+            ':root': { '--brand': 'tomato' },
+          },
+        });
+        const compact = css.replace(/\s/g, '');
+        expect(compact).toContain(`.${className}{color:red;}`);
+        expect(compact).toContain(':root{--brand:tomato;}');
+        // :root must not be appended to the hash class as a pseudo-class
+        expect(compact).not.toContain(`.${className}:root`);
+      });
+
+      it('global key emits html and body as unscoped rules', async () => {
+        const { css } = await runtime.resolve({
+          global: {
+            html: { colorScheme: 'dark' },
+            body: { margin: '0' },
+          },
+        });
+        const compact = css.replace(/\s/g, '');
+        expect(compact).toContain('html{color-scheme:dark;}');
+        expect(compact).toContain('body{margin:0;}');
+      });
+
+      it('global key emits the universal selector as an unscoped rule', async () => {
+        const { css } = await runtime.resolve({
+          global: {
+            '*': { boxSizing: 'border-box' },
+          },
+        });
+        expect(css.replace(/\s/g, '')).toContain('*{box-sizing:border-box;}');
+      });
+
+      it('global key supports nested selectors starting from an empty scope', async () => {
+        const { css } = await runtime.resolve({
+          global: {
+            ':root': { '&:has(.dark)': { '--bg': 'black' } },
+          },
+        });
+        expect(css.replace(/\s/g, '')).toContain(':root:has(.dark){--bg:black;}');
+      });
+    });
   });
 });

@@ -153,6 +153,14 @@ export const parseStyles = async <T extends object>(
         return undefined;
       }
 
+      // Global escape hatch: emit child selectors unscoped (scope reset to '').
+      // Mirrors how keyframes reset scope to avoid inheriting the component class.
+      if (_key === 'global') {
+        const results = await parseStyles(value, '', config);
+        results.forEach((res) => cssStyles.add(res));
+        return undefined;
+      }
+
       if (_key.startsWith('@')) {
         if (bareAtRuleRegex.test(_key)) reportParserIssue(strict, `At-rule "${_key}" is missing its condition (e.g. "@media (min-width: 600px)").`);
 
