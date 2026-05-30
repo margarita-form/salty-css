@@ -34,6 +34,7 @@ export const resolveAstroProps = (
     class: incomingClass = '',
     className: incomingClassName,
     element: consumerElement,
+    as: consumerAs,
     passProps = generatorProps.passProps,
     _vks: incomingVks,
     style: incomingStyle,
@@ -105,7 +106,7 @@ export const resolveAstroProps = (
     class: [...classes],
     style,
     rest: passedProps,
-    element: consumerElement || generatorProps.element,
+    element: consumerAs ?? consumerElement ?? generatorProps.element,
     _vks: [...vks],
   };
 };

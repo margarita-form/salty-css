@@ -100,4 +100,24 @@ describe('resolveAstroProps', () => {
     const r = resolveAstroProps({ class: 'a' }, {}, 'hash');
     expect(r.rest).not.toHaveProperty('class');
   });
+
+  it('consumer as prop sets the element', () => {
+    const r = resolveAstroProps({ as: 'section' }, {}, 'hash');
+    expect(r.element).toBe('section');
+  });
+
+  it('consumer as prop wins over consumer element prop', () => {
+    const r = resolveAstroProps({ as: 'section', element: 'div' }, {}, 'hash');
+    expect(r.element).toBe('section');
+  });
+
+  it('consumer as prop wins over generator element', () => {
+    const r = resolveAstroProps({ as: 'section' }, { element: 'div' }, 'hash');
+    expect(r.element).toBe('section');
+  });
+
+  it('as prop is stripped from rest (not forwarded to DOM)', () => {
+    const r = resolveAstroProps({ as: 'section' }, {}, 'hash');
+    expect(r.rest).not.toHaveProperty('as');
+  });
 });

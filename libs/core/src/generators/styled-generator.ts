@@ -30,7 +30,8 @@ export class StyledGenerator<const STYLE_PARAMS extends StyledParams = StyledPar
   }
 
   get clientProps(): StyledGeneratorClientProps {
-    const { element, variants = {}, compoundVariants = [], anyOfVariants = [], defaultVariants = {}, defaultProps = {}, passProps } = this.params;
+    const { element: _element, as: _as, variants = {}, compoundVariants = [], anyOfVariants = [], defaultVariants = {}, defaultProps = {}, passProps } = this.params;
+    const element = _as ?? _element;
     const { callerName, isProduction } = this.buildContext;
 
     const variantKeys = new Set<string>([]);

@@ -17,7 +17,8 @@ export const elementFactory = (
   const fn = (
     {
       extend = tagName,
-      element = _generatorProps.element,
+      element: _element,
+      as: _as,
       className = '',
       children,
       passProps = _generatorProps.passProps,
@@ -26,6 +27,7 @@ export const elementFactory = (
     }: StyledComponentProps,
     elementRef: ForwardedRef<any>
   ) => {
+    const element = _as ?? _element ?? _generatorProps.element;
     const passedProps = { passProps } as StyledComponentProps;
     if (_generatorProps.attr) Object.assign(passedProps, _generatorProps.attr);
     if (_additionalProps) Object.assign(passedProps, _additionalProps);

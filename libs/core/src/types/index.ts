@@ -8,6 +8,7 @@ export type CreateElementProps = {
   children?: ReactNode;
   className?: string;
   element?: string;
+  as?: string;
   passProps?: boolean | string | string[];
   style?: CssProperties | { [key: string]: PropertyValueToken | NeverObj };
   /** vks = Variant key set */
@@ -91,6 +92,7 @@ export interface GeneratorOptions {
   className?: string | string[];
   displayName?: string;
   element?: string;
+  as?: string;
   passProps?: boolean | string | string[];
   defaultProps?: Record<PropertyKey, unknown>;
   priority?: number;

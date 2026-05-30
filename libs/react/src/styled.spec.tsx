@@ -93,6 +93,42 @@ describe('styled() — element override', () => {
   });
 });
 
+describe('styled() — as alias for element', () => {
+  it('renders params.as tag instead of the tagName argument', () => {
+    const Link = styled('button', { as: 'a', base: { color: 'red' } });
+    const { container } = render(<Link>x</Link>);
+    expect(container.querySelector('a')).not.toBeNull();
+    expect(container.querySelector('button')).toBeNull();
+  });
+
+  it('runtime as prop overrides the tagName', () => {
+    const Box = styled('div', { base: { color: 'red' } });
+    const { container } = render(<Box as="section">x</Box>);
+    expect(container.querySelector('section')).not.toBeNull();
+    expect(container.querySelector('div')).toBeNull();
+  });
+
+  it('runtime as prop wins over params.element', () => {
+    const Link = styled('button', { element: 'a', base: {} });
+    const { container } = render(<Link as="span">x</Link>);
+    expect(container.querySelector('span')).not.toBeNull();
+    expect(container.querySelector('a')).toBeNull();
+  });
+
+  it('params.as wins over params.element', () => {
+    const Link = styled('button', { as: 'span', element: 'a', base: {} });
+    const { container } = render(<Link>x</Link>);
+    expect(container.querySelector('span')).not.toBeNull();
+    expect(container.querySelector('a')).toBeNull();
+  });
+
+  it('as prop does not leak onto the DOM node', () => {
+    const Box = styled('div', { base: {} });
+    const { container } = render(<Box as="section">x</Box>);
+    expect(container.querySelector('section')?.getAttribute('as')).toBeNull();
+  });
+});
+
 describe('styled() — user props', () => {
   const Box = styled('div', { base: { color: 'red' } });
 
