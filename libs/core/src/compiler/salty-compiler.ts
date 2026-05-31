@@ -1,5 +1,5 @@
 import * as esbuild from 'esbuild';
-import { join, parse as parsePath } from 'path';
+import { join, parse as parsePath, relative } from 'path';
 import { logger } from '../bin/logger';
 import { RCFile } from '../types/cli-types';
 import { readFile } from 'fs/promises';
@@ -9,7 +9,7 @@ import { isSaltyFile, resolveExportValue, saltyFileExtensions } from './helpers'
 import { defineTemplates, GlobalStylesFactory, FontFactory, ImportFactory, TemplatesFactory, VariablesFactory } from '../factories';
 import { resolveImport } from './resolve-import';
 import { ClassNameGenerator, StyledGenerator } from '../generators';
-import { dashCase, toHash } from '../util';
+import { dashCase, isPathAllowed, normalizePath, toHash } from '../util';
 import { mergeFactories, mergeObjects } from '../css';
 import { CachedConfig, CssConditionalVariables, CssResponsiveVariables, CssTemplates, SaltyConfig, SaltyVariables } from '../config';
 import { detectCurrentModuleType } from '../util/module-type';
@@ -105,6 +105,25 @@ export class SaltyCompiler {
     const projectConfig = rcFile.projects?.find((project) => dirname.endsWith(project.dir || ''));
     if (!projectConfig) return rcFile.projects?.find((project) => project.dir === rcFile.defaultProject);
     return projectConfig;
+  };
+
+  /**
+   * Read the optional `include` / `exclude` glob filters for the current project from
+   * `.saltyrc.json`. Used to scope which files the compiler discovers and watches.
+   */
+  private getPathFilter = async (): Promise<{ include?: string[]; exclude?: string[] }> => {
+    const projectConfig = await this.getRCProjectConfig(this.projectRootDir);
+    return { include: projectConfig?.include, exclude: projectConfig?.exclude };
+  };
+
+  /**
+   * Whether a file should be compiled: it must be a salty file and pass the project's
+   * `include` / `exclude` filters. `relPath` is the path relative to the project root.
+   */
+  private isAllowedSaltyFile = (file: string, filter: { include?: string[]; exclude?: string[] }) => {
+    if (!isSaltyFile(file)) return false;
+    const relPath = normalizePath(relative(this.projectRootDir, file));
+    return isPathAllowed(relPath, filter);
   };
 
   private getExternalModules = (coreConfigPath: string) => {
@@ -208,18 +227,26 @@ export class SaltyCompiler {
       // Collect salty css files
       const files = new Set<string>();
       const configFiles = new Set<string>();
+      const pathFilter = await this.getPathFilter();
+      const { exclude } = pathFilter;
+      const projectRootDir = this.projectRootDir;
 
       async function collectFiles(src: string) {
         const foldersToSkip = ['node_modules', 'saltygen'];
         const stats = statSync(src);
 
         if (stats.isDirectory()) {
-          const files = readdirSync(src);
           const shouldSkip = foldersToSkip.some((folder) => src.includes(folder));
           if (shouldSkip) return;
+          // Prune directories matching `exclude` (perf + intent); `include` is applied at the file level.
+          if (exclude?.length) {
+            const relDir = normalizePath(relative(projectRootDir, src));
+            if (relDir && !isPathAllowed(relDir, { exclude })) return;
+          }
+          const files = readdirSync(src);
           await Promise.all(files.map((file) => collectFiles(join(src, file))));
         } else if (stats.isFile()) {
-          const validFile = isSaltyFile(src);
+          const validFile = isSaltyFile(src) && isPathAllowed(normalizePath(relative(projectRootDir, src)), pathFilter);
 
           if (validFile) {
             files.add(src);
@@ -754,7 +781,8 @@ export class SaltyCompiler {
   generateFile = async (file: string) => {
     try {
       const destDir = await this.getDestDir();
-      const validFile = isSaltyFile(file);
+      const pathFilter = await this.getPathFilter();
+      const validFile = this.isAllowedSaltyFile(file, pathFilter);
 
       if (validFile) {
         const cssFiles: string[][] = [];

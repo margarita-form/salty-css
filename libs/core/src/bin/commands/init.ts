@@ -12,6 +12,7 @@ import { applyIntegrationPlans, planIntegrations } from '../integrations';
 import { logError, logger } from '../logger';
 import { addPrepareScript, corePackages, readPackageJson, updatePackageJson } from '../package-json';
 import { formatWithPrettier } from '../prettier';
+import { computePathDefaults } from '../path-defaults';
 import { writeProjectToRc } from '../saltyrc';
 import { readTemplate } from '../templates';
 
@@ -108,7 +109,13 @@ export const registerInitCommand = (program: Command): void => {
         await mkdir(ctx.projectDir, { recursive: true });
         await Promise.all(projectFiles.map(({ fileName, content }) => writeProjectFile(ctx.projectDir, fileName, content)));
 
-        await writeProjectToRc(ctx.cwd, ctx.relativeProjectPath, framework);
+        const pathDefaults = computePathDefaults({
+          framework: framework.name,
+          integrations: plannedIntegrations.map((p) => p.name),
+          hasSrcDir: existsSync(join(ctx.projectDir, 'src')),
+        });
+
+        await writeProjectToRc(ctx.cwd, ctx.relativeProjectPath, framework, pathDefaults);
         await ensureGitignoreSaltygen(ctx.cwd);
         await importSaltygenIntoCss(ctx.projectDir, opts.cssFile);
 
