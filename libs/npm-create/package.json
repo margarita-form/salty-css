@@ -1,6 +1,6 @@
 {
   "name": "create-salty-css",
-  "version": "0.2.0-alpha.3",
+  "version": "0.2.0-fix-astro-fixes-06-2026.0",
   "type": "module",
   "license": "MIT",
   "private": false,
@@ -25,7 +25,7 @@
     "name": "npm-create"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.0-alpha.3"
+    "@salty-css/core": "0.2.0-fix-astro-fixes-06-2026.0"
   },
   "bin": {
     "create-salty-css": "./index.js"
