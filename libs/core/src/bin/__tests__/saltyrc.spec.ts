@@ -30,4 +30,17 @@ describe('upsertProjectInRc', () => {
     const parsed = JSON.parse(content);
     expect(parsed.projects[0].framework).toBe('react');
   });
+
+  it('writes include/exclude defaults into a fresh entry', () => {
+    const { content } = upsertProjectInRc(undefined, 'apps/web', reactFramework, { include: ['src/**'], exclude: ['dist/**'] });
+    const parsed = JSON.parse(content);
+    expect(parsed.projects).toEqual([{ dir: 'apps/web', framework: 'react', include: ['src/**'], exclude: ['dist/**'] }]);
+  });
+
+  it('writes include/exclude defaults into an appended entry', () => {
+    const existing = JSON.stringify({ defaultProject: 'apps/web', projects: [{ dir: 'apps/web', framework: 'react' }] });
+    const { content } = upsertProjectInRc(existing, 'apps/site', reactFramework, { exclude: ['.next/**', 'out/**'] });
+    const parsed = JSON.parse(content);
+    expect(parsed.projects[1]).toEqual({ dir: 'apps/site', framework: 'react', exclude: ['.next/**', 'out/**'] });
+  });
 });
