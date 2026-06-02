@@ -38,7 +38,7 @@
     "vite": "^6.4.1"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.2.0-fix-astro-fixes-06-2026.2"
+    "@salty-css/react": "0.2.0-fix-astro-fixes-06-2026.3"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
