@@ -6,7 +6,7 @@ import { checkShouldRestart } from '@salty-css/core/server';
 import { toHash } from '@salty-css/core/util';
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { PluginOption } from 'vite';
+import { PluginOption, ResolvedConfig, ViteDevServer } from 'vite';
 import { detectFramework, getFrameworkTransform } from './framework-registry';
 
 export interface SaltyAstroPluginOptions {
@@ -22,22 +22,37 @@ export const saltyPlugin = (dir: string, options: SaltyAstroPluginOptions = {}):
 
   const saltyCompiler = new SaltyCompiler(dir, { mode: options.mode });
 
+  // Core's default importer: native dynamic import() of the esbuild output in
+  // saltygen/js. No server dependency, so it is safe inside a Rollup / Astro build.
+  const defaultImportFile = saltyCompiler.importFile.bind(saltyCompiler);
+
+  let devServer: ViteDevServer | undefined;
+  let isBuild = false;
+
+  // Decide per call instead of swapping importFile in configureServer. ssrLoadModule
+  // is only used when a dev server is live AND we are not building: its compat
+  // module runner has no connected transport during `astro build` (Astro 6
+  // Environment API), which throws "invoke was called before connect".
+  saltyCompiler.importFile = async (path: string) => {
+    if (isBuild || !devServer) return defaultImportFile(path);
+    const now = Date.now();
+    importer = devServer.ssrLoadModule;
+    return devServer.ssrLoadModule(`${path}?t=${now}`);
+  };
+
   return {
     name: 'stylegen',
-    configureServer: function (_server) {
-      saltyCompiler.importFile = async (path: string) => {
-        const now = Date.now();
-        importer = _server.ssrLoadModule;
-        return _server.ssrLoadModule(`${path}?t=${now}`);
-      };
-    },
-    configResolved: async function () {
+    configResolved: async function (config: ResolvedConfig) {
+      isBuild = config.command === 'build';
       try {
         await saltyCompiler.generateCss();
       } catch (error) {
         console.error('Error during initial CSS generation:', error);
         throw error;
       }
+    },
+    configureServer: function (_server) {
+      devServer = _server;
     },
     load: async function (filePath) {
       try {

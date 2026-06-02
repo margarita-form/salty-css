@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/eslint-config-core",
-  "version": "0.2.0-fix-astro-fixes-06-2026.1",
+  "version": "0.2.0-fix-astro-fixes-06-2026.2",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -38,8 +38,8 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "0.2.0-fix-astro-fixes-06-2026.1",
-    "@salty-css/eslint-plugin-core": "0.2.0-fix-astro-fixes-06-2026.1",
+    "@salty-css/core": "0.2.0-fix-astro-fixes-06-2026.2",
+    "@salty-css/eslint-plugin-core": "0.2.0-fix-astro-fixes-06-2026.2",
     "eslint": ">=9.x || >=8.x || >=7.x"
   }
 }
