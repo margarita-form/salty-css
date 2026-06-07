@@ -1,6 +1,6 @@
 import type { SaltyCompiler } from '@salty-css/core/compiler/salty-compiler';
 
-type Importer = undefined | ((path: string) => Promise<any>);
+export type Importer = undefined | ((path: string) => Promise<any>);
 
 export type SaltyFileTransform = (compiler: SaltyCompiler, file: string) => Promise<string | undefined>;
 
@@ -16,7 +16,7 @@ export const frameworkRegistry: FrameworkEntry[] = [
     importMarkers: [/['"]@salty-css\/react(\/[^'"]*)?['"]/],
     loadTransform: async (importer) => {
       const path = '@salty-css/react/transform-salty-file';
-      const mod = importer ? await importer(path) : await import(path);
+      const mod = importer ? await importer(path) : await import(/* @vite-ignore */ path);
       return mod.transformSaltyFile;
     },
   },

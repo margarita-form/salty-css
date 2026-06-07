@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/astro",
-  "version": "0.2.0-fix-astro-fixes-06-2026.3",
+  "version": "0.2.0-fix-astro-fixes-06-2026.4",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -78,7 +78,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "0.2.0-fix-astro-fixes-06-2026.3",
+    "@salty-css/core": "0.2.0-fix-astro-fixes-06-2026.4",
     "astro": "^5.13.2",
     "vite": "^6.3.5"
   },
