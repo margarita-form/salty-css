@@ -10,12 +10,14 @@
     "update-readmes": "node ./scripts/update-readmes.mjs",
     "dev:react": "nx run react-testing:serve",
     "dev:astro": "nx run astro-testing:dev",
+    "ensure-build:react": "nx run react-testing:build",
+    "ensure-build:astro": "nx run astro-testing:build",
     "test:core": "nx run core:test",
     "test:vite": "nx run vite:test",
     "test:react": "nx run react:test",
     "test:webpack": "nx run webpack:test",
     "test:next": "nx run next:test",
-    "test:all": "nx run-many --target=test --projects core vite react webpack next",
+    "test:all": "nx run-many --target=test --projects core vite react webpack next && nx run-many --target=build --projects react-testing astro-testing",
     "build:react-testing": "nx run react-testing:build",
     "build:core": "nx run core:build",
     "build:react": "nx run react:build",
@@ -98,6 +100,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "6.30.3",
+    "vite-node": "^5.3.0",
     "winston": "^3.19.0"
   },
   "nx": {
