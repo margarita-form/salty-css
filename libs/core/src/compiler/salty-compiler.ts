@@ -193,7 +193,7 @@ export class SaltyCompiler {
     const destDir = await this.getDestDir();
     const coreConfigDest = join(destDir, 'salty.config.js');
     const { config } = await this.importFile(coreConfigDest);
-    return mergeObjects<SaltyConfig & CachedConfig>(config, cached);
+    return mergeObjects<SaltyConfig & CachedConfig>(cached, config);
   };
 
   /**
@@ -820,6 +820,8 @@ export class SaltyCompiler {
           }
 
           if (!resolved.generator) continue;
+
+          console.log(`config`, config);
 
           const generator = resolved.generator._withBuildContext({
             callerName: name,
