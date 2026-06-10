@@ -83,7 +83,7 @@
     "vite": "^6.3.5"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.2.0-alpha.3"
+    "@salty-css/react": "0.2.0-alpha.4"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
