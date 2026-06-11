@@ -821,8 +821,6 @@ export class SaltyCompiler {
 
           if (!resolved.generator) continue;
 
-          console.log(`config`, config);
-
           const generator = resolved.generator._withBuildContext({
             callerName: name,
             isProduction: this.isProduction,
