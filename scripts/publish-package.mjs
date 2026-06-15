@@ -118,7 +118,7 @@ const main = async () => {
   //   console.log('sync-peer-deps produced no changes; skipping extra commit.');
   // }
 
-  await run('npm', ['run', 'build:all']);
+  // await run('npm', ['run', 'build:all']);
 
   const rl = createInterface({ input, output });
   const otp = (await rl.question('Enter OTP: ')).trim();
