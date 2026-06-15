@@ -22,11 +22,14 @@
   },
   "dependencies": {
     "color": ">=5.x",
-    "commander": "^15.0.0",
-    "csstype": "^3.2.3",
-    "ejs": "^6.0.1",
-    "esbuild": "^0.28.0",
-    "winston": "^3.19.0"
+    "commander": ">=15.x",
+    "csstype": "^3.2.x",
+    "ejs": ">=6.x",
+    "esbuild": ">=0.28.x",
+    "ora": ">=8.x",
+    "react": ">=18.x || >=19.x",
+    "typescript": ">=5.x",
+    "winston": ">=3.x"
   },
   "nx": {
     "targets": {
