@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "version": "0.2.2-refactor-vite-8.8",
+  "version": "0.2.2-refactor-vite-8.9",
   "type": "module",
   "scripts": {
     "build": "vite build",

@@ -14,15 +14,15 @@
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "version": "0.2.2-refactor-vite-8.8",
+  "version": "0.2.2-refactor-vite-8.9",
   "type": "module",
   "scripts": {
     "build": "node ../../node_modules/vite-build/bin/vite.js build --config vite.config.ts",
     "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.2-refactor-vite-8.8",
-    "@salty-css/react": "0.2.2-refactor-vite-8.8",
+    "@salty-css/core": "0.2.2-refactor-vite-8.9",
+    "@salty-css/react": "0.2.2-refactor-vite-8.9",
     "vite": "^7.3.5",
     "vite-node": "^5.3.0"
   },
