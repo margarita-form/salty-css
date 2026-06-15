@@ -1,6 +1,6 @@
 {
   "name": "@salty-css/next",
-  "version": "0.2.1",
+  "version": "0.2.2-chore-size-check.0",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
@@ -58,7 +58,7 @@
     }
   },
   "dependencies": {
-    "@salty-css/core": "0.2.1",
-    "@salty-css/webpack": "0.2.1"
+    "@salty-css/core": "0.2.2-chore-size-check.0",
+    "@salty-css/webpack": "0.2.2-chore-size-check.0"
   }
 }
