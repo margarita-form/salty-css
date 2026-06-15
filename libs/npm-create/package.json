@@ -1,27 +1,14 @@
 {
   "name": "create-salty-css",
-  "version": "0.2.2-refactor-vite-8.1",
+  "version": "0.2.2-refactor-vite-8.4",
   "type": "module",
-  "license": "MIT",
   "license": "MIT",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
-  "description": "Vite plugin for Salty CSS",
-  "homepage": "https://salty-css.dev/",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/margarita-form/salty-css.git"
-  },
-  "bugs": {
-    "url": "https://github.com/margarita-form/salty-css/issues"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "homepage": "https://salty-css.dev/",
   "description": "NPM create CLI package for Salty CSS",
+  "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/margarita-form/salty-css.git"
@@ -38,7 +25,7 @@
     "name": "npm-create"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.2-refactor-vite-8.1"
+    "@salty-css/core": "0.2.2-refactor-vite-8.4"
   },
   "bin": {
     "create-salty-css": "./index.js"
