@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 import { defineConfig, type PluginOption } from 'vite';
 import dts from 'unplugin-dts/vite';
 import { rolldown } from '../../shared/vite-rolldown-config';
+import { vitePlugins } from '../../shared/vite-plugin-config';
 
 const templateLoaderPlugin: () => PluginOption = () => ({
   name: 'gqlLoader',
@@ -17,6 +18,7 @@ export default defineConfig({
   root: resolve(import.meta.dirname, 'src'),
   publicDir: resolve(import.meta.dirname, 'public'),
   plugins: [
+    ...vitePlugins,
     templateLoaderPlugin(),
     dts({
       root: resolve(import.meta.dirname),
