@@ -20,6 +20,7 @@
   "scripts": {
     "pretty": "prettier --write .",
     "lerna": "lerna",
+    "version": "npm run build:all",
     "dev:astro-demo": "nx run astro-demo:dev",
     "test:all": "nx run-many --target=test --projects astro core next react vite webpack",
     "test:astro": "nx run astro:test",
