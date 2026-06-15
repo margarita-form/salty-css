@@ -8,24 +8,10 @@ import { CommonRecord } from '@salty-css/core/types/util-types';
 
 const _styledKeys = ['passProps'];
 
-export const elementFactory = (
-  tagName: Tag<any>,
-  _className = '',
-  _generatorProps: StyledGeneratorClientProps = {},
-  _additionalProps?: Record<PropertyKey, any>
-) => {
+export const elementFactory = (tagName: Tag<any>, _className = '', _generatorProps: StyledGeneratorClientProps = {}, _additionalProps?: Record<PropertyKey, any>) => {
   const fn = (
-    {
-      extend = tagName,
-      element: _element,
-      as: _as,
-      className = '',
-      children,
-      passProps = _generatorProps.passProps,
-      _vks = new Set<string>(),
-      ...props
-    }: StyledComponentProps,
-    elementRef: ForwardedRef<any>
+    { extend = tagName, element: _element, as: _as, className = '', children, passProps = _generatorProps.passProps, _vks = new Set<string>(), ...props }: StyledComponentProps,
+    elementRef: ForwardedRef<any>,
   ) => {
     const element = _as ?? _element ?? _generatorProps.element;
     const passedProps = { passProps } as StyledComponentProps;
@@ -93,7 +79,7 @@ export const elementFactory = (
         ref: elementRef,
         ...passedProps,
       },
-      children
+      children,
     );
   };
 

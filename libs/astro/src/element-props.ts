@@ -28,7 +28,7 @@ export const resolveAstroProps = (
   astroProps: Record<string, any> = {},
   generatorProps: StyledGeneratorClientProps = {},
   baseClassName = '',
-  additionalProps?: Record<string, any>
+  additionalProps?: Record<string, any>,
 ): ResolvedAstroProps => {
   const {
     class: incomingClass = '',

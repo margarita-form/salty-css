@@ -5,7 +5,7 @@ const generateFileMock = vi.fn();
 const compilerCtorMock = vi.fn();
 
 vi.mock('@salty-css/core/compiler/salty-compiler', () => ({
-  SaltyCompiler: vi.fn().mockImplementation((dir: string, opts: Record<string, unknown>) => {
+  SaltyCompiler: vi.fn().mockImplementation(function (dir: string, opts: Record<string, unknown>) {
     compilerCtorMock(dir, opts);
     return {
       generateCss: generateCssMock,

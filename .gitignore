@@ -1,15 +1,11 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
-
-saltygen
-config-cache*
-
-# Astro
-.astro
+# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
 # compiled output
 dist
 tmp
-/out-tsc
+out-tsc
+
+/libs/*/README.md
 
 # dependencies
 node_modules
@@ -46,9 +42,6 @@ Thumbs.db
 
 .nx/cache
 .nx/workspace-data
-
-vite.config.*.timestamp*
-vitest.config.*.timestamp*
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 

@@ -1,127 +1,117 @@
 {
   "name": "@salty-css/core",
-  "version": "0.2.1",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "typings": "./dist/index.d.ts",
+  "private": true,
+  "version": "0.1.0",
   "type": "module",
-  "license": "MIT",
-  "private": false,
-  "publishConfig": {
-    "access": "public"
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run"
   },
-  "description": "Core library for Salty CSS. Will be used by other Salty CSS libraries and plugins.",
-  "homepage": "https://salty-css.dev/",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/margarita-form/salty-css.git"
+  "dependencies": {
+    "commander": "^15.0.0",
+    "ejs": "^6.0.1",
+    "esbuild": "^0.28.0",
+    "winston": "^3.19.0",
+    "csstype": "^3.2.3",
+    "color": ">=5.x"
   },
-  "bugs": {
-    "url": "https://github.com/margarita-form/salty-css/issues"
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
   },
   "files": [
-    "**/*",
-    "!**/*.tsbuildinfo"
+    "dist",
+    "README.md"
   ],
-  "nx": {
-    "sourceRoot": "libs/core/src",
-    "name": "core"
-  },
-  "peerDependencies": {
-    "color": ">=5.x",
-    "commander": ">=12.x",
-    "csstype": "^3.1.x",
-    "ejs": ">=3.x",
-    "esbuild": ">=0.25.x",
-    "ora": ">=8.x",
-    "react": ">=18.x || >=19.x",
-    "typescript": ">=5.x",
-    "winston": ">=3.x"
-  },
   "exports": {
     "./bin": {
-      "import": "./bin/index.js",
-      "require": "./bin/index.cjs"
+      "import": "./dist/bin/index.js",
+      "require": "./dist/bin/index.cjs"
     },
     "./bin/main": {
-      "import": "./bin/main.js",
-      "require": "./bin/main.cjs"
+      "import": "./dist/bin/main.js",
+      "require": "./dist/bin/main.cjs"
     },
     "./compiler/salty-compiler": {
-      "import": "./compiler/salty-compiler.js",
-      "require": "./compiler/salty-compiler.cjs"
+      "import": "./dist/compiler/salty-compiler.js",
+      "require": "./dist/compiler/salty-compiler.cjs"
     },
     "./compiler/get-files": {
-      "import": "./compiler/get-files.js",
-      "require": "./compiler/get-files.cjs"
+      "import": "./dist/compiler/get-files.js",
+      "require": "./dist/compiler/get-files.cjs"
     },
     "./compiler/get-function-range": {
-      "import": "./compiler/get-function-range.js",
-      "require": "./compiler/get-function-range.cjs"
+      "import": "./dist/compiler/get-function-range.js",
+      "require": "./dist/compiler/get-function-range.cjs"
     },
     "./compiler/helpers": {
-      "import": "./compiler/helpers.js",
-      "require": "./compiler/helpers.cjs"
+      "import": "./dist/compiler/helpers.js",
+      "require": "./dist/compiler/helpers.cjs"
     },
     "./factories": {
-      "import": "./factories/index.js",
-      "require": "./factories/index.cjs"
+      "import": "./dist/factories/index.js",
+      "require": "./dist/factories/index.cjs"
     },
     "./css": {
-      "import": "./css/index.js",
-      "require": "./css/index.cjs"
+      "import": "./dist/css/index.js",
+      "require": "./dist/css/index.cjs"
     },
     "./css/keyframes": {
-      "import": "./css/keyframes.js",
-      "require": "./css/keyframes.cjs"
+      "import": "./dist/css/keyframes.js",
+      "require": "./dist/css/keyframes.cjs"
     },
     "./css/media": {
-      "import": "./css/media.js",
-      "require": "./css/media.cjs"
+      "import": "./dist/css/media.js",
+      "require": "./dist/css/media.cjs"
     },
     "./css/token": {
-      "import": "./css/token.js",
-      "require": "./css/token.cjs"
+      "import": "./dist/css/token.js",
+      "require": "./dist/css/token.cjs"
     },
     "./css/merge": {
-      "import": "./css/merge.js",
-      "require": "./css/merge.cjs"
+      "import": "./dist/css/merge.js",
+      "require": "./dist/css/merge.cjs"
     },
     "./helpers": {
-      "import": "./helpers/index.js",
-      "require": "./helpers/index.cjs"
+      "import": "./dist/helpers/index.js",
+      "require": "./dist/helpers/index.cjs"
     },
     "./generators": {
-      "import": "./generators/index.js",
-      "require": "./generators/index.cjs"
+      "import": "./dist/generators/index.js",
+      "require": "./dist/generators/index.cjs"
     },
     "./parsers": {
-      "import": "./parsers/index.js",
-      "require": "./parsers/index.cjs"
+      "import": "./dist/parsers/index.js",
+      "require": "./dist/parsers/index.cjs"
     },
     "./config": {
-      "import": "./config/index.js",
-      "require": "./config/index.cjs"
+      "import": "./dist/config/index.js",
+      "require": "./dist/config/index.cjs"
     },
     "./types": {
-      "import": "./types/index.js",
-      "require": "./types/index.cjs"
+      "import": "./dist/types/index.js",
+      "require": "./dist/types/index.cjs"
     },
     "./util": {
-      "import": "./util/index.js",
-      "require": "./util/index.cjs"
+      "import": "./dist/util/index.js",
+      "require": "./dist/util/index.cjs"
     },
     "./server": {
-      "import": "./server/index.js",
-      "require": "./server/index.cjs"
+      "import": "./dist/server/index.js",
+      "require": "./dist/server/index.cjs"
     },
     "./instances/classname-instance": {
-      "import": "./instances/classname-instance.js",
-      "require": "./instances/classname-instance.cjs"
+      "import": "./dist/instances/classname-instance.js",
+      "require": "./dist/instances/classname-instance.cjs"
     },
     "./runtime": {
-      "import": "./runtime/index.js",
-      "require": "./runtime/index.cjs"
+      "import": "./dist/runtime/index.js",
+      "require": "./dist/runtime/index.cjs"
     }
   },
   "bin": {

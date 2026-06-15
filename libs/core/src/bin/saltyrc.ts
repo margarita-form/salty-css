@@ -8,8 +8,7 @@ import { PathDefaults } from './path-defaults';
 
 export const SALTYRC_FILENAME = '.saltyrc.json';
 export const SALTYRC_SCHEMA = './node_modules/@salty-css/core/.saltyrc.schema.json';
-export const SALTYRC_INFO =
-  'This file is used to define projects and their configurations for Salty CSS cli. Do not delete, modify or add this file to .gitignore.';
+export const SALTYRC_INFO = 'This file is used to define projects and their configurations for Salty CSS cli. Do not delete, modify or add this file to .gitignore.';
 
 export interface ProjectEntry {
   dir: string;
@@ -45,7 +44,7 @@ export const upsertProjectInRc = (
   existingRaw: string | undefined,
   relativeProjectPath: string,
   framework: FrameworkAdapter,
-  pathDefaults: PathDefaults = {}
+  pathDefaults: PathDefaults = {},
 ): { content: string; changed: boolean; created: boolean } => {
   const projectPath = join(relativeProjectPath, framework.srcDirectory);
   const newEntry = { dir: projectPath, framework: framework.name, ...pathDefaults } satisfies ProjectEntry;
@@ -73,12 +72,7 @@ export const upsertProjectInRc = (
  * Writes the saltyrc file, creating or updating the project entry for the given dir.
  * Returns true when a write occurred.
  */
-export const writeProjectToRc = async (
-  cwd: string,
-  relativeProjectPath: string,
-  framework: FrameworkAdapter,
-  pathDefaults: PathDefaults = {}
-): Promise<boolean> => {
+export const writeProjectToRc = async (cwd: string, relativeProjectPath: string, framework: FrameworkAdapter, pathDefaults: PathDefaults = {}): Promise<boolean> => {
   const path = saltyrcPath(cwd);
   const existing = await readRawRc(cwd);
   const { content, changed, created } = upsertProjectInRc(existing, relativeProjectPath, framework, pathDefaults);

@@ -22,9 +22,7 @@ const getSaltyCssPackages = async () => {
   const allDependencies = { ...packageJson.dependencies, ...packageJson.devDependencies } as Record<string, string>;
   const saltyCssPackages = Object.entries(allDependencies).filter(([name]) => name === 'salty-css' || name.startsWith('@salty-css/'));
   if (!saltyCssPackages.length) {
-    return logError(
-      'No Salty-CSS packages found in package.json. Make sure you are running update command in the same directory! Used package.json path: ' + packageJSONPath
-    );
+    return logError('No Salty-CSS packages found in package.json. Make sure you are running update command in the same directory! Used package.json path: ' + packageJSONPath);
   }
   return saltyCssPackages;
 };
@@ -65,11 +63,14 @@ export const registerUpdateCommand = (program: Command): void => {
       const updatedPackages = await getSaltyCssPackages();
       if (!updatedPackages) return logError('Something went wrong while reading the updated packages.');
 
-      const mappedByVersions = updatedPackages.reduce((acc, [name, version]) => {
-        if (!acc[version]) acc[version] = [];
-        acc[version].push(name);
-        return acc;
-      }, {} as Record<string, string[]>);
+      const mappedByVersions = updatedPackages.reduce(
+        (acc, [name, version]) => {
+          if (!acc[version]) acc[version] = [];
+          acc[version].push(name);
+          return acc;
+        },
+        {} as Record<string, string[]>,
+      );
 
       const versionsCount = Object.keys(mappedByVersions).length;
 

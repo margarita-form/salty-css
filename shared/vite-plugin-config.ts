@@ -1,0 +1,5 @@
+import type { Plugin } from 'vite';
+import { updateVersionsPlugin } from './vite-plugin-update-versions';
+import { copyReadmePlugin } from './vite-plugin-copy-readme';
+
+export const vitePlugins: Plugin[] = [updateVersionsPlugin, copyReadmePlugin];

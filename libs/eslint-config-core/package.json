@@ -1,45 +1,38 @@
 {
   "name": "@salty-css/eslint-config-core",
-  "version": "0.2.1",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "typings": "./dist/index.d.ts",
+  "private": true,
+  "version": "0.1.0",
   "type": "module",
-  "license": "MIT",
-  "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
-  "description": "ESLint plugin for Salty CSS",
-  "homepage": "https://salty-css.dev/",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/margarita-form/salty-css.git"
-  },
-  "bugs": {
-    "url": "https://github.com/margarita-form/salty-css/issues"
-  },
-  "files": [
-    "**/*",
-    "!**/*.tsbuildinfo"
-  ],
-  "nx": {
-    "sourceRoot": "libs/eslint-config-core/src",
-    "name": "eslint-config-core"
-  },
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "require": "./index.cjs"
-    },
-    "./flat": {
-      "import": "./flat.js",
-      "require": "./flat.cjs"
-    }
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.1",
-    "@salty-css/eslint-plugin-core": "0.2.1",
+    "@salty-css/core": "0.1.0",
+    "@salty-css/eslint-plugin-core": "0.1.0",
     "eslint": ">=9.x || >=8.x || >=7.x"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./flat": {
+      "import": "./dist/flat.js",
+      "require": "./dist/flat.cjs"
+    }
   }
 }

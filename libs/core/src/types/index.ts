@@ -55,7 +55,7 @@ export type VariantProps<
   STYLES extends StyledParams,
   B = STYLES['variants'] extends undefined ? object : STYLES['variants'],
   C = STYLES['compoundVariants'] extends MultiVariant[] ? Merge<STYLES['compoundVariants'][number]> : object,
-  U = STYLES['anyOfVariants'] extends MultiVariant[] ? Merge<STYLES['anyOfVariants'][number]> : object
+  U = STYLES['anyOfVariants'] extends MultiVariant[] ? Merge<STYLES['anyOfVariants'][number]> : object,
 > = Merge<
   | {
       [K in keyof B]?: K extends 'css' ? never : VariantPropValue<keyof B[K]>;

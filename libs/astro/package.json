@@ -1,93 +1,83 @@
 {
   "name": "@salty-css/astro",
-  "version": "0.2.1",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "typings": "./dist/index.d.ts",
+  "private": true,
+  "version": "0.2.0",
   "type": "module",
-  "license": "MIT",
-  "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
-  "description": "Astro library for Salty CSS",
-  "homepage": "https://salty-css.dev/",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/margarita-form/salty-css.git"
-  },
-  "bugs": {
-    "url": "https://github.com/margarita-form/salty-css/issues"
-  },
-  "files": [
-    "**/*",
-    "!**/*.tsbuildinfo"
-  ],
-  "nx": {
-    "sourceRoot": "libs/astro/src",
-    "name": "astro"
-  },
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "require": "./index.cjs"
-    },
-    "./astro-vite-plugin": {
-      "import": "./astro-vite-plugin.js",
-      "require": "./astro-vite-plugin.cjs"
-    },
-    "./integration": {
-      "import": "./integration.js",
-      "require": "./integration.cjs"
-    },
-    "./styled": {
-      "import": "./styled.js",
-      "require": "./styled.cjs"
-    },
-    "./class-name": {
-      "import": "./class-name.js",
-      "require": "./class-name.cjs"
-    },
-    "./element-props": {
-      "import": "./element-props.js",
-      "require": "./element-props.cjs"
-    },
-    "./runtime": {
-      "import": "./runtime.js",
-      "require": "./runtime.cjs"
-    },
-    "./keyframes": {
-      "import": "./keyframes.js",
-      "require": "./keyframes.cjs"
-    },
-    "./media": {
-      "import": "./media.js",
-      "require": "./media.cjs"
-    },
-    "./factories": {
-      "import": "./factories.js",
-      "require": "./factories.cjs"
-    },
-    "./config": {
-      "import": "./config.js",
-      "require": "./config.cjs"
-    },
-    "./helpers": {
-      "import": "./helpers.js",
-      "require": "./helpers.cjs"
-    }
+  "scripts": {
+    "build": "node ../../node_modules/vite-build/bin/vite.js build --config vite.config.ts",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.1",
-    "astro": "^5.13.2",
-    "vite": "^6.3.5"
+    "@salty-css/core": "0.2.0",
+    "@salty-css/react": "0.2.0",
+    "vite": "^7.3.5",
+    "vite-node": "^5.3.0"
   },
-  "peerDependencies": {
-    "@salty-css/react": "0.2.1"
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vite-build": "npm:vite@^8.0.12"
   },
-  "peerDependenciesMeta": {
-    "@salty-css/react": {
-      "optional": true
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./astro-vite-plugin": {
+      "import": "./dist/astro-vite-plugin.js",
+      "require": "./dist/astro-vite-plugin.cjs"
+    },
+    "./integration": {
+      "import": "./dist/integration.js",
+      "require": "./dist/integration.cjs"
+    },
+    "./styled": {
+      "import": "./dist/styled.js",
+      "require": "./dist/styled.cjs"
+    },
+    "./class-name": {
+      "import": "./dist/class-name.js",
+      "require": "./dist/class-name.cjs"
+    },
+    "./element-props": {
+      "import": "./dist/element-props.js",
+      "require": "./dist/element-props.cjs"
+    },
+    "./runtime": {
+      "import": "./dist/runtime.js",
+      "require": "./dist/runtime.cjs"
+    },
+    "./keyframes": {
+      "import": "./dist/keyframes.js",
+      "require": "./dist/keyframes.cjs"
+    },
+    "./media": {
+      "import": "./dist/media.js",
+      "require": "./dist/media.cjs"
+    },
+    "./factories": {
+      "import": "./dist/factories.js",
+      "require": "./dist/factories.cjs"
+    },
+    "./config": {
+      "import": "./dist/config.js",
+      "require": "./dist/config.cjs"
+    },
+    "./helpers": {
+      "import": "./dist/helpers.js",
+      "require": "./dist/helpers.cjs"
     }
   }
 }

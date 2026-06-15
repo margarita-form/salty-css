@@ -1,52 +1,48 @@
 {
   "name": "@salty-css/webpack",
-  "version": "0.2.1",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "typings": "./dist/index.d.ts",
+  "private": true,
+  "version": "0.1.0",
   "type": "module",
-  "license": "MIT",
-  "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
-  "description": "Webpack plugin for Salty CSS",
-  "homepage": "https://salty-css.dev/",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/margarita-form/salty-css.git"
-  },
-  "bugs": {
-    "url": "https://github.com/margarita-form/salty-css/issues"
-  },
-  "files": [
-    "**/*",
-    "!**/*.tsbuildinfo"
-  ],
-  "nx": {
-    "sourceRoot": "libs/webpack/src",
-    "name": "webpack"
-  },
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "require": "./index.cjs"
-    },
-    "./loader": {
-      "import": "./loader.js",
-      "require": "./loader.cjs"
-    }
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.1",
+    "@salty-css/core": "0.1.0",
     "webpack": ">=5.x"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.2.1"
+    "@salty-css/react": "0.1.0"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
       "optional": true
+    }
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./loader": {
+      "import": "./dist/loader.js",
+      "require": "./dist/loader.cjs"
     }
   }
 }

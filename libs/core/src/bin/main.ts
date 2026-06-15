@@ -21,10 +21,10 @@ export async function main() {
   const defaultProject = await getDefaultProject();
 
   registerInitCommand(program);
-  registerBuildCommand(program, defaultProject);
-  registerGenerateCommand(program, defaultProject);
   registerUpdateCommand(program);
   registerVersionOption(program);
+  registerBuildCommand(program, defaultProject);
+  registerGenerateCommand(program, defaultProject);
 
   program.parseAsync(process.argv);
 }

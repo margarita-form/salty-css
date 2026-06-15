@@ -40,9 +40,7 @@ export const noVariantsInBase: Rule.RuleModule = {
           const baseHasParams = baseValue.type === 'ObjectExpression';
           if (!baseHasParams) return;
 
-          const nestedVariants = baseValue.properties.find(
-            (prop) => prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'variants'
-          );
+          const nestedVariants = baseValue.properties.find((prop) => prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'variants');
           if (!nestedVariants) return;
 
           context.report({

@@ -104,19 +104,19 @@ const main = async () => {
   await run('npm', ['run', 'build:all']);
   await run('npm', ['run', 'lerna', '--', ...mode.lernaArgs(branch)]);
 
-  await run('node', ['./scripts/sync-peer-deps.mjs']);
-  const syncDiff = spawnSync('git', ['diff', '--name-only', 'HEAD', '--', 'libs'], { encoding: 'utf8' });
-  if (syncDiff.status !== 0) fail(`git diff failed: ${syncDiff.stderr.trim()}`);
-  const syncChangedFiles = syncDiff.stdout.split('\n').map((s) => s.trim()).filter(Boolean);
-  if (syncChangedFiles.length) {
-    const tagName = `v${readLernaVersion()}`;
-    console.log(`sync-peer-deps changed ${syncChangedFiles.length} file(s); creating chore commit and moving ${tagName}.`);
-    git(['add', '--', ...syncChangedFiles]);
-    git(['commit', '-m', `chore(release): pin @salty-css/* deps to ${readLernaVersion()}`]);
-    git(['tag', '-f', tagName]);
-  } else {
-    console.log('sync-peer-deps produced no changes; skipping extra commit.');
-  }
+  // await run('node', ['./scripts/sync-peer-deps.mjs']);
+  // const syncDiff = spawnSync('git', ['diff', '--name-only', 'HEAD', '--', 'libs'], { encoding: 'utf8' });
+  // if (syncDiff.status !== 0) fail(`git diff failed: ${syncDiff.stderr.trim()}`);
+  // const syncChangedFiles = syncDiff.stdout.split('\n').map((s) => s.trim()).filter(Boolean);
+  // if (syncChangedFiles.length) {
+  //   const tagName = `v${readLernaVersion()}`;
+  //   console.log(`sync-peer-deps changed ${syncChangedFiles.length} file(s); creating chore commit and moving ${tagName}.`);
+  //   git(['add', '--', ...syncChangedFiles]);
+  //   git(['commit', '-m', `chore(release): pin @salty-css/* deps to ${readLernaVersion()}`]);
+  //   git(['tag', '-f', tagName]);
+  // } else {
+  //   console.log('sync-peer-deps produced no changes; skipping extra commit.');
+  // }
 
   await run('npm', ['run', 'build:all']);
 

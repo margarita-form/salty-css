@@ -35,6 +35,7 @@ export const registerBuildCommand = (program: Command, defaultProject: string | 
       if (watch) {
         logger.info('Watching for changes in the project directory...');
         watchChanges(projectDir, { recursive: true }, async (_event, filePath) => {
+          if (!filePath) return console.warn('File path not provided for change event');
           const shouldRestart = await checkShouldRestart(filePath);
           if (shouldRestart) {
             await compiler.generateCss(false);

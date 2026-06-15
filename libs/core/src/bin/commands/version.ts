@@ -14,9 +14,7 @@ export const registerVersionOption = (program: Command): void => {
     const allDependencies = { ...packageJson.dependencies, ...packageJson.devDependencies } as Record<string, string>;
     const saltyCssPackages = Object.keys(allDependencies).filter((dep) => dep === 'salty-css' || dep.startsWith('@salty-css/'));
     if (!saltyCssPackages.length) {
-      return logError(
-        'No Salty-CSS packages found in package.json. Make sure you are running update command in the same directory! Used package.json path: ' + packageJSONPath
-      );
+      return logError('No Salty-CSS packages found in package.json. Make sure you are running update command in the same directory! Used package.json path: ' + packageJSONPath);
     }
     for (const dep of saltyCssPackages) {
       logger.info(`${dep}: ${allDependencies[dep]}`);
