@@ -14,15 +14,15 @@
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "version": "0.2.2-refactor-vite-8.6",
+  "version": "0.2.2-refactor-vite-8.7",
   "type": "module",
   "scripts": {
     "build": "vite build",
     "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.2-refactor-vite-8.6",
-    "@salty-css/webpack": "0.2.2-refactor-vite-8.6"
+    "@salty-css/core": "0.2.2-refactor-vite-8.7",
+    "@salty-css/webpack": "0.2.2-refactor-vite-8.7"
   },
   "devDependencies": {
     "jsdom": "^29.1.1"
