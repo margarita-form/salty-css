@@ -27,6 +27,11 @@
   "peerDependencies": {
     "@salty-css/react": "0.2.2-refactor-vite-8.4"
   },
+  "peerDependenciesMeta": {
+    "@salty-css/react": {
+      "optional": true
+    }
+  },
   "nx": {
     "targets": {
       "build": {
