@@ -1,19 +1,32 @@
 {
   "name": "@salty-css/core",
+  "license": "MIT",
   "private": false,
-  "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Vite plugin for Salty CSS",
+  "homepage": "https://salty-css.dev/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/margarita-form/salty-css.git"
+  },
+  "bugs": {
+    "url": "https://github.com/margarita-form/salty-css/issues"
+  },
+  "version": "0.2.2-refactor-vite-8.1",
   "type": "module",
   "scripts": {
     "build": "vite build",
     "test": "vitest run"
   },
   "dependencies": {
+    "color": ">=5.x",
     "commander": "^15.0.0",
+    "csstype": "^3.2.3",
     "ejs": "^6.0.1",
     "esbuild": "^0.28.0",
-    "winston": "^3.19.0",
-    "csstype": "^3.2.3",
-    "color": ">=5.x"
+    "winston": "^3.19.0"
   },
   "nx": {
     "targets": {

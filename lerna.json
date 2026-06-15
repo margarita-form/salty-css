@@ -1,5 +1,7 @@
 {
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
-  "version": "0.2.1",
-  "packages": ["libs/*"]
+  "version": "0.2.2-refactor-vite-8.1",
+  "packages": [
+    "libs/*"
+  ]
 }

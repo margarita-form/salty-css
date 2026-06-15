@@ -1,15 +1,28 @@
 {
   "name": "@salty-css/astro",
+  "license": "MIT",
   "private": false,
-  "version": "0.2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Vite plugin for Salty CSS",
+  "homepage": "https://salty-css.dev/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/margarita-form/salty-css.git"
+  },
+  "bugs": {
+    "url": "https://github.com/margarita-form/salty-css/issues"
+  },
+  "version": "0.2.2-refactor-vite-8.1",
   "type": "module",
   "scripts": {
     "build": "node ../../node_modules/vite-build/bin/vite.js build --config vite.config.ts",
     "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.0",
-    "@salty-css/react": "0.2.0",
+    "@salty-css/core": "0.2.2-refactor-vite-8.1",
+    "@salty-css/react": "0.2.2-refactor-vite-8.1",
     "vite": "^7.3.5",
     "vite-node": "^5.3.0"
   },
