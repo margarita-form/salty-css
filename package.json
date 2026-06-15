@@ -2,7 +2,6 @@
   "name": "@salty-css/source",
   "version": "0.0.0",
   "license": "MIT",
-  "license": "MIT",
   "private": false,
   "publishConfig": {
     "access": "public"
