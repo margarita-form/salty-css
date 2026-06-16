@@ -131,9 +131,9 @@
     }
   },
   "bin": {
-    "salty": "./bin/index.js",
-    "salty-css": "./bin/index.js",
-    "salty-css-cjs": "./bin/index.cjs",
-    "@salty-css/core": "./bin/index.js"
+    "salty": "./dist/bin/index.js",
+    "salty-css": "./dist/bin/index.js",
+    "salty-css-cjs": "./dist/bin/index.cjs",
+    "@salty-css/core": "./dist/bin/index.js"
   }
 }
