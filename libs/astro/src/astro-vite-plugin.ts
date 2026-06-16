@@ -1,13 +1,11 @@
-import { isSaltyFile } from '@salty-css/core/compiler/helpers';
-import { getFunctionRange } from '@salty-css/core/compiler/get-function-range';
-import { resolveExportValue } from '@salty-css/core/compiler/helpers';
 import { SaltyCompiler, SaltyCompilerMode } from '@salty-css/core/compiler/salty-compiler';
-import { checkShouldRestart } from '@salty-css/core/server';
-import { toHash } from '@salty-css/core/util';
-import { mkdir, readFile, writeFile } from 'fs/promises';
-import { join } from 'path';
-import { PluginOption } from 'vite';
-import { detectFramework, getFrameworkTransform } from './framework-registry';
+import { PluginOption, ResolvedConfig, ViteDevServer } from 'vite';
+import { AstroPluginContext, loadSaltyFile } from './load-salty-file';
+import { handleHotUpdate, watchChange } from './watch-handlers';
+
+import { ViteNodeServer } from 'vite-node/server';
+import { ViteNodeRunner } from 'vite-node/client';
+import { installSourcemapsSupport } from 'vite-node/source-map';
 
 export interface SaltyAstroPluginOptions {
   /**
@@ -17,201 +15,203 @@ export interface SaltyAstroPluginOptions {
 }
 
 export const saltyPlugin = (dir: string, options: SaltyAstroPluginOptions = {}): PluginOption => {
-  type Importer = undefined | ((path: string) => Promise<any>);
-  let importer: Importer = undefined;
+  // A standalone Vite + vite-node pipeline used to evaluate Salty's generated
+  // output (the esbuild bundles in saltygen/js, plus whatever user source they
+  // import). It is fully independent of Astro's dev server and of the Astro 6
+  // Environment API, so:
+  //   - it behaves identically in `astro dev` and `astro build`, and
+  //   - it is immune to the "invoke was called before connect" error that
+  //     breaks devServer.ssrLoadModule during build, and
+  //   - it does not depend on native import(), which is unreliable on Vite 7+.
+  let auxServer: ViteDevServer | undefined;
+  let node: ViteNodeServer | undefined;
+  let runner: ViteNodeRunner | undefined;
+  let resolvedConfig: ResolvedConfig | undefined;
 
   const saltyCompiler = new SaltyCompiler(dir, { mode: options.mode });
 
+  // Shared, mutable state crossing the hook boundary. `importer` lets the
+  // `load` hook (loadSaltyFile) evaluate files through the exact same pipeline
+  // the compiler uses internally, instead of a separate ssrLoadModule path.
+  const ctx: AstroPluginContext = { compiler: saltyCompiler, importer: undefined };
+
+  // Lazily create (and re-create) the vite-node pipeline. Re-creation matters
+  // because Astro's build can run multiple passes and may fire closeBundle
+  // between them; if the aux server was torn down, the next importFile call
+  // transparently rebuilds it instead of failing.
+  const ensureRunner = async (): Promise<ViteNodeRunner> => {
+    if (runner && node && auxServer) return runner;
+
+    if (!resolvedConfig) {
+      throw new Error('[stylegen] vite-node runner requested before configResolved ran');
+    }
+
+    const { createServer, version: viteVersion } = await import('vite');
+
+    auxServer = await createServer({
+      // Inherit the user's module resolution so generated files that import via
+      // tsconfig path aliases (`@/...`, `~/...`, etc.) still resolve. Widen this
+      // (conditions, mainFields, dedupe) if your generated output needs more.
+      resolve: {
+        alias: resolvedConfig.resolve.alias,
+      },
+      // Middleware mode => no HTTP server is started, so there is no port to
+      // clash with Astro's. NOTE: `hmr: false` is NOT enough to free the HMR
+      // WebSocket port — Vite still binds it (default 24678). `ws: false` is
+      // what actually disables the WebSocket server, which is why the build
+      // logged "Port 24678 is already in use". `watch: null` drops the chokidar
+      // watcher we never use (lighter, and it won't keep the build alive).
+      server: { middlewareMode: true, hmr: false, ws: false, watch: null },
+      // vite-node evaluates modules itself; dependency pre-bundling is not used.
+      optimizeDeps: { noDiscovery: true, include: [] },
+    });
+
+    // Older Vite needs an explicit buildStart to initialise the plugin
+    // container. Vite 6+ does this for us, and calling it again would re-fire
+    // plugin buildStart hooks, so guard on the major version.
+    if (Number(viteVersion.split('.')[0]) < 6) {
+      await auxServer.pluginContainer.buildStart({});
+    }
+
+    // Capture in a local const so the callbacks below never see a reset
+    // (closeAuxServer nulls the outer `node`).
+    const nodeServer = new ViteNodeServer(auxServer);
+    node = nodeServer;
+
+    // Maps evaluated stack traces back to source. Replaces the manual
+    // ssrFixStacktrace dance from the ssrLoadModule approach.
+    installSourcemapsSupport({
+      getSourceMap: (src) => nodeServer.getSourceMap(src),
+    });
+
+    runner = new ViteNodeRunner({
+      root: auxServer.config.root,
+      base: auxServer.config.base,
+      // Server and runner live in the same process here, so the transport is a
+      // direct function call. Swap these for RPC if you ever move the runner.
+      fetchModule: (modId) => nodeServer.fetchModule(modId),
+      resolveId: (modId, importer) => nodeServer.resolveId(modId, importer),
+    });
+
+    return runner;
+  };
+
+  // vite-node caches *evaluated* modules by id. After Salty regenerates a file
+  // we must drop the stale entry so it re-executes — this is the vite-node
+  // equivalent of the `?t=${Date.now()}` ESM cache-bust the old native import
+  // relied on. Helper names vary across vite-node versions, so feature-detect
+  // and fall back to a full clear (safe; the generated files are small).
+  const invalidateModule = (r: ViteNodeRunner, path: string) => {
+    const cache = r.moduleCache as unknown as {
+      invalidateDepTree?: (ids: string[] | Set<string>) => void;
+      deleteByModuleId?: (id: string) => boolean;
+      clear: () => void;
+    };
+    if (cache.invalidateDepTree) cache.invalidateDepTree([path]);
+    else if (cache.deleteByModuleId) cache.deleteByModuleId(path);
+    else cache.clear();
+  };
+
+  // Single code path for both dev and build: resolve + transform + EXECUTE the
+  // file through vite-node and return its evaluated exports (the same shape
+  // native import() produced).
+  //
+  // IMPORTANT: this uses runner.executeFile(), NOT node.fetchModule().
+  // fetchModule() returns transformed *source code* ({ code, id, map }) that the
+  // runner consumes internally — it is not the evaluated module, which is why
+  // returning it produced no usable exports.
+  saltyCompiler.importFile = async (path: string) => {
+    const r = await ensureRunner();
+    invalidateModule(r, path);
+    return r.executeFile(path);
+  };
+
+  // Route the `load` hook through the same evaluator so both entry points are
+  // consistent (previously this pointed at devServer.ssrLoadModule).
+  ctx.importer = saltyCompiler.importFile;
+
+  const closeAuxServer = async () => {
+    const s = auxServer;
+    auxServer = undefined;
+    node = undefined;
+    runner = undefined;
+    if (s) {
+      try {
+        await s.close();
+      } catch {
+        // ignore teardown errors
+      }
+    }
+  };
+
+  // The initial full generation must happen exactly once per build/serve, but
+  // configResolved fires multiple times during an Astro build: a client pass
+  // and a server pass, one config per environment under the Astro 6 Environment
+  // API, and the SSR server Astro spins up to render static routes — all on this
+  // single shared plugin instance. Dev resolves the config once, so it was only
+  // ever generated once there. Memoise the promise so repeated configResolved
+  // calls reuse it; incremental rebuilds still go through watchChange /
+  // handleHotUpdate, which are independent of this.
+  let initialGeneration: Promise<unknown> | undefined;
+  const generateCssOnce = () => {
+    if (!initialGeneration) {
+      initialGeneration = saltyCompiler.generateCss().catch((error) => {
+        // Let a later pass retry if the first attempt failed.
+        initialGeneration = undefined;
+        throw error;
+      });
+    }
+    return initialGeneration;
+  };
+
   return {
     name: 'stylegen',
-    configureServer: function (_server) {
-      saltyCompiler.importFile = async (path: string) => {
-        const now = Date.now();
-        importer = _server.ssrLoadModule;
-        return _server.ssrLoadModule(`${path}?t=${now}`);
-      };
-    },
-    configResolved: async function () {
+    configResolved: async function (config: ResolvedConfig) {
+      resolvedConfig = config;
+
+      // Warm up the pipeline, then do the initial full generation (once).
+      await ensureRunner();
+
       try {
-        await saltyCompiler.generateCss();
+        await generateCssOnce();
       } catch (error) {
         console.error('Error during initial CSS generation:', error);
         throw error;
       }
     },
-    load: async function (filePath) {
-      try {
-        const saltyFile = isSaltyFile(filePath, [], !filePath.includes('configFile='));
-        if (saltyFile) {
-          const destDir = await saltyCompiler.getDestDir();
-          if (/.+\?configFile=(\w+).+/.test(filePath)) {
-            const searchParams = new URLSearchParams(filePath.split('?')[1]);
-            const configFile = searchParams.get('configFile');
-            if (!configFile) return undefined;
-            const configPath = join(destDir, 'astro', configFile);
-            const configFileContent = await readFile(configPath, 'utf-8');
-            if (!configFileContent) return undefined;
-            try {
-              const config = JSON.parse(configFileContent);
-              const { clientProps = {}, classNames = '', tagIsComponent, tagName = 'div' } = config;
-
-              const userImports: string[] = config.imports || [];
-              const imports = ["import { resolveAstroProps } from '@salty-css/astro/element-props';", ...userImports];
-
-              const elementExpr = tagIsComponent ? tagName : `__r.element || ${JSON.stringify(clientProps.element || tagName)}`;
-
-              const result = `---
-            ${imports.join('\n')}
-            const __gp = ${JSON.stringify(clientProps)};
-            const __r = resolveAstroProps(Astro.props, __gp, ${JSON.stringify(classNames)});
-            const Element = ${elementExpr};
-            ---
-            <Element class:list={__r.class} style={__r.style} {...__r.rest}><slot/></Element>`;
-              return result;
-            } catch (error) {
-              console.error('Error parsing config file:', error);
-              return undefined;
-            }
-          }
-
-          const originalContents = await readFile(filePath, 'utf-8');
-
-          const framework = detectFramework(originalContents);
-          if (framework) {
-            const transform = await getFrameworkTransform(framework, importer);
-            return await transform(saltyCompiler, filePath);
-          }
-
-          const imports: string[] = ["import { classNameInstance } from '@salty-css/core/instances/classname-instance';"];
-          const consts: string[] = [];
-          const exports: string[] = [];
-
-          const compiled = await saltyCompiler.compileSaltyFile(filePath, destDir);
-
-          const components = Object.entries(compiled.contents);
-          for (const [name, value] of components) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const resolved = await resolveExportValue<any>(value, 1);
-            if (!resolved.generator) continue;
-
-            if (resolved.isClassName) {
-              const generator = resolved.generator._withBuildContext({
-                callerName: name,
-                isProduction: saltyCompiler.isProduction,
-                config: {},
-              });
-
-              consts.push(`const ${name} = classNameInstance(${JSON.stringify(generator.params)});`);
-              exports.push(name);
-              continue;
-            }
-
-            const [start, end] = await getFunctionRange(originalContents, name);
-            const range = originalContents.slice(start, end);
-            const tagName = /styled\(([^,]+),/.exec(range)?.at(1)?.trim();
-            if (!tagName) {
-              console.warn(`Could not determine tag name for ${name} in ${filePath}`);
-              continue;
-            }
-
-            const generator = resolved.generator._withBuildContext({
-              callerName: name,
-              isProduction: saltyCompiler.isProduction,
-              config: {},
-            });
-
-            const fileConfig = {
-              componentName: name,
-              tagName: tagName.replace(/['"`]/g, ''),
-              tagIsComponent: false,
-              classNames: generator.classNames,
-              imports: [] as (string | undefined)[],
-              clientProps: generator.clientProps,
-            };
-
-            const extendsComponent = /^\w+$/.test(tagName);
-            fileConfig.tagIsComponent = extendsComponent;
-            if (extendsComponent) {
-              const isInSameFile = components.some(([name]) => name === tagName);
-              const matchingImport = originalContents.match(new RegExp(`import[^;]*${tagName}[^;]*;`));
-              if (isInSameFile) {
-                const hashedName = toHash(tagName);
-                const importPath = `import ${tagName} from '${filePath}.astro?configFile=${hashedName}.config';`;
-                fileConfig.imports = [importPath];
-              } else if (matchingImport) {
-                const importPath = matchingImport.at(0);
-                fileConfig.imports = [importPath];
-              }
-            }
-
-            const astroComponentsDir = join(destDir, 'astro');
-            const exists = await readFile(astroComponentsDir, 'utf-8').catch(() => false);
-
-            if (!exists) await mkdir(astroComponentsDir, { recursive: true });
-
-            const hashedName = toHash(name);
-            const fileConfigPath = join(destDir, `astro`, `${hashedName}.config`);
-            await writeFile(fileConfigPath, JSON.stringify(fileConfig));
-
-            imports.push(`import ${name} from '${filePath}.astro?configFile=${hashedName}.config';`);
-            exports.push(name);
-          }
-
-          const result = `${imports.join('\n')}\n${consts.join('\n')}\nexport { ${exports.join(', ')} };`;
-          return result;
-        }
-        return undefined;
-      } catch (error) {
-        console.error('Error during file compilation:', error);
-        return undefined;
+    resolveId: function (source) {
+      // Salty's load() emits virtual imports of the form
+      //   `<abs path>.css.ts.astro?configFile=<hash>.config`
+      // and resolves them itself (reading saltygen/astro/<hash>.config and
+      // returning an Astro component). Vite's dev server tolerates these as
+      // unclaimed ids and calls load() anyway, but Rollup's production build is
+      // strict: with no plugin owning the id it tries to resolve the path as a
+      // real file and fails ("Rollup failed to resolve import ...").
+      //
+      // Returning the id marks it as owned so it is routed to load(). Do NOT
+      // prefix with `\0` — the path must keep its `.astro` extension so Astro's
+      // own plugin still compiles the component that load() returns.
+      if (source.includes('.astro?configFile=')) {
+        return source;
       }
+      return null;
     },
-    handleHotUpdate: async function ({ file, server, modules }) {
-      try {
-        const shouldRestart = await checkShouldRestart(file);
-        if (shouldRestart) return await saltyCompiler.generateCss(false);
-        const saltyFile = isSaltyFile(file);
-        if (!saltyFile) return;
-
-        const destDir = await saltyCompiler.getDestDir(); // absolute path
-        const cssGraphHits = [];
-
-        // Invalidate modules that imported the changed file's config
-        for (const [id, mod] of server.moduleGraph.idToModuleMap) {
-          if (id.startsWith(file + '.astro?configFile=')) {
-            server.moduleGraph.invalidateModule(mod);
-            cssGraphHits.push(mod);
-          }
-        }
-
-        // Invalidate modules that imported the changed file's generated CSS
-        for (const mod of server.moduleGraph.urlToModuleMap.values()) {
-          if (!mod.file) continue;
-          if (mod.file.startsWith(destDir)) {
-            server.moduleGraph.invalidateModule(mod);
-            cssGraphHits.push(mod);
-          }
-        }
-
-        server.ws.send({ type: 'update', updates: [] });
-
-        return [...modules, ...cssGraphHits];
-      } catch (error) {
-        console.error('Error during hot update handling:', error);
-      }
+    load: function (filePath) {
+      return loadSaltyFile(ctx, filePath);
+    },
+    handleHotUpdate: function (hmrContext) {
+      return handleHotUpdate(saltyCompiler, hmrContext);
     },
     watchChange: {
-      handler: async function (filePath, change) {
-        try {
-          const saltyFile = isSaltyFile(filePath);
-          if (saltyFile && change.event !== 'delete') {
-            const shouldRestart = await checkShouldRestart(filePath);
-            if (!shouldRestart) await saltyCompiler.generateFile(filePath);
-          }
-        } catch (error) {
-          console.error('Error during watch change handling:', error);
-        }
+      handler: function (filePath, change) {
+        return watchChange(saltyCompiler, filePath, change);
       },
+    },
+    // Vite fires closeBundle when the dev server closes and at the end of a
+    // build, so the auxiliary vite-node server is torn down in both cases. If a
+    // later build pass needs it again, ensureRunner() rebuilds it on demand.
+    closeBundle: async function () {
+      await closeAuxServer();
     },
   };
 };

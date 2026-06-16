@@ -70,7 +70,7 @@ describe('Parser testing', () => {
             '& svg': { transform: 'translateX(2px)' },
           },
         },
-        '.X'
+        '.X',
       );
       expectRule(rules, '.X:hover svg, .X:focus-visible svg', { transform: 'translateX(2px)' });
       for (const rule of rules) {
@@ -92,7 +92,7 @@ describe('Parser testing', () => {
         {
           '&:hover, &:focus': { ':active': { color: 'red' } },
         },
-        '.X'
+        '.X',
       );
       expectRule(rules, '.X:hover:active, .X:focus:active', { color: 'red' });
     });
@@ -111,7 +111,7 @@ describe('Parser testing', () => {
         {
           '&:hover, &:focus': { '& a, & button': { color: 'red' } },
         },
-        '.X'
+        '.X',
       );
       expectRule(rules, '.X:hover a, .X:hover button, .X:focus a, .X:focus button', { color: 'red' });
     });
@@ -302,7 +302,7 @@ describe('Parser testing', () => {
         {
           '&:hover': { '& svg': { '&:focus': { color: 'red' } } },
         },
-        '.X'
+        '.X',
       );
       expectRule(rules, '.X:hover svg:focus', { color: 'red' });
     });
@@ -321,7 +321,7 @@ describe('Parser testing', () => {
         {
           '&:hover': { '&:active, &:focus': { color: 'red' } },
         },
-        '.X'
+        '.X',
       );
       expectRule(rules, '.X:hover:active, .X:hover:focus', { color: 'red' });
     });
@@ -346,7 +346,7 @@ describe('Parser testing', () => {
         {
           '&.a, &.b, &.c': { '& span, & em': { color: 'red' } },
         },
-        '.X'
+        '.X',
       );
       expectRule(rules, '.X.a span, .X.a em, .X.b span, .X.b em, .X.c span, .X.c em', { color: 'red' });
     });
@@ -375,7 +375,7 @@ describe('Parser testing', () => {
             '@media (min-width: 600px)': { color: 'red' },
           },
         },
-        '.X'
+        '.X',
       );
       const media = rules.find((rule) => strip(rule).startsWith('@media (min-width: 600px) {'));
       if (!media) throw new Error(`@media rule not found in:\n${rules.map((r) => `  ${strip(r)}`).join('\n')}`);
@@ -403,7 +403,7 @@ describe('Parser testing', () => {
         {
           '&:hover': { color: 'red', '& svg': { opacity: '0.5' } },
         },
-        '.X'
+        '.X',
       );
       expectRule(rules, '.X:hover', { color: 'red' });
       expectRule(rules, '.X:hover svg', { opacity: '0.5' });
@@ -453,7 +453,7 @@ describe('Parser testing', () => {
             '100%': { backgroundPosition: '200% 0%' },
           },
         },
-        '.X'
+        '.X',
       );
       const kf = rules.find((rule) => strip(rule).startsWith('@keyframes shimmer {'));
       if (!kf) throw new Error(`@keyframes rule not found in:\n${rules.map((r) => `  ${strip(r)}`).join('\n')}`);
@@ -485,7 +485,7 @@ describe('Parser testing', () => {
             },
           },
         },
-        '.X'
+        '.X',
       );
       expectRule(rules, '.X.variant-rgb', { animation: 'shimmer1slinearinfinite' });
       const kf = rules.find((rule) => strip(rule).startsWith('@keyframes shimmer {'));
@@ -510,7 +510,7 @@ describe('Parser testing', () => {
             },
           },
         },
-        '.X'
+        '.X',
       );
       const kf = rules.find((rule) => strip(rule).startsWith('@keyframes fade {'));
       if (!kf) throw new Error(`@keyframes rule not found in:\n${rules.map((r) => `  ${strip(r)}`).join('\n')}`);
@@ -529,7 +529,7 @@ describe('Parser testing', () => {
             '100%': { transform: 'rotate(360deg)' },
           },
         },
-        '.X'
+        '.X',
       );
       const kf = rules.find((rule) => strip(rule).startsWith('@-webkit-keyframes spin {'));
       if (!kf) throw new Error(`@-webkit-keyframes rule not found in:\n${rules.map((r) => `  ${strip(r)}`).join('\n')}`);
@@ -555,7 +555,7 @@ describe('Parser testing', () => {
             },
           },
         },
-        '.X'
+        '.X',
       );
       const media = rules.find((rule) => strip(rule).startsWith('@media (min-width: 600px) {'));
       if (!media) throw new Error(`@media rule not found in:\n${rules.map((r) => `  ${strip(r)}`).join('\n')}`);

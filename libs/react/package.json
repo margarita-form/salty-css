@@ -1,89 +1,113 @@
 {
   "name": "@salty-css/react",
-  "version": "0.2.1",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "typings": "./dist/index.d.ts",
-  "type": "module",
   "license": "MIT",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
-  "description": "React library for Salty CSS",
+  "description": "Vite plugin for Salty CSS",
   "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/margarita-form/salty-css.git"
+    "url": "git+https://github.com/margarita-form/salty-css.git",
+    "directory": "libs/react"
   },
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "files": [
-    "**/*",
-    "!**/*.tsbuildinfo"
-  ],
-  "nx": {
-    "sourceRoot": "libs/react/src",
-    "name": "react"
-  },
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "require": "./index.cjs"
-    },
-    "./styled": {
-      "import": "./styled.js",
-      "require": "./styled.cjs"
-    },
-    "./styled-client": {
-      "import": "./styled-client.js",
-      "require": "./styled-client.cjs"
-    },
-    "./class-name": {
-      "import": "./class-name.js",
-      "require": "./class-name.cjs"
-    },
-    "./class-name-client": {
-      "import": "./class-name-client.js",
-      "require": "./class-name-client.cjs"
-    },
-    "./keyframes": {
-      "import": "./keyframes.js",
-      "require": "./keyframes.cjs"
-    },
-    "./media": {
-      "import": "./media.js",
-      "require": "./media.cjs"
-    },
-    "./factories": {
-      "import": "./factories.js",
-      "require": "./factories.cjs"
-    },
-    "./config": {
-      "import": "./config.js",
-      "require": "./config.cjs"
-    },
-    "./helpers": {
-      "import": "./helpers.js",
-      "require": "./helpers.cjs"
-    },
-    "./runtime": {
-      "import": "./runtime.js",
-      "require": "./runtime.cjs"
-    },
-    "./transform-salty-file": {
-      "import": "./transform-salty-file.js",
-      "require": "./transform-salty-file.cjs"
-    }
+  "version": "0.3.0-refactor-vite-8.5",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.1",
-    "@testing-library/react": "^16.3.2",
+    "@salty-css/core": "0.3.0-refactor-vite-8.5",
     "clsx": ">=2.x",
     "react": ">=19.x || >=18.3.x"
   },
   "devDependencies": {
-    "@types/react-dom": "^19.2.3"
-  }
+    "@types/react-dom": "^19.2.3",
+    "jsdom": "^29.1.1"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styled": {
+      "import": "./dist/styled.js",
+      "require": "./dist/styled.cjs"
+    },
+    "./styled-client": {
+      "import": "./dist/styled-client.js",
+      "require": "./dist/styled-client.cjs"
+    },
+    "./class-name": {
+      "import": "./dist/class-name.js",
+      "require": "./dist/class-name.cjs"
+    },
+    "./class-name-client": {
+      "import": "./dist/class-name-client.js",
+      "require": "./dist/class-name-client.cjs"
+    },
+    "./keyframes": {
+      "import": "./dist/keyframes.js",
+      "require": "./dist/keyframes.cjs"
+    },
+    "./media": {
+      "import": "./dist/media.js",
+      "require": "./dist/media.cjs"
+    },
+    "./factories": {
+      "import": "./dist/factories.js",
+      "require": "./dist/factories.cjs"
+    },
+    "./config": {
+      "import": "./dist/config.js",
+      "require": "./dist/config.cjs"
+    },
+    "./helpers": {
+      "import": "./dist/helpers.js",
+      "require": "./dist/helpers.cjs"
+    },
+    "./runtime": {
+      "import": "./dist/runtime.js",
+      "require": "./dist/runtime.cjs"
+    },
+    "./transform-salty-file": {
+      "import": "./dist/transform-salty-file.js",
+      "require": "./dist/transform-salty-file.cjs"
+    }
+  },
+  "author": {
+    "name": "Teemu Lahjalahti",
+    "url": "https://www.linkedin.com/in/teemulahjalahti/"
+  },
+  "keywords": [
+    "salty-css",
+    "css-in-js",
+    "react",
+    "styled",
+    "styled-components",
+    "css",
+    "styling"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "sideEffects": false
 }

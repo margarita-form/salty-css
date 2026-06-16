@@ -27,9 +27,7 @@ export const planIntegrations = async (ctx: ProjectContext): Promise<PlannedInte
 };
 
 /** Execute each previously-planned integration (writes config files). */
-export const applyIntegrationPlans = async (
-  planned: PlannedIntegration[]
-): Promise<{ name: string; configPath: string; changed: boolean }[]> => {
+export const applyIntegrationPlans = async (planned: PlannedIntegration[]): Promise<{ name: string; configPath: string; changed: boolean }[]> => {
   const results: { name: string; configPath: string; changed: boolean }[] = [];
   for (const { name, configPath, plan } of planned) {
     const result = await plan.execute();

@@ -1,19 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "types": ["vitest"],
-    "esModuleInterop": true
-  },
-  "files": [],
-  "include": [],
+  "extends": "../../tsconfig.json",
   "references": [
     {
       "path": "./tsconfig.lib.json"

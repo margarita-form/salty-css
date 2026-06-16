@@ -73,15 +73,18 @@ export const getTemplateKeys = <T extends object>(templates: T): string[] => {
 
 export const getTemplateTypes = <T extends object>(templates: T): Record<string, string> => {
   if (!templates) return {};
-  return Object.entries(templates).reduce((acc, [key, value]) => {
-    if (typeof value === 'function') {
-      acc[key] = 'any';
-    } else if (typeof value === 'object')
-      acc[key] = getTemplateTokens(value)
-        .map((val) => `"${val}"`)
-        .join(' | ');
-    return acc;
-  }, {} as Record<string, string>);
+  return Object.entries(templates).reduce(
+    (acc, [key, value]) => {
+      if (typeof value === 'function') {
+        acc[key] = 'any';
+      } else if (typeof value === 'object')
+        acc[key] = getTemplateTokens(value)
+          .map((val) => `"${val}"`)
+          .join(' | ');
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 };
 
 export const getTemplateTokens = <T extends object>(templates: T, parent = '', templateTokens = new Set<string>()): string[] => {

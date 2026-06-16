@@ -1,64 +1,90 @@
 {
   "name": "@salty-css/next",
-  "version": "0.2.1",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "typings": "./dist/index.d.ts",
-  "type": "module",
   "license": "MIT",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
-  "description": "Next.js plugin for Salty CSS",
+  "description": "Vite plugin for Salty CSS",
   "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/margarita-form/salty-css.git"
+    "url": "git+https://github.com/margarita-form/salty-css.git",
+    "directory": "libs/next"
   },
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "files": [
-    "**/*",
-    "!**/*.tsbuildinfo"
-  ],
-  "nx": {
-    "sourceRoot": "libs/next/src",
-    "name": "next"
-  },
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "require": "./index.cjs"
-    },
-    "./config": {
-      "import": "./config.js",
-      "require": "./config.cjs"
-    },
-    "./factories": {
-      "import": "./factories.js",
-      "require": "./factories.cjs"
-    },
-    "./helpers": {
-      "import": "./helpers.js",
-      "require": "./helpers.cjs"
-    },
-    "./keyframes": {
-      "import": "./keyframes.js",
-      "require": "./keyframes.cjs"
-    },
-    "./media": {
-      "import": "./media.js",
-      "require": "./media.cjs"
-    },
-    "./runtime": {
-      "import": "./runtime.js",
-      "require": "./runtime.cjs"
-    }
+  "version": "0.3.0-refactor-vite-8.5",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.1",
-    "@salty-css/webpack": "0.2.1"
-  }
+    "@salty-css/core": "0.3.0-refactor-vite-8.5",
+    "@salty-css/webpack": "0.3.0-refactor-vite-8.5"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./config": {
+      "import": "./dist/config.js",
+      "require": "./dist/config.cjs"
+    },
+    "./factories": {
+      "import": "./dist/factories.js",
+      "require": "./dist/factories.cjs"
+    },
+    "./helpers": {
+      "import": "./dist/helpers.js",
+      "require": "./dist/helpers.cjs"
+    },
+    "./keyframes": {
+      "import": "./dist/keyframes.js",
+      "require": "./dist/keyframes.cjs"
+    },
+    "./media": {
+      "import": "./dist/media.js",
+      "require": "./dist/media.cjs"
+    },
+    "./runtime": {
+      "import": "./dist/runtime.js",
+      "require": "./dist/runtime.cjs"
+    }
+  },
+  "author": {
+    "name": "Teemu Lahjalahti",
+    "url": "https://www.linkedin.com/in/teemulahjalahti/"
+  },
+  "keywords": [
+    "salty-css",
+    "css-in-js",
+    "next",
+    "nextjs",
+    "css",
+    "styling"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "sideEffects": false
 }

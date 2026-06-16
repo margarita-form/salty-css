@@ -1,0 +1,64 @@
+{
+  "compileOnSave": false,
+  "exclude": ["./node_modules", "./tmp"],
+  "compilerOptions": {
+    "rootDir": ".",
+    /* Strictness */
+    "strict": true,
+    "composite": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "noEmitOnError": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+
+    /* Language and Environment */
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["ESNext", "DOM"],
+    "types": ["vite/client", "node"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "moduleDetection": "force",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": false,
+
+    "customConditions": ["@org/source"],
+    "paths": {
+      "@salty-css/core/*": ["./libs/core/src/*"],
+      "@salty-css/react/*": ["./libs/react/src/*"],
+      "@salty-css/vite/*": ["./libs/vite/src/*"],
+      "@salty-css/webpack/*": ["./libs/webpack/src/*"],
+      "@salty-css/next/*": ["./libs/next/src/*"]
+    }
+  },
+  "references": [
+    {
+      "path": "./libs/core/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/react/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/vite/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/webpack/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/next/tsconfig.lib.json"
+    }
+  ]
+}

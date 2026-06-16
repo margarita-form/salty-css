@@ -1,52 +1,78 @@
 {
   "name": "@salty-css/webpack",
-  "version": "0.2.1",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "typings": "./dist/index.d.ts",
-  "type": "module",
   "license": "MIT",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
-  "description": "Webpack plugin for Salty CSS",
+  "description": "Vite plugin for Salty CSS",
   "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/margarita-form/salty-css.git"
+    "url": "git+https://github.com/margarita-form/salty-css.git",
+    "directory": "libs/webpack"
   },
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "files": [
-    "**/*",
-    "!**/*.tsbuildinfo"
-  ],
-  "nx": {
-    "sourceRoot": "libs/webpack/src",
-    "name": "webpack"
-  },
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "require": "./index.cjs"
-    },
-    "./loader": {
-      "import": "./loader.js",
-      "require": "./loader.cjs"
-    }
+  "version": "0.3.0-refactor-vite-8.5",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.1",
+    "@salty-css/core": "0.3.0-refactor-vite-8.5",
     "webpack": ">=5.x"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.2.1"
+    "@salty-css/react": "0.3.0-refactor-vite-8.5"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
       "optional": true
     }
-  }
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./loader": {
+      "import": "./dist/loader.js",
+      "require": "./dist/loader.cjs"
+    }
+  },
+  "author": {
+    "name": "Teemu Lahjalahti",
+    "url": "https://www.linkedin.com/in/teemulahjalahti/"
+  },
+  "keywords": [
+    "salty-css",
+    "css-in-js",
+    "webpack",
+    "webpack-plugin",
+    "webpack-loader",
+    "css"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "sideEffects": false
 }

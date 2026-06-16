@@ -1,9 +1,8 @@
-/// <reference types='vitest' />
-import { defineConfig, PluginOption } from 'vite';
-import dts from 'vite-plugin-dts';
-import * as path from 'path';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import { resolve } from 'node:path';
+import { defineConfig, type PluginOption } from 'vite';
+import dts from 'unplugin-dts/vite';
+import { rolldown } from '../../shared/vite-rolldown-config';
+import { vitePlugins } from '../../shared/vite-plugin-config';
 
 const templateLoaderPlugin: () => PluginOption = () => ({
   name: 'gqlLoader',
@@ -16,100 +15,54 @@ const templateLoaderPlugin: () => PluginOption = () => ({
 });
 
 export default defineConfig({
-  root: __dirname,
-  cacheDir: '../../node_modules/.vite/libs/core',
-  builder: {},
+  root: resolve(import.meta.dirname, 'src'),
+  publicDir: resolve(import.meta.dirname, 'public'),
   plugins: [
-    nxViteTsPaths(),
+    ...vitePlugins,
     templateLoaderPlugin(),
-    nxCopyAssetsPlugin(['*.md']),
     dts({
-      entryRoot: 'src',
-      tsconfigPath: path.join(__dirname, 'tsconfig.lib.json'),
-      pathsToAliases: false,
+      root: resolve(import.meta.dirname),
+      entryRoot: resolve(import.meta.dirname, 'src'),
+      tsconfigPath: resolve(import.meta.dirname, 'tsconfig.lib.json'),
+      exclude: ['**/*.test.ts', '**/*.__template'],
+      compilerOptions: {
+        rootDir: resolve(import.meta.dirname, 'src'),
+      },
     }),
   ],
-
-  // Configuration for building your library.
-  // See: https://vitejs.dev/guide/build.html#library-mode
   build: {
-    outDir: './dist',
+    outDir: resolve(import.meta.dirname, 'dist'),
     emptyOutDir: true,
-    reportCompressedSize: true,
-    assetsInlineLimit: 0,
-    ssr: true,
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
+    target: 'node22',
+    minify: true,
+    copyPublicDir: true,
     lib: {
-      // Could also be a dictionary or array of multiple entry points.
-      name: 'salty-css-core',
-      entry: {
-        'bin/index': 'src/bin/index.ts',
-        'bin/main': 'src/bin/main.ts',
-        'compiler/salty-compiler': 'src/compiler/salty-compiler.ts',
-        'compiler/get-files': 'src/compiler/get-files.ts',
-        'compiler/get-function-range': 'src/compiler/get-function-range.ts',
-        'compiler/helpers': 'src/compiler/helpers.ts',
-        'factories/index': 'src/factories/index.ts',
-        'css/index': 'src/css/index.ts',
-        'css/keyframes': 'src/css/keyframes.ts',
-        'css/media': 'src/css/media.ts',
-        'css/token': 'src/css/token.ts',
-        'css/merge': 'src/css/merge.ts',
-        'helpers/index': 'src/helpers/index.ts',
-        'generators/index': 'src/generators/index.ts',
-        'parsers/index': 'src/parsers/index.ts',
-        'config/index': 'src/config/index.ts',
-        'types/index': 'src/types/index.ts',
-        'util/index': 'src/util/index.ts',
-        'server/index': 'src/server/index.ts',
-        'instances/classname-instance': 'src/instances/classname-instance.ts',
-        'runtime/index': 'src/runtime/index.ts',
-      },
-      fileName: (format, entryName) => {
-        const ext = format === 'es' ? 'js' : format;
-        const parts = entryName.split('/');
-        if (parts.length > 1) {
-          const name = parts.at(-1);
-          const path = parts.slice(0, -1).join('/');
-          return `${path}/${name}.${ext}`;
-        }
-        return `${entryName}.${ext}`;
-      },
-      // Change this to the formats you want to support.
-      // Don't forget to update your package.json as well.
+      name: 'core',
       formats: ['es', 'cjs'],
+      entry: {
+        'bin/index': 'bin/index.ts',
+        'bin/main': 'bin/main.ts',
+        'compiler/salty-compiler': 'compiler/salty-compiler.ts',
+        'compiler/get-files': 'compiler/get-files.ts',
+        'compiler/get-function-range': 'compiler/get-function-range.ts',
+        'compiler/helpers': 'compiler/helpers.ts',
+        'factories/index': 'factories/index.ts',
+        'css/index': 'css/index.ts',
+        'css/keyframes': 'css/keyframes.ts',
+        'css/media': 'css/media.ts',
+        'css/token': 'css/token.ts',
+        'css/merge': 'css/merge.ts',
+        'helpers/index': 'helpers/index.ts',
+        'generators/index': 'generators/index.ts',
+        'parsers/index': 'parsers/index.ts',
+        'config/index': 'config/index.ts',
+        'types/index': 'types/index.ts',
+        'util/index': 'util/index.ts',
+        'server/index': 'server/index.ts',
+        'instances/classname-instance': 'instances/classname-instance.ts',
+        'runtime/index': 'runtime/index.ts',
+      },
     },
-    rollupOptions: {
-      // External packages that should not be bundled into your library.
-      external: [
-        'path',
-        /node:.*/,
-        /fs.*/,
-        /readline.*/,
-        /^module$/,
-        'esbuild',
-        'winston',
-        'child_process',
-        'react',
-        'commander',
-        'ejs',
-        'ora',
-        'typescript',
-        'vm',
-      ],
-    },
-  },
-  test: {
-    watch: false,
-    globals: true,
-    environment: 'node',
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    reporters: ['default'],
-    coverage: {
-      reportsDirectory: '../../coverage/libs/core',
-      provider: 'v8',
-    },
+    rolldownOptions: rolldown,
   },
 });

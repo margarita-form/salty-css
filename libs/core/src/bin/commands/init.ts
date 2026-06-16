@@ -96,11 +96,7 @@ export const registerInitCommand = (program: Command): void => {
         const plannedIntegrations = await planIntegrations(ctx);
 
         if (!ctx.skipInstall) {
-          const packages = [
-            corePackages.core(ctx.cliVersion),
-            framework.runtimePackage(ctx.cliVersion),
-            ...plannedIntegrations.flatMap((p) => p.plan.packages),
-          ];
+          const packages = [corePackages.core(ctx.cliVersion), framework.runtimePackage(ctx.cliVersion), ...plannedIntegrations.flatMap((p) => p.plan.packages)];
           await confirmInstall(packages, ctx.yes);
           await npmInstall(...packages);
         }

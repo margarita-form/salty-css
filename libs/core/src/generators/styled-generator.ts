@@ -16,7 +16,10 @@ export interface StyledGeneratorClientProps {
 }
 
 export class StyledGenerator<const STYLE_PARAMS extends StyledParams = StyledParams> extends StylesGenerator<STYLE_PARAMS> {
-  constructor(public tagName: Tag<any>, public _params: STYLE_PARAMS) {
+  constructor(
+    public tagName: Tag<any>,
+    public _params: STYLE_PARAMS,
+  ) {
     super(_params);
   }
 

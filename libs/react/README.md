@@ -79,29 +79,29 @@ Full reference → [salty-css.dev/docs/eslint](https://salty-css.dev/docs/eslint
 
 ## API index
 
-| Symbol                                          | Import                         | One-liner                                                                     | Docs                                                                    |
-| ----------------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [`styled`](#styled)                             | `@salty-css/react/styled`      | React component factory with variants & extension.                            | [api/styled](https://salty-css.dev/docs/api/styled)                     |
-| [`className`](#classname)                       | `@salty-css/react/class-name`  | CSS class string with `.variant()` chaining.                                  | [api/classname](https://salty-css.dev/docs/api/classname)               |
-| [Variants](#variants)                           | —                              | `variants`, `compoundVariants`, `anyOfVariants`, `defaultVariants` semantics. | [variants](https://salty-css.dev/docs/variants)                         |
-| [Overrides](#overrides)                         | —                              | Extend components, swap element, override per-instance via `style`.           | [overrides](https://salty-css.dev/docs/overrides)                       |
-| [ESLint plugin](#eslint)                        | `@salty-css/eslint-config-core` | Two rules: enforce `export` and correct `variants` placement on Salty files. | [eslint](https://salty-css.dev/docs/eslint)                             |
-| [`defineConfig`](#defineconfig)                 | `@salty-css/core/config`       | Top-level project config.                                                     | [api/config](https://salty-css.dev/docs/api/config)                     |
-| [`defineVariables`](#definevariables)           | `@salty-css/core/factories`    | Static, responsive, and conditional CSS variables (tokens).                   | [variables](https://salty-css.dev/docs/variables)                       |
-| [Theming](#theming)                             | —                              | `data-theme` switcher built on conditional variables.                         | [theming](https://salty-css.dev/docs/theming)                           |
-| [`defineGlobalStyles`](#defineglobalstyles)     | `@salty-css/core/factories`    | Global rules (`html`, `body`, etc.).                                          | [api/define-factories](https://salty-css.dev/docs/api/define-factories) |
-| [`defineMediaQuery`](#definemediaquery)         | `@salty-css/core/factories`    | Named, reusable media queries.                                                | [media-queries](https://salty-css.dev/docs/media-queries)               |
-| [`defineTemplates`](#definetemplates)           | `@salty-css/core/factories`    | Reusable style bundles, optionally with variants.                             | [templates](https://salty-css.dev/docs/templates)                       |
-| [`defineFont`](#definefont)                     | `@salty-css/core/factories`    | `@font-face` (or `@import`) + CSS variable in one.                            | [fonts](https://salty-css.dev/docs/fonts)                               |
-| [`defineImport`](#defineimport)                 | `@salty-css/core/factories`    | Pull external CSS into Salty's `imports` layer.                               | [imports](https://salty-css.dev/docs/imports)                           |
-| [`keyframes`](#keyframes)                       | `@salty-css/react/keyframes`   | Typed `@keyframes` with params and initial-state injection.                   | [animations](https://salty-css.dev/docs/animations)                     |
-| [`defineViewportClamp`](#defineviewportclamp)   | `@salty-css/core/helpers`      | Fluid `clamp()` values that scale with the viewport.                          | [viewport-clamp](https://salty-css.dev/docs/viewport-clamp)             |
-| [`color`](#color)                               | `@salty-css/core/helpers`      | Color manipulation (`alpha`, `darken`, …).                                    | [color-function](https://salty-css.dev/docs/color-function)             |
-| [Modifiers](#modifiers)                         | (on `defineConfig`)            | Custom value transformers, e.g. `'space:3'` → `'12px'`.                       | [modifiers](https://salty-css.dev/docs/modifiers)                       |
-| [`withSaltyCss`](#withsaltycss-nextjs)          | `@salty-css/next`              | Next.js config wrapper (Webpack + Turbopack).                                 | [installation](https://salty-css.dev/docs/installation)                 |
-| [`saltyPlugin` (Vite)](#saltyplugin-vite)       | `@salty-css/vite`              | Vite plugin.                                                                  | [installation](https://salty-css.dev/docs/installation)                 |
-| [`saltyPlugin` (Webpack)](#saltyplugin-webpack) | `@salty-css/webpack`           | Webpack loader + plugin.                                                      | [installation](https://salty-css.dev/docs/installation)                 |
-| [`saltyIntegration`](#saltyintegration-astro)   | `@salty-css/astro/integration` | Astro integration.                                                            | [installation](https://salty-css.dev/docs/installation)                 |
+| Symbol                                          | Import                          | One-liner                                                                     | Docs                                                                    |
+| ----------------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [`styled`](#styled)                             | `@salty-css/react/styled`       | React component factory with variants & extension.                            | [api/styled](https://salty-css.dev/docs/api/styled)                     |
+| [`className`](#classname)                       | `@salty-css/react/class-name`   | CSS class string with `.variant()` chaining.                                  | [api/classname](https://salty-css.dev/docs/api/classname)               |
+| [Variants](#variants)                           | —                               | `variants`, `compoundVariants`, `anyOfVariants`, `defaultVariants` semantics. | [variants](https://salty-css.dev/docs/variants)                         |
+| [Overrides](#overrides)                         | —                               | Extend components, swap element, override per-instance via `style`.           | [overrides](https://salty-css.dev/docs/overrides)                       |
+| [ESLint plugin](#eslint)                        | `@salty-css/eslint-config-core` | Two rules: enforce `export` and correct `variants` placement on Salty files.  | [eslint](https://salty-css.dev/docs/eslint)                             |
+| [`defineConfig`](#defineconfig)                 | `@salty-css/core/config`        | Top-level project config.                                                     | [api/config](https://salty-css.dev/docs/api/config)                     |
+| [`defineVariables`](#definevariables)           | `@salty-css/core/factories`     | Static, responsive, and conditional CSS variables (tokens).                   | [variables](https://salty-css.dev/docs/variables)                       |
+| [Theming](#theming)                             | —                               | `data-theme` switcher built on conditional variables.                         | [theming](https://salty-css.dev/docs/theming)                           |
+| [`defineGlobalStyles`](#defineglobalstyles)     | `@salty-css/core/factories`     | Global rules (`html`, `body`, etc.).                                          | [api/define-factories](https://salty-css.dev/docs/api/define-factories) |
+| [`defineMediaQuery`](#definemediaquery)         | `@salty-css/core/factories`     | Named, reusable media queries.                                                | [media-queries](https://salty-css.dev/docs/media-queries)               |
+| [`defineTemplates`](#definetemplates)           | `@salty-css/core/factories`     | Reusable style bundles, optionally with variants.                             | [templates](https://salty-css.dev/docs/templates)                       |
+| [`defineFont`](#definefont)                     | `@salty-css/core/factories`     | `@font-face` (or `@import`) + CSS variable in one.                            | [fonts](https://salty-css.dev/docs/fonts)                               |
+| [`defineImport`](#defineimport)                 | `@salty-css/core/factories`     | Pull external CSS into Salty's `imports` layer.                               | [imports](https://salty-css.dev/docs/imports)                           |
+| [`keyframes`](#keyframes)                       | `@salty-css/react/keyframes`    | Typed `@keyframes` with params and initial-state injection.                   | [animations](https://salty-css.dev/docs/animations)                     |
+| [`defineViewportClamp`](#defineviewportclamp)   | `@salty-css/core/helpers`       | Fluid `clamp()` values that scale with the viewport.                          | [viewport-clamp](https://salty-css.dev/docs/viewport-clamp)             |
+| [`color`](#color)                               | `@salty-css/core/helpers`       | Color manipulation (`alpha`, `darken`, …).                                    | [color-function](https://salty-css.dev/docs/color-function)             |
+| [Modifiers](#modifiers)                         | (on `defineConfig`)             | Custom value transformers, e.g. `'space:3'` → `'12px'`.                       | [modifiers](https://salty-css.dev/docs/modifiers)                       |
+| [`withSaltyCss`](#withsaltycss-nextjs)          | `@salty-css/next`               | Next.js config wrapper (Webpack + Turbopack).                                 | [installation](https://salty-css.dev/docs/installation)                 |
+| [`saltyPlugin` (Vite)](#saltyplugin-vite)       | `@salty-css/vite`               | Vite plugin.                                                                  | [installation](https://salty-css.dev/docs/installation)                 |
+| [`saltyPlugin` (Webpack)](#saltyplugin-webpack) | `@salty-css/webpack`            | Webpack loader + plugin.                                                      | [installation](https://salty-css.dev/docs/installation)                 |
+| [`saltyIntegration`](#saltyintegration-astro)   | `@salty-css/astro/integration`  | Astro integration.                                                            | [installation](https://salty-css.dev/docs/installation)                 |
 
 ---
 
@@ -376,7 +376,7 @@ export default defineImport(
   '/fonts/inter.css', // public/ folder
   'https://fonts.googleapis.com/css2?family=Inter', // URL
   { url: './print.css', media: 'print' }, // media-conditional
-  { url: './p3.css', supports: 'color(display-p3 1 1 1)' } // supports-conditional
+  { url: './p3.css', supports: 'color(display-p3 1 1 1)' }, // supports-conditional
 );
 ```
 

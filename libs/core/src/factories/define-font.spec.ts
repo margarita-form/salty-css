@@ -148,7 +148,7 @@ describe('defineFont', () => {
         variable: '--font-inter',
         variants: [baseVariant],
         import: 'https://example.com/inter.css',
-      } as never)
+      } as never),
     ).toThrow(/either `variants` or `import`/);
   });
 

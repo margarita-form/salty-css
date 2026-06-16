@@ -1,17 +1,18 @@
 {
   "name": "create-salty-css",
-  "version": "0.2.1",
+  "version": "0.3.0-refactor-vite-8.5",
   "type": "module",
   "license": "MIT",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://salty-css.dev/",
   "description": "NPM create CLI package for Salty CSS",
+  "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/margarita-form/salty-css.git"
+    "url": "git+https://github.com/margarita-form/salty-css.git",
+    "directory": "libs/npm-create"
   },
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
@@ -25,9 +26,23 @@
     "name": "npm-create"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.1"
+    "@salty-css/core": "0.3.0-refactor-vite-8.5"
   },
   "bin": {
     "create-salty-css": "./index.js"
+  },
+  "author": {
+    "name": "Teemu Lahjalahti",
+    "url": "https://www.linkedin.com/in/teemulahjalahti/"
+  },
+  "keywords": [
+    "salty-css",
+    "css-in-js",
+    "create",
+    "scaffold",
+    "cli"
+  ],
+  "engines": {
+    "node": ">=22"
   }
 }

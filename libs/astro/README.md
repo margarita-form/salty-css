@@ -1,554 +1,535 @@
 ![Salty CSS Banner](https://salty-css.dev/assets/banners/dvd.svg)
 
-# Salty CSS - CSS-in-JS library that is kinda sweet
+# Salty CSS — CSS-in-JS that compiles away
 
-Is there anything saltier than CSS in frontend web development? Salty CSS is built to provide better developer experience for developers looking for performant and feature rich CSS-in-JS solutions.
+Salty CSS is a build-time, type-safe CSS-in-JS library. You author styles in `.css.ts` files; the compiler emits real CSS, your runtime ships zero styling logic.
 
-[Get started](#get-started) | [API](#api) | [Discord](https://discord.gg/R6kr4KxMhP) | [Website](https://salty-css.dev/) | [GitHub](https://github.com/margarita-form/salty-css) | [NPM](https://www.npmjs.com/package/@salty-css/core)
+[Get started](#get-started) · [API index](#api-index) · [Docs](https://salty-css.dev/docs) · [Discord](https://discord.gg/R6kr4KxMhP) · [GitHub](https://github.com/margarita-form/salty-css) · [NPM](https://www.npmjs.com/package/@salty-css/core)
 
 ## Features
 
-- Build time compilation to achieve awesome runtime performance and minimal size
-- Next.js, React Server Components, Astro, Vite and Webpack support
-- Type safety with out of the box TypeScript and ESLint plugin
-- Advanced CSS variables configuration to allow smooth token usage
-- Style templates to create reusable styles easily
+- **Build-time compilation** — no runtime style injection, no FOUC, no client bundle cost.
+- **Framework support** — Next.js (App + Pages, React Server Components, Webpack & Turbopack), React + Vite, React + Webpack, Astro.
+- **Type safety** — TypeScript-first authoring, generated token types, an [ESLint plugin](https://www.npmjs.com/package/@salty-css/eslint-plugin-core).
+- **Design tokens & theming** — static, responsive (media-bound), and conditional (data-attribute / class-bound) variables in one place.
+- **Templates** — reusable style bundles with their own variants.
+- **Modifiers** — custom value transformers (`'space:3'` → `'12px'`) defined in config.
+- **Variants, compound variants, anyOf variants, default variants** out of the box.
 
 ## Get started
-
-Fastest way to get started with any framework is
 
 ```bash
 npx salty-css init
 ```
 
-Other guides:
+`init` detects your framework, installs the right packages, creates `salty.config.ts`, and wires the bundler plugin. Per-framework setup:
 
-- Next.js → [Next.js guide](#nextjs) + [Next.js example app](https://github.com/margarita-form/salty-css-website)
-- React + Vite → [React + Vite guide](#react--vite) + [React example code](#code-examples)
-- React + Webpack → Guide coming soon
+- **Next.js** → [salty-css.dev/docs/installation](https://salty-css.dev/docs/installation) — `withSaltyCss(nextConfig)` in `next.config.ts`. Auto-detects Webpack vs Turbopack; React Server Components supported.
+- **React + Vite** → [salty-css.dev/docs/installation](https://salty-css.dev/docs/installation) — `saltyPlugin(__dirname)` in `vite.config.ts`.
+- **Astro** → [salty-css.dev/docs/installation](https://salty-css.dev/docs/installation) — `saltyIntegration()` in `astro.config.mjs`.
 
-## Useful commands
+React + Webpack (without Next.js) is also supported via `@salty-css/webpack`.
 
-- Create component: `npx salty-css generate [filePath]`
-- Build: `npx salty-css build [directory]`
-- Update Salty CSS packages: `npx salty-css up`
+## CLI
+
+| Command                             | Alias | What it does                                                                                                                   |
+| ----------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `npx salty-css init [directory]`    | —     | Detect framework, install packages, create `salty.config.ts`, wire the plugin.                                                 |
+| `npx salty-css generate [filePath]` | `g`   | Scaffold a new Salty component file. Flags: `--name`, `--className`, `--tag`.                                                  |
+| `npx salty-css build [directory]`   | `b`   | Compile `*.css.ts` files into `saltygen/index.css`. Not needed when the bundler plugin is running. Flags: `--watch`, `--mode`. |
+| `npx salty-css update [version]`    | `up`  | Update all `@salty-css/*` packages. Defaults to `latest`. Flags: `--dir`, `--yes`.                                             |
+| `npx salty-css --version`           | —     | Print CLI version.                                                                                                             |
+
+Full reference: [salty-css.dev/docs/cli](https://salty-css.dev/docs/cli).
 
 ## Good to know
 
-1. All Salty CSS functions (`styled`, `classNames`, `keyframes`, etc.) must be created in `*.css.ts` or `*.css.tsx` files. This is to ensure best build performance.
-2. Salty CSS components created with styled function can extend non Salty CSS components (`export const CustomLink = styled(NextJSLink, { ... });`) but those components must take in `className` prop for styles to apply.
-3. Among common types like `string` and `number`, CSS-in-JS properties in Salty CSS do support `functions` and `promises` as values (`styled('span', { base: { color: async () => 'red' } });`) but running asynchronous tasks or importing heavy 3rd party libraries into `*.css.ts` or `*.css.tsx` files can cause longer build times.
+1. **File extensions matter.** `styled`, `className`, `keyframes`, and every `defineX(...)` call must live in a file ending `.css.ts`, `.css.tsx`, `.salty.ts`, `.styles.ts`, or `.styled.ts`. The compiler ignores everything else.
+2. **Extending non-Salty components is fine** — `styled(NextLink, { ... })` — as long as the wrapped component forwards `className` to a DOM element.
+3. **Async values & functions are allowed** (`base: { color: async () => 'red' }`), but heavy imports inside `*.css.ts` slow the build.
+4. **React Server Components are supported** via `@salty-css/next` — no `'use client'` needed for styled output.
 
-## Get support
+## ESLint
 
-To get help with problems, [Join Salty CSS Discord server](https://discord.gg/R6kr4KxMhP).
+Salty CSS ships a small ESLint plugin and matching shareable config. Two rules, both `error` by default, both autofixable, both scoped to Salty files (`.css.ts`, `.css.tsx`, `.salty.ts`, `.styles.ts`, `.styled.ts`):
 
-## API
+- **`@salty-css/core/must-be-exported`** — every `styled`, `className`, `keyframes`, and `defineX*` call must be exported; the compiler ignores anything else.
+- **`@salty-css/core/no-variants-in-base`** — `variants` must be a sibling of `base`, not nested inside it.
 
-### Component styling
+```bash
+npm i -D @salty-css/eslint-plugin-core @salty-css/eslint-config-core
+```
 
-- [styled](#styled-function) (react only) - create React components that can be used anywhere easily
-- [className](#class-name-function) (framework agnostic) - create a CSS class string that can be applied to any element
+**Flat config (ESLint 9+):**
 
-### Global styling
+```js
+// eslint.config.mjs
+import saltyConfig from '@salty-css/eslint-config-core/flat';
 
-- [defineGlobalStyles](#global-styles) - set global styles like `html` and `body`
-- [defineVariables](#variables) - create CSS variables (tokens) that can be used in any styling function
-- [defineMediaQuery](#media-queries) - create CSS media queries and use them in any styling function
-- [defineTemplates](#templates) - create reusable templates that can be applied when same styles are used over and over again
-- [keyframes](#keyframes-animations) - create CSS keyframes animation that can be used and imported in any styling function
+export default [saltyConfig];
+```
 
-### Styling helpers & utility
+**Legacy (`.eslintrc`):**
 
-- [defineViewportClamp](#viewport-clamp) - create CSS clamp functions that are based on user's viewport and can calculate relative values easily
-- [color](#color-function) - transform any valid color code or variable to be darker, lighter etc. easily (uses [color library by Qix-](https://github.com/Qix-/color))
+```js
+module.exports = { extends: ['@salty-css/eslint-config-core'] };
+```
 
-### Salty CSS CLI
+Full reference → [salty-css.dev/docs/eslint](https://salty-css.dev/docs/eslint).
 
-In your existing repository you can use `npx salty-css [command]` to initialize a project, generate components, update related packages and build required files.
+## API index
 
-- Initialize project → `npx salty-css init [directory]` - Installs required packages, detects framework in use and creates project files to the provided directory. Directory can be left blank if you want files to be created to the current directory.
-- Generate component → `npx salty-css update [version]` - Update @salty-css packages in your repository. Default version is "latest". Additional options like `--dir`, `--tag`, `--name` and `--className` are also supported.
-- Build files → `npx salty-css build [directory/filename]` - Compile Salty CSS related files in your project. This should not be needed if you are using tools like Next.js or Vite
+| Symbol                                          | Import                          | One-liner                                                                     | Docs                                                                    |
+| ----------------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [`styled`](#styled)                             | `@salty-css/react/styled`       | React component factory with variants & extension.                            | [api/styled](https://salty-css.dev/docs/api/styled)                     |
+| [`className`](#classname)                       | `@salty-css/react/class-name`   | CSS class string with `.variant()` chaining.                                  | [api/classname](https://salty-css.dev/docs/api/classname)               |
+| [Variants](#variants)                           | —                               | `variants`, `compoundVariants`, `anyOfVariants`, `defaultVariants` semantics. | [variants](https://salty-css.dev/docs/variants)                         |
+| [Overrides](#overrides)                         | —                               | Extend components, swap element, override per-instance via `style`.           | [overrides](https://salty-css.dev/docs/overrides)                       |
+| [ESLint plugin](#eslint)                        | `@salty-css/eslint-config-core` | Two rules: enforce `export` and correct `variants` placement on Salty files.  | [eslint](https://salty-css.dev/docs/eslint)                             |
+| [`defineConfig`](#defineconfig)                 | `@salty-css/core/config`        | Top-level project config.                                                     | [api/config](https://salty-css.dev/docs/api/config)                     |
+| [`defineVariables`](#definevariables)           | `@salty-css/core/factories`     | Static, responsive, and conditional CSS variables (tokens).                   | [variables](https://salty-css.dev/docs/variables)                       |
+| [Theming](#theming)                             | —                               | `data-theme` switcher built on conditional variables.                         | [theming](https://salty-css.dev/docs/theming)                           |
+| [`defineGlobalStyles`](#defineglobalstyles)     | `@salty-css/core/factories`     | Global rules (`html`, `body`, etc.).                                          | [api/define-factories](https://salty-css.dev/docs/api/define-factories) |
+| [`defineMediaQuery`](#definemediaquery)         | `@salty-css/core/factories`     | Named, reusable media queries.                                                | [media-queries](https://salty-css.dev/docs/media-queries)               |
+| [`defineTemplates`](#definetemplates)           | `@salty-css/core/factories`     | Reusable style bundles, optionally with variants.                             | [templates](https://salty-css.dev/docs/templates)                       |
+| [`defineFont`](#definefont)                     | `@salty-css/core/factories`     | `@font-face` (or `@import`) + CSS variable in one.                            | [fonts](https://salty-css.dev/docs/fonts)                               |
+| [`defineImport`](#defineimport)                 | `@salty-css/core/factories`     | Pull external CSS into Salty's `imports` layer.                               | [imports](https://salty-css.dev/docs/imports)                           |
+| [`keyframes`](#keyframes)                       | `@salty-css/react/keyframes`    | Typed `@keyframes` with params and initial-state injection.                   | [animations](https://salty-css.dev/docs/animations)                     |
+| [`defineViewportClamp`](#defineviewportclamp)   | `@salty-css/core/helpers`       | Fluid `clamp()` values that scale with the viewport.                          | [viewport-clamp](https://salty-css.dev/docs/viewport-clamp)             |
+| [`color`](#color)                               | `@salty-css/core/helpers`       | Color manipulation (`alpha`, `darken`, …).                                    | [color-function](https://salty-css.dev/docs/color-function)             |
+| [Modifiers](#modifiers)                         | (on `defineConfig`)             | Custom value transformers, e.g. `'space:3'` → `'12px'`.                       | [modifiers](https://salty-css.dev/docs/modifiers)                       |
+| [`withSaltyCss`](#withsaltycss-nextjs)          | `@salty-css/next`               | Next.js config wrapper (Webpack + Turbopack).                                 | [installation](https://salty-css.dev/docs/installation)                 |
+| [`saltyPlugin` (Vite)](#saltyplugin-vite)       | `@salty-css/vite`               | Vite plugin.                                                                  | [installation](https://salty-css.dev/docs/installation)                 |
+| [`saltyPlugin` (Webpack)](#saltyplugin-webpack) | `@salty-css/webpack`            | Webpack loader + plugin.                                                      | [installation](https://salty-css.dev/docs/installation)                 |
+| [`saltyIntegration`](#saltyintegration-astro)   | `@salty-css/astro/integration`  | Astro integration.                                                            | [installation](https://salty-css.dev/docs/installation)                 |
 
-## Styled function
+---
 
-Styled function is the main way to use Salty CSS within React. Styled function creates a React component that then can be used anywhere in your app. All styled functions must be created in `.css.ts` or `.css.tsx` files
+## `styled`
 
 ```ts
-// /components/my-component.css.ts
+// components/button.css.ts
 import { styled } from '@salty-css/react/styled';
 
-// Define a component with a styled function. First argument is the component name or existing component to extend and second argument is the object containing the styles and other options
-export const Component = styled('div', {
-  className: 'wrapper', // Define optional custom class name that will be included for this component
-  element: 'section', // Override the html element that will be rendered for this component
+export const Button = styled('button', {
+  className: 'btn', // optional custom class
+  element: 'button', // optional element override
   base: {
-    // 👉 Add your CSS-in-JS base styles here! 👈
+    padding: '0.6em 1.2em',
+    border: '1px solid currentColor',
+    '&:hover': { background: 'black', color: 'white' },
   },
   variants: {
-    // Define conditional styles that will be applied to the component based on the variant prop values
+    variant: {
+      outlined: {},
+      solid: { background: 'black', color: 'white' },
+    },
   },
   compoundVariants: [
-    // Define conditional styles that will be applied to the component based on the combination of variant prop values
+    /* { variant: 'solid', size: 'lg', css: { ... } } */
   ],
-  defaultVariants: {
-    // Set default variant prop values
-  },
-  defaultProps: {
-    // Add additional default props for the component (eg, id and other html element attributes)
-  },
-  passProps: true, // Pass variant props to the rendered element / parent component (default: false)
-  priority: 1, // Override automatic priotity layer with a custom value (0-8), higher is considered more important
+  defaultVariants: { variant: 'outlined' },
+  defaultProps: { type: 'button' },
+  passProps: false, // pass variant props through to the rendered element
+  priority: undefined, // 0–8, higher wins; usually leave to auto
 });
 ```
 
-Example usage:
-
 ```tsx
-import { Component } from './my-component.css';
-
-export const Page = () => {
-  return <Component>Hello world</Component>;
-};
+<Button variant="solid">Save</Button>
 ```
 
-## Class name function
+See full reference → [salty-css.dev/docs/api/styled](https://salty-css.dev/docs/api/styled).
 
-Create CSS class names with possibility to add scope and media queries etc. Function `className` is quite similar to `styled` but does not allow extending components or classes.
+## `className`
+
+Framework-agnostic class-string factory. The return value is a `string` you can drop in `className=`, plus a `.variant(name, value)` method for chaining variant classes.
 
 ```ts
-// /components/my-class.css.ts
+// components/card.css.ts
 import { className } from '@salty-css/react/class-name';
 
-// Define a CSS class with className function. First and only argument is the object containing the styles and other options
-export const myClass = className({
-  className: 'wrapper', // Define optional custom class name that will be included to the scope
+export const card = className({
+  className: 'card',
   base: {
-    // 👉 Add your CSS-in-JS base styles here! 👈
+    padding: '1rem',
+    borderRadius: '8px',
+  },
+  variants: {
+    tone: {
+      neutral: { background: '#f6f6f6' },
+      brand: { background: '{colors.brand.main}' },
+    },
   },
 });
 ```
-
-Example usage:
 
 ```tsx
-import { myClass } from './my-class.css';
-
-export const Page = () => {
-  return <div className={myClass}>Hello world</div>;
-};
+<div className={`${card.variant('tone', 'brand')}`}>Hello</div>
 ```
 
-## Global styles
+See full reference → [salty-css.dev/docs/api/classname](https://salty-css.dev/docs/api/classname).
+
+## Variants
+
+`styled` and `className` share the same variant shape:
+
+- **`variants`** — named axes (e.g. `size: { sm, md, lg }`). Each axis becomes a prop.
+- **`compoundVariants`** — array; styles applied only when **all** listed axes match.
+- **`anyOfVariants`** — array; styles applied when **any** listed axis matches.
+- **`defaultVariants`** — values used when the prop is omitted at the call site.
 
 ```ts
-// /styles/global.css.ts
-import { defineGlobalStyles } from '@salty-css/core/factories';
-
-export default defineGlobalStyles({
-  html: {
-    fontFamily: 'Arial, sans-serif',
+styled('a', {
+  base: { textDecoration: 'none' },
+  variants: {
+    size: { sm: { fontSize: 14 }, lg: { fontSize: 18 } },
+    underline: { true: { textDecoration: 'underline' } },
   },
-  body: {
-    backgroundColor: '#fff',
-    margin: 0,
-  },
-  // Add more global styles as needed
+  compoundVariants: [{ size: 'lg', underline: true, css: { textUnderlineOffset: 4 } }],
+  defaultVariants: { size: 'sm' },
 });
 ```
 
-## Variables
+Boolean variants accept `true`/`false` keys; pass them as `<Link underline />` shorthand. See [salty-css.dev/docs/variants](https://salty-css.dev/docs/variants).
+
+## Overrides
+
+- **Extend any component:** `styled(ExistingComponent, { ... })`. The wrapped component must accept `className`.
+- **Swap the rendered element** for one instance: `<Button as="a" href="/x" />` (use `passProps` if you want variant props to reach the underlying element).
+- **Per-instance style overrides:** `<Box style={{ ... }} />` and `<Box css={{ ... }} />` accept regular React `style` and Salty's `css` prop (overrides apply at the highest priority).
+
+See [salty-css.dev/docs/overrides](https://salty-css.dev/docs/overrides) for `as`, `style`, CSS-variable overrides, and ref forwarding.
+
+## `defineConfig`
 
 ```ts
-// /styles/variables.css.ts
+// salty.config.ts
+import { defineConfig } from '@salty-css/core/config';
+
+export const config = defineConfig({
+  importStrategy: 'root', // 'root' | 'component'
+  variables: {
+    /* see defineVariables */
+  },
+  global: {
+    /* see defineGlobalStyles */
+  },
+  templates: {
+    /* see defineTemplates */
+  },
+  modifiers: {
+    /* see Modifiers */
+  },
+  reset: 'default', // 'default' | 'none' | GlobalStyles
+  externalModules: ['react', 'react-dom'],
+  strict: true, // true | 'warn' | false
+  defaultUnit: 'px', // px, rem, em, vh, vw, % …
+});
+```
+
+Full reference → [salty-css.dev/docs/api/config](https://salty-css.dev/docs/api/config).
+
+## `defineVariables`
+
+Tokens come in three flavours — static, responsive (media-bound), conditional (class/data-attribute-bound):
+
+```ts
+// styles/variables.css.ts
 import { defineVariables } from '@salty-css/core/factories';
 
 export default defineVariables({
-  /*
-  Define static variable token (like colors, font sizes, etc.). and use them in your styles (e.g. color: '{colors.brand.highlight}').
-  Variables can be nested (colors.brand.main) and can reference other variables.
-  */
   colors: {
     dark: '#111',
     light: '#fefefe',
-    brand: {
-      main: '#0070f3',
-      highlight: '#ff4081',
-    },
+    brand: { main: '#0070f3', highlight: '#ff4081' },
   },
-  fontFamily: {
-    heading: 'Arial, sans-serif',
-    body: 'Georgia, serif',
-  },
-
-  /* 
-  Define variables that are responsive to a media query (defined in media.css.ts) asn use them in your styles as normal (e.g. font-size: '{fontSize.heading.regular}').
-  These variables will be automatically updated when the media query is matched. Base values are used when no media query is matched.
-  */
   responsive: {
-    base: {
-      fontSize: {
-        heading: {
-          small: '32px',
-          regular: '48px',
-          large: '64px',
-        },
-        body: {
-          small: '16px',
-          regular: '20px',
-          large: '24px',
-        },
-      },
-    },
-    '@largeMobileDown': {
-      fontSize: {
-        heading: {
-          small: '20px',
-          regular: '32px',
-          large: '48px',
-        },
-        body: {
-          small: '14px',
-          regular: '16px',
-          large: '20px',
-        },
-      },
-    },
+    base: { fontSize: { heading: '48px', body: '16px' } },
+    '@largeMobileDown': { fontSize: { heading: '32px', body: '14px' } },
   },
-
-  /* 
-  Conditional variables are used to define styles that depend on a class name (e.g. <div className="theme-dark">). or data-attribute (e.g. <div data-theme="dark">). Names for these variables will be "{theme.backgroundColor}" and "{theme.textColor}".
-  */
   conditional: {
     theme: {
-      dark: {
-        backgroundColor: '{colors.dark}',
-        textColor: '{colors.light}',
-      },
-      light: {
-        backgroundColor: '{colors.light}',
-        textColor: '{colors.dark}',
-      },
+      dark: { backgroundColor: '{colors.dark}', textColor: '{colors.light}' },
+      light: { backgroundColor: '{colors.light}', textColor: '{colors.dark}' },
     },
   },
 });
 ```
 
-Example usage:
+Use as string references: `{colors.brand.main}`, `{fontSize.heading}`, `{theme.textColor}`.
+
+See [salty-css.dev/docs/variables](https://salty-css.dev/docs/variables).
+
+## Theming
+
+The `conditional` bucket above wires up data-attribute / class-based themes with zero providers. Toggle a `data-theme` attribute on `<html>` (or any ancestor) and conditional variables resolve to the matching branch:
+
+```html
+<html data-theme="dark">
+  <!-- '{theme.textColor}' resolves to '{colors.light}' -->
+</html>
+```
+
+See the dark-mode walkthrough (with SSR flash fix) → [salty-css.dev/docs/theming](https://salty-css.dev/docs/theming).
+
+## `defineGlobalStyles`
 
 ```ts
-styled('span', {
-  base: {
-    // Use of static font family variable
-    fontFamily: '{fontFamily.heading}',
-    // Use of responsive font size variable
-    fontSize: '{fontSize.heading.regular}',
-    // Use of conditional theme text color variable
-    color: '{theme.textColor}',
-  },
+// styles/global.css.ts
+import { defineGlobalStyles } from '@salty-css/core/factories';
+
+export default defineGlobalStyles({
+  html: { fontFamily: 'Inter, system-ui, sans-serif' },
+  body: { margin: 0, background: '#fff' },
 });
 ```
 
-## Media queries
-
-Create global media queries that can be either used directly as a scope (e.g. `'@MEDIA_QUERY_NAME': { color: 'blue' }`) or imported to be used in JS.
+## `defineMediaQuery`
 
 ```ts
-// /styles/media.css.ts
-import { defineMediaQuery } from '@salty-css/react/config';
+// styles/media.css.ts
+import { defineMediaQuery } from '@salty-css/core/factories';
 
-export const largePortraitUp = defineMediaQuery((media) => media.minWidth(600));
 export const largeMobileDown = defineMediaQuery((media) => media.maxWidth(600));
+export const darkMode = defineMediaQuery((media) => media.prefersColorScheme('dark'));
 ```
 
-Example usage:
-
 ```ts
-styled('span', { base: { fontSize: '64px', '@largeMobileDown': { fontSize: '32px' } } });
+styled('span', { base: { fontSize: 64, '@largeMobileDown': { fontSize: 32 } } });
 ```
 
-## Templates
+See [salty-css.dev/docs/media-queries](https://salty-css.dev/docs/media-queries).
 
-With templates you can create reusable styles that can be used in any styles function. Templates can be static (all values defined in the template) or functions (parameters can be passed to define values). Templates can be used in styles by using template's name (e.g. textStyle) as property name and for static a key as the value for functions any supported parameter value can be used as the value.
+## `defineTemplates`
+
+Reusable style bundles. Static templates pick values by dot-path; function templates take a parameter.
 
 ```ts
-// /styles/templates.css.ts
+// styles/templates.css.ts
 import { defineTemplates } from '@salty-css/core/factories';
 
 export default defineTemplates({
-  // Static templates for text styles.
   textStyle: {
-    headline: {
-      small: {
-        fontSize: '{fontSize.heading.small}',
+    heading: {
+      base: { fontFamily: '{fontFamily.heading}', lineHeight: 1.1 },
+      variants: {
+        weight: { regular: { fontWeight: 500 }, heavy: { fontWeight: 800 } },
       },
-      regular: {
-        fontSize: '{fontSize.heading.regular}',
-      },
-      large: {
-        fontSize: '{fontSize.heading.large}',
-      },
-    },
-    body: {
-      small: {
-        fontSize: '{fontSize.body.small}',
-        lineHeight: '1.5em',
-      },
-      regular: {
-        fontSize: '{fontSize.body.regular}',
-        lineHeight: '1.33em',
-      },
+      large: { fontSize: '{fontSize.heading.large}' },
+      small: { fontSize: '{fontSize.heading.small}' },
     },
   },
-  // Dynamic function templates for card styles.
-  card: (value: string) => {
-    return {
-      padding: value,
-      borderRadius: '8px',
-      boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-    };
-  },
+  card: (padding: string) => ({
+    padding,
+    borderRadius: 8,
+    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+  }),
 });
 ```
 
-Example usage:
-
 ```ts
-styled('div', { base: { textStyle: 'headline.large', card: '20px' } });
+styled('h1', { base: { textStyle: 'heading.large@weight=heavy', card: '20px' } });
 ```
 
-## Keyframes animations
+Rich-node variants, inheritance, and the `compoundVariants`/`anyOfVariants` rules: [salty-css.dev/docs/templates](https://salty-css.dev/docs/templates).
+
+## `defineFont`
 
 ```ts
-// /styles/animations.css.ts
+// styles/fonts.css.ts
+import { defineFont } from '@salty-css/core/factories';
+
+export const Inter = defineFont({
+  name: 'Inter',
+  variable: '--font-inter',
+  display: 'swap',
+  fallback: 'system-ui, sans-serif',
+  variants: [
+    { weight: 400, style: 'normal', src: '/fonts/inter-400.woff2' },
+    { weight: 700, style: 'normal', src: ['/fonts/inter-700.woff2', '/fonts/inter-700.ttf'] },
+  ],
+});
+
+// Or pull a remote stylesheet (e.g. Google Fonts) — emits @import + variable.
+export const InterCdn = defineFont({
+  name: 'Inter',
+  variable: '--font-inter',
+  import: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap',
+});
+```
+
+`Inter.className`, `Inter.variable`, `Inter.fontFamily`, and `Inter.style` are available for explicit usage. See [salty-css.dev/docs/fonts](https://salty-css.dev/docs/fonts).
+
+## `defineImport`
+
+Pull external CSS into Salty's `imports` cascade layer (which sits **before** `reset`, `global`, `templates`, and your component layers — so your styles always win).
+
+```ts
+// styles/imports.css.ts
+import { defineImport } from '@salty-css/core/factories';
+
+export default defineImport(
+  './reset.css', // relative
+  'modern-normalize/modern-normalize.css', // node_modules
+  '~normalize.css/normalize.css', // node_modules (~ form)
+  '/fonts/inter.css', // public/ folder
+  'https://fonts.googleapis.com/css2?family=Inter', // URL
+  { url: './print.css', media: 'print' }, // media-conditional
+  { url: './p3.css', supports: 'color(display-p3 1 1 1)' }, // supports-conditional
+);
+```
+
+Layer order: `@layer imports, reset, global, templates, fonts, l0…l8;`. See [salty-css.dev/docs/imports](https://salty-css.dev/docs/imports).
+
+## `keyframes`
+
+```ts
+// styles/animations.css.ts
 import { keyframes } from '@salty-css/react/keyframes';
 
 export const fadeIn = keyframes({
-  // Name of the animation in final CSS
   animationName: 'fadeIn',
-  // Add `from` or `0%` to the component's css making it the initial state.
-  appendInitialStyles: true,
-  // CSS animation default params used with the value
-  params: {
-    delay: '250ms',
-    fillMode: 'forwards',
-  },
-  // Rest is animation timeline
-  from: {
-    opacity: 0,
-  },
-  to: {
-    opacity: 1,
-  },
+  appendInitialStyles: true, // injects `from`/`0%` as base styles on the component
+  params: { delay: '250ms', fillMode: 'forwards' },
+  from: { opacity: 0 },
+  to: { opacity: 1 },
 });
 ```
 
-Example usage:
-
 ```ts
-import { fadeIn } from 'path-to-animations.css.ts';
-
-export const Wrapper = styled('div', { base: { animation: fadeIn } });
+styled('div', { base: { animation: fadeIn } });
 ```
 
-## Viewport clamp
+See [salty-css.dev/docs/animations](https://salty-css.dev/docs/animations).
 
-Create a CSS clamp function based on screen sizes. Useful when aiming to create font sizes or spacings that scale with the screen.
+## `defineViewportClamp`
 
 ```ts
-// /styles/clamp.css.ts
-import { defineViewportClamp } from '@salty-css/react/helpers';
+// styles/clamp.css.ts
+import { defineViewportClamp } from '@salty-css/core/helpers';
 
 export const fhdClamp = defineViewportClamp({ screenSize: 1920 });
-export const mobileClamp = defineViewportClamp({ screenSize: 640 });
+export const mobileClamp = defineViewportClamp({ screenSize: 640, axis: 'horizontal' });
 ```
-
-Example usage:
 
 ```ts
 styled('span', { base: { fontSize: fhdClamp(96), '@largeMobileDown': { fontSize: mobileClamp(48) } } });
 ```
 
-## Color function
+Options: `screenSize`, `axis` (`'horizontal' | 'vertical'`), `minMultiplier`, `maxMultiplier`, `minMaxUnit`. See [salty-css.dev/docs/viewport-clamp](https://salty-css.dev/docs/viewport-clamp).
 
-Modify any color easily, add opacity, darken...
-
-Example usage:
+## `color`
 
 ```ts
 import { color } from '@salty-css/core/helpers';
+import { styled } from '@salty-css/react/styled';
 
-export const Wrapper = styled('span', { base: { backgroundColor: color('#000').alpha(0.5) } });
+export const Tint = styled('span', {
+  base: { backgroundColor: color('#000').alpha(0.5) },
+});
 ```
 
-## Usage
+Backed by the [Qix-/color](https://github.com/Qix-/color) library — `.alpha()`, `.darken()`, `.lighten()`, `.mix()`, etc. See [salty-css.dev/docs/color-function](https://salty-css.dev/docs/color-function).
 
-### Next.js
+## Modifiers
 
-![salty-next](https://github.com/user-attachments/assets/2cf6a93f-cdd5-4f5f-ab2e-3bc8bcfb83e8)
+Custom value transformers registered on `defineConfig`. Each modifier is a `{ pattern, transform }` pair: when Salty sees a string value matching `pattern`, it replaces it with `transform(match).value` (and optionally emits extra CSS via `transform(match).css`).
 
-Salty CSS provides Next.js App & Pages router support with full React Server Components support.
-
-### Add Salty CSS to Next.js
-
-1. In your existing Next.js repository you can run `npx salty-css init` to automatically configure Salty CSS.
-2. Create your first Salty CSS component with `npx salty-css generate [filePath]` (e.g. src/custom-wrapper)
-3. Import your component for example to `page.tsx` and see it working!
-
-And note: steps 2 & 3 are just to show how get new components up and running, step 1 does all of the important stuff 🤯
-
-#### Manual configuration
-
-1. For Next.js support install `npm i @salty-css/next @salty-css/core @salty-css/react`
-2. Create `salty.config.ts` to your app directory
-3. Add Salty CSS plugin to next.js config
-
-- **Next.js 15:** In `next.config.ts` add import for salty plugin `import { withSaltyCss } from '@salty-css/next';` and then add `withSaltyCss` to wrap your nextConfig export like so `export default withSaltyCss(nextConfig);`
-- **Next.js 14 and older:** In `next.config.js` add import for salty plugin `const { withSaltyCss } = require('@salty-css/next');` and then add `withSaltyCss` to wrap your nextConfig export like so `module.exports = withSaltyCss(nextConfig);`
-
-4. Make sure that `salty.config.ts` and `next.config.ts` are in the same folder!
-5. Build `saltygen` directory by running your app once or with cli `npx salty-css build [directory]`
-6. Import global styles from `saltygen/index.css` to some global css file with `@import 'insert_path_to_index_css';`.
-
-[Check out Next.js demo project](https://github.com/margarita-form/salty-css-website) or [react example code](#code-examples)
-
----
-
-### React + Vite
-
-![salty-vite-react](https://github.com/user-attachments/assets/12ec5b6a-0dcc-48fa-afc1-d337fc8f800c)
-
-### Add Salty CSS to your React + Vite app
-
-1. In your existing Vite repository you can run `npx salty-css init` to automatically configure Salty CSS.
-2. Create your first Salty CSS component with `npx salty-css generate [filePath]` (e.g. src/custom-wrapper)
-3. Import your component for example to `main.tsx` and see it working!
-
-And note: steps 2 & 3 are just to show how get new components up and running, step 1 does all of the important stuff 🤯
-
-### Test it out
-
-Check out React + Vite + Salty CSS demo repository at https://github.com/margarita-form/salty-css-react-vite-demo or view it in CodeSandbox:
-
-[![Edit margarita-form/salty-css-react-vite-demo/main](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/github/margarita-form/salty-css-react-vite-demo/main?import=true&embed=1)
-
-### Manual configuration
-
-1. For Vite support install `npm i @salty-css/vite @salty-css/core`
-2. In `vite.config` add import for salty plugin `import { saltyPlugin } from '@salty-css/vite';` and then add `saltyPlugin(__dirname)` to your vite configuration plugins
-3. Make sure that `salty.config.ts` and `vite.config.ts` are in the same folder!
-4. Build `saltygen` directory by running your app once or with cli `npx salty-css build [directory]`
-5. Import global styles from `saltygen/index.css` to some global css file with `@import 'insert_path_to_index_css';`.
-
-[Check out react example code](#code-examples)
-
----
-
-### Create components
-
-1. Create salty components with styled only inside files that end with `.css.ts`, `.salty.ts` `.styled.ts` or `.styles.ts`
-
-## Code examples
-
-### Basic usage example with Button
-
-**Salty config**
-
-```tsx
+```ts
+// salty.config.ts
 import { defineConfig } from '@salty-css/core/config';
 
 export const config = defineConfig({
-  variables: {
-    colors: {
-      brand: '#111',
-      highlight: 'yellow',
-    },
-  },
-  global: {
-    html: {
-      backgroundColor: '#f8f8f8',
-    },
-  },
-});
-```
-
-**Wrapper** (`components/wrapper/wrapper.css.ts`)
-
-```tsx
-import { styled } from '@salty-css/react/styled';
-
-export const Wrapper = styled('div', {
-  base: {
-    display: 'block',
-    padding: '2vw',
-  },
-});
-```
-
-**Button** (`components/button/button.css.ts`)
-
-```tsx
-import { styled } from '@salty-css/react/styled';
-
-export const Button = styled('button', {
-  base: {
-    display: 'block',
-    padding: `0.6em 1.2em`,
-    border: '1px solid currentColor',
-    background: 'transparent',
-    color: 'currentColor',
-    cursor: 'pointer',
-    transition: '200ms',
-    textDecoration: 'none',
-    '&:hover': {
-      background: 'black',
-      borderColor: 'black',
-      color: 'white',
-    },
-    '&:disabled': {
-      opacity: 0.25,
-      pointerEvents: 'none',
-    },
-  },
-  variants: {
-    variant: {
-      outlined: {
-        // same as default styles
-      },
-      solid: {
-        '&:not(:hover)': {
-          background: 'black',
-          borderColor: 'black',
-          color: 'white',
-        },
-        '&:hover': {
-          background: 'transparent',
-          borderColor: 'currentColor',
-          color: 'currentColor',
-        },
+  modifiers: {
+    spaceShorthand: {
+      pattern: /^space:(\d+)$/,
+      transform: (match) => {
+        const n = Number(match.replace('space:', ''));
+        return { value: `${n * 4}px` };
       },
     },
   },
 });
 ```
 
-**Your React component file**
+```ts
+styled('div', { base: { padding: 'space:3' } }); // → padding: 12px
+```
 
-```tsx
-import { Wrapper } from '../components/wrapper/wrapper.css';
-import { Button } from '../components/button/button.css';
+See [salty-css.dev/docs/modifiers](https://salty-css.dev/docs/modifiers).
 
-export const IndexPage = () => {
-  return (
-    <Wrapper>
-      <Button variant="solid" onClick={() => alert('It is a button.')}>
-        Outlined
-      </Button>
-    </Wrapper>
-  );
+## `withSaltyCss` (Next.js)
+
+```ts
+// next.config.ts
+import { withSaltyCss } from '@salty-css/next';
+
+const nextConfig = {
+  /* your config */
+};
+export default withSaltyCss(nextConfig);
+// Or pin a bundler: withSaltyCss(nextConfig, { bundler: 'webpack' })
+```
+
+Options: `mode` (build mode override), `bundler` (`'auto' | 'webpack' | 'turbopack'`, defaults to auto-detect via `process.env.TURBOPACK`), `dir` (project root for Turbopack — defaults to `nextConfig.turbopack.root` or `process.cwd()`).
+
+Next.js 14 CommonJS:
+
+```js
+const { withSaltyCss } = require('@salty-css/next');
+module.exports = withSaltyCss(nextConfig);
+```
+
+See [salty-css.dev/docs/installation](https://salty-css.dev/docs/installation).
+
+## `saltyPlugin` (Vite)
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { saltyPlugin } from '@salty-css/vite';
+
+export default defineConfig({
+  plugins: [saltyPlugin(__dirname)],
+});
+```
+
+Options: `{ mode }`.
+
+## `saltyPlugin` (Webpack)
+
+```js
+// webpack.config.js
+const { saltyPlugin } = require('@salty-css/webpack');
+
+module.exports = (env, argv) => {
+  const config = {
+    /* … */
+  };
+  saltyPlugin(config, __dirname);
+  return config;
 };
 ```
 
-More examples coming soon
+Signature: `saltyPlugin(config, dir, isServer?, cjs?, { mode? })`.
+
+## `saltyIntegration` (Astro)
+
+```ts
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import saltyIntegration from '@salty-css/astro/integration';
+
+export default defineConfig({
+  integrations: [saltyIntegration()],
+});
+```
+
+Options: `srcDir` (defaults to `'src'`), `rootDir` (defaults to the Astro config root).
+
+---
+
+## Support
+
+Help, questions, or feedback → [Join the Salty CSS Discord](https://discord.gg/R6kr4KxMhP). Bug reports → [GitHub issues](https://github.com/margarita-form/salty-css/issues).

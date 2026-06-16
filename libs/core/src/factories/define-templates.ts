@@ -35,7 +35,7 @@ export class TemplatesFactory {
         new TemplateFactory({
           name,
           template,
-        })
+        }),
       );
     });
   }
@@ -48,7 +48,7 @@ export class TemplatesFactory {
     return Object.fromEntries(
       this.templates.map((template) => {
         return [template.params.name, template];
-      })
+      }),
     );
   }
 

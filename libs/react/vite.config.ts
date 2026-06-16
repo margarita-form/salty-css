@@ -1,90 +1,50 @@
-/// <reference types='vitest' />
+import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
-import dts from 'vite-plugin-dts';
-import * as path from 'path';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import dts from 'unplugin-dts/vite';
+import { rolldown } from '../../shared/vite-rolldown-config';
+import { vitePlugins } from '../../shared/vite-plugin-config';
 
 export default defineConfig({
-  root: __dirname,
-  cacheDir: '../../node_modules/.vite/libs/react',
+  root: resolve(import.meta.dirname, 'src'),
+  publicDir: resolve(import.meta.dirname, 'public'),
   plugins: [
-    nxViteTsPaths(),
-    nxCopyAssetsPlugin(['*.md']),
+    ...vitePlugins,
     dts({
-      entryRoot: 'src',
-      tsconfigPath: path.join(__dirname, 'tsconfig.lib.json'),
-      pathsToAliases: false,
+      root: resolve(import.meta.dirname),
+      entryRoot: resolve(import.meta.dirname, 'src'),
+      tsconfigPath: resolve(import.meta.dirname, 'tsconfig.lib.json'),
+      exclude: ['test/**/*', '**/*.test.ts', '**/*.__template'],
+      compilerOptions: {
+        rootDir: resolve(import.meta.dirname, 'src'),
+        paths: {
+          '@salty-css/core/*': [resolve(import.meta.dirname, '../core/dist/*')],
+        },
+      },
     }),
   ],
-
-  // Configuration for building your library.
-  // See: https://vitejs.dev/guide/build.html#library-mode
   build: {
-    outDir: './dist',
+    outDir: resolve(import.meta.dirname, 'dist'),
     emptyOutDir: true,
-    reportCompressedSize: true,
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
+    target: 'node22',
+    minify: true,
     lib: {
-      // Could also be a dictionary or array of multiple entry points.
       name: 'salty-css-react',
-      entry: {
-        index: 'src/index.ts',
-        styled: 'src/styled.ts',
-        'styled-client': 'src/styled-client.ts',
-        'class-name': 'src/class-name.ts',
-        'class-name-client': 'src/class-name-client.ts',
-        keyframes: 'src/keyframes.ts',
-        media: 'src/media.ts',
-        factories: 'src/factories.ts',
-        config: 'src/config.ts',
-        helpers: 'src/helpers.ts',
-        runtime: 'src/runtime.ts',
-        'transform-salty-file': 'src/transform-salty-file.ts',
-      },
-      fileName: (format, entryName) => {
-        const ext = format === 'es' ? 'js' : format;
-        const parts = entryName.split('/');
-        if (parts.length > 1) {
-          const name = parts.at(-1);
-          const path = parts.slice(0, -1).join('/');
-          return `${path}/${name}.${ext}`;
-        }
-        return `${entryName}.${ext}`;
-      },
-      // Change this to the formats you want to support.
-      // Don't forget to update your package.json as well.
       formats: ['es', 'cjs'],
+      entry: {
+        index: 'index.ts',
+        styled: 'styled.ts',
+        'styled-client': 'styled-client.ts',
+        'class-name': 'class-name.ts',
+        'class-name-client': 'class-name-client.ts',
+        keyframes: 'keyframes.ts',
+        media: 'media.ts',
+        factories: 'factories.ts',
+        config: 'config.ts',
+        helpers: 'helpers.ts',
+        runtime: 'runtime.ts',
+        'transform-salty-file': 'transform-salty-file.ts',
+      },
     },
-    rollupOptions: {
-      // External packages that should not be bundled into your library.
-      external: [
-        //
-        /@salty-css\/.+/,
-        /fs.*/,
-        /path.*/,
-        /esbuild.*/,
-        /winston.*/,
-        /child_process.*/,
-        'react',
-        /react\/jsx.*/,
-        /react-dom\/.*/,
-        /typescript.*/,
-      ],
-    },
-  },
-  test: {
-    watch: false,
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./test/setup.ts'],
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    reporters: ['default'],
-    coverage: {
-      reportsDirectory: '../../coverage/libs/react',
-      provider: 'v8',
-    },
+    rolldownOptions: rolldown,
   },
 });

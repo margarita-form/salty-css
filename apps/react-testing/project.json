@@ -1,6 +1,0 @@
-{
-  "name": "react-testing",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/react-testing/src",
-  "projectType": "application"
-}

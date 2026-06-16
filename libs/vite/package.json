@@ -1,10 +1,5 @@
 {
   "name": "@salty-css/vite",
-  "version": "0.2.1",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "typings": "./dist/index.d.ts",
-  "type": "module",
   "license": "MIT",
   "private": false,
   "publishConfig": {
@@ -14,35 +9,63 @@
   "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/margarita-form/salty-css.git"
+    "url": "git+https://github.com/margarita-form/salty-css.git",
+    "directory": "libs/vite"
   },
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "files": [
-    "**/*",
-    "!**/*.tsbuildinfo"
-  ],
-  "nx": {
-    "sourceRoot": "libs/vite/src",
-    "name": "vite"
-  },
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "require": "./index.cjs"
-    }
+  "version": "0.3.0-refactor-vite-8.5",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.2.1",
-    "vite": "^6.4.1"
+    "@salty-css/core": "0.3.0-refactor-vite-8.5",
+    "vite": ">=6.4.1"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.2.1"
+    "@salty-css/react": "0.3.0-refactor-vite-8.5"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
       "optional": true
     }
-  }
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "author": {
+    "name": "Teemu Lahjalahti",
+    "url": "https://www.linkedin.com/in/teemulahjalahti/"
+  },
+  "keywords": [
+    "salty-css",
+    "css-in-js",
+    "vite",
+    "vite-plugin",
+    "css",
+    "styling"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "sideEffects": false
 }

@@ -113,12 +113,7 @@ const matchesAny = (entry: CssCompoundVariant, effective: Record<string, string 
  *
  * Returns `undefined` if the path doesn't resolve. Emits console.warn for unknown axes / values.
  */
-export const resolveRichTemplate = (
-  root: any,
-  path: string[],
-  callSiteVariants: Record<string, string | boolean>,
-  templateName: string
-): Record<string, any> | undefined => {
+export const resolveRichTemplate = (root: any, path: string[], callSiteVariants: Record<string, string | boolean>, templateName: string): Record<string, any> | undefined => {
   const stack = buildPathStack(root, path);
   if (!stack) return undefined;
 
