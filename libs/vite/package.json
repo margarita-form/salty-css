@@ -14,18 +14,18 @@
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "version": "0.3.0-refactor-vite-8.1",
+  "version": "0.3.0-refactor-vite-8.2",
   "type": "module",
   "scripts": {
     "build": "vite build",
     "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.3.0-refactor-vite-8.1",
+    "@salty-css/core": "0.3.0-refactor-vite-8.2",
     "vite": ">=6.4.1"
   },
   "peerDependencies": {
-    "@salty-css/react": "0.3.0-refactor-vite-8.1"
+    "@salty-css/react": "0.3.0-refactor-vite-8.2"
   },
   "peerDependenciesMeta": {
     "@salty-css/react": {
