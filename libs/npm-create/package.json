@@ -1,6 +1,6 @@
 {
   "name": "create-salty-css",
-  "version": "0.3.0-alpha.0",
+  "version": "0.3.0",
   "type": "module",
   "license": "MIT",
   "private": false,
@@ -26,7 +26,7 @@
     "name": "npm-create"
   },
   "dependencies": {
-    "@salty-css/core": "0.3.0-alpha.0"
+    "@salty-css/core": "0.3.0"
   },
   "bin": {
     "create-salty-css": "./index.js"
