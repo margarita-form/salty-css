@@ -10,9 +10,9 @@ Salty CSS is a build-time CSS-in-JS library. This is an Nx monorepo containing t
 - `libs/react`, `libs/next`, `libs/astro`, `libs/vite`, `libs/webpack` — framework integrations / bundler plugins. Each one is a separate npm package and a separate Nx project.
 - `libs/eslint-config-core`, `libs/eslint-plugin-core` — ESLint config and plugin published with the library.
 - `libs/cli` (`salty-css` on npm) and `libs/npm-create` — tiny wrappers that re-export `@salty-css/core/bin/main` so users can run `npx salty-css …` / `npm create salty-css`.
-- `apps/react-testing`, `apps/astro-testing` — real apps used as fixtures to exercise the compiler end-to-end. `.saltyrc.json` points at these and `react-testing` is the `defaultProject`.
+- `apps/react-vite-demo`, `apps/astro-demo` — real apps used as fixtures to exercise the compiler end-to-end. Each carries its own `.saltyrc.json` (there is no root one) declaring its framework and config location.
 
-Source-of-truth docs live in the root `README.md`; `scripts/update-readmes.mjs` copies it into each published lib at release time. **Edit the root README, not the per-lib copies.**
+Source-of-truth docs live in the root `README.md`; the `copy-readme` Vite plugin (`shared/vite-plugin-copy-readme.ts`, wired into every lib build via `shared/vite-plugin-config.ts`) copies it into each published lib during `build`. **Edit the root README, not the per-lib copies** (they are overwritten on every build).
 
 When thinking of running tests, ALWAYS only run a currently supported "npm run" command from the repo root. Don't run `vitest`, `tsc`, or `nx` directly.
 
@@ -20,17 +20,17 @@ When thinking of running tests, ALWAYS only run a currently supported "npm run" 
 
 All commands run from the repo root. The repo uses Nx; equivalent `nx run …` forms work too.
 
-- `npm run dev:react` — Vite dev server for the React fixture app (most useful for trying things out).
-- `npm run dev:astro` — Astro dev server for the Astro fixture app.
-- `npm run test:core` — vitest for `@salty-css/core` (the bulk of the logic).
-- `npm run test:all` — vitest across core, vite, react, webpack, next.
-- `npm run build:all` — runs `update-readmes` then builds every published package. Required before publishing.
+- `npm run dev:astro-demo` — Astro dev server for the `astro-demo` fixture app. There is no root script for the React demo; run it with `nx run react-vite-demo:dev` (most useful for trying things out by hand).
+- `npm run test:core` — vitest for `@salty-css/core` (the bulk of the logic). Also `test:react`, `test:vite`, `test:webpack`, `test:next`, `test:astro`.
+- `npm run test:all` — vitest across astro, core, next, react, vite, webpack.
+- `npm run test:exports` — `scripts/verify-exports.mjs`; loads every package's published `exports`/`bin` by its bare specifier after a build to catch broken re-exports and missing files. Run after touching any `package.json` `exports` map.
+- `npm run build:all` — builds every published package (the six framework libs plus `eslint-config-core`/`eslint-plugin-core`). Required before publishing and before `test:exports`. README copy happens inside each package's build.
 - `npm run build:core` (and `build:react`, `build:vite`, …) — build a single package.
 - `npm run pretty` — Prettier across the repo.
 - `npx nx run core:lint` — lint a single project (the workspace doesn't define a root `lint` script).
 - `npx nx run core:typecheck` — typecheck a single project.
 
-Run a single test file: `npx nx run core:test -- src/parsers/parser.spec.ts` (or `npx vitest run libs/core/src/parsers/parser.spec.ts` from the repo root). Vitest is wired via the `@nx/vitest` plugin in `nx.json`; tests are colocated next to source as `*.spec.ts(x)`.
+Run a single test file by passing the path through the npm script: `npm run test:core -- src/parsers/parser.spec.ts`. Vitest is wired via the `@nx/vitest` plugin in `nx.json`; tests are colocated next to source as `*.spec.ts(x)`.
 
 Publishing is automated via `npm run publish:all` / `publish:all-dev` (runs tests, builds, bumps versions with `lerna version --force-publish`, then publishes each package's `dist/` folder, prompting once for an npm OTP). Don't invoke these ever.
 
