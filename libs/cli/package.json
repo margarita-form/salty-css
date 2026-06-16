@@ -1,6 +1,6 @@
 {
   "name": "salty-css",
-  "version": "0.3.0-refactor-vite-8.4",
+  "version": "0.3.0-refactor-vite-8.5",
   "type": "module",
   "license": "MIT",
   "private": false,
@@ -26,7 +26,7 @@
     "name": "cli"
   },
   "dependencies": {
-    "@salty-css/core": "0.3.0-refactor-vite-8.4"
+    "@salty-css/core": "0.3.0-refactor-vite-8.5"
   },
   "bin": {
     "salty-css": "./index.js"
