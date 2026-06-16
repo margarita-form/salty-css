@@ -31,6 +31,7 @@
     "test:exports": "node ./scripts/verify-exports.mjs",
     "ensure:astro-demo-build": "nx run astro-demo:build",
     "ensure:react-vite-demo-build": "nx run react-vite-demo:build",
+    "ensure:demos-build": "nx run-many --target=build --projects astro-demo react-vite-demo",
     "build:all": "nx run-many --target=build --projects astro core next react vite webpack eslint-config-core eslint-plugin-core",
     "build:astro": "nx run astro:build",
     "build:core": "nx run core:build",

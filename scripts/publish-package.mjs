@@ -217,6 +217,7 @@ const main = async () => {
   await run('npm', ['run', 'test:all']);
   await run('npm', ['run', 'build:all']);
   await run('npm', ['run', 'test:exports']);
+  await run('npm', ['run', 'ensure:demos-build']);
   await run('npm', ['run', 'lerna', '--', ...mode.lernaArgs(branch)]);
 
   const rl = createInterface({ input, output });
