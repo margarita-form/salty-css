@@ -27,14 +27,24 @@ export const parseStyles = async <T extends object>(
   omitTemplates = false,
 ): Promise<string[]> => {
   if (!styles) throw new Error('No styles provided to parseStyles function!');
-  const cssStyles = new Set<string>();
   const entries = Object.entries(styles);
   const strict: StrictMode = (config as { strict?: StrictMode } | undefined)?.strict;
 
-  const processStyleEntry = async ([key, value]: [key: string, any]) => {
+  // Heuristic warning for overlapping media queries declared in a
+  // cascade-breaking order (e.g. a wider max-width after a narrower one).
+  checkMediaQueryOrder(entries, config, strict);
+
+  // Each entry produces at most one direct declaration (`value`) plus any
+  // number of nested rules (`nested`) — media queries, variants, child
+  // selectors, etc. Nested rules are returned (not pushed to a shared Set
+  // mid-flight) so that, after the concurrent `Promise.all`, they can be
+  // assembled in source-declaration order instead of async-completion order.
+  const processStyleEntry = async ([key, value]: [key: string, any]): Promise<EntryResult> => {
     const _key = key.trim().replace(/^\?+/g, '');
     const propertyName = propertyNameCheck(_key);
+    const nested: string[] = [];
 
+    const declaration = (val?: string): EntryResult => ({ value: val, nested });
     const toString = (val: unknown, eol = ';') => `${propertyName}:${val}${eol}`;
     const context = { scope: currentScope, config }; // todo, add typing and add custom context options
 
@@ -43,7 +53,7 @@ export const parseStyles = async <T extends object>(
         return await processStyleEntry([key, value(context)]);
       } catch (error) {
         reportParserIssue(strict, `Function value for "${_key}" threw: ${(error as Error)?.message ?? error}`);
-        return undefined;
+        return declaration();
       }
     }
     if (value instanceof Promise) return processStyleEntry([key, await value]);
@@ -59,16 +69,16 @@ export const parseStyles = async <T extends object>(
         if (values && typeof template === 'function') {
           const templateStyles = await template(value);
           const [result] = await parseStyles(templateStyles, '');
-          return result;
+          return declaration(result);
         }
       } catch (error) {
         console.error(`Error loading template "${_key}" from path "${config.templatePaths[_key]}"`, error);
-        return undefined;
+        return declaration();
       }
     }
 
     if (config?.templates && config.templates[_key]) {
-      if (omitTemplates) return undefined;
+      if (omitTemplates) return declaration();
       const root = config.templates[_key];
       const callSite = parseTemplateCallSite(value);
       if (callSite) {
@@ -78,22 +88,22 @@ export const parseStyles = async <T extends object>(
           const resolved = resolveRichTemplate(root, path, variants, _key);
           if (resolved) {
             const [result] = await parseStyles(resolved, '');
-            return result;
+            return declaration(result);
           }
           console.warn(`Template "${_key}" with path of "${path.join('.')}" was not found in config!`);
-          return undefined;
+          return declaration();
         }
         // Legacy flat path — unchanged from prior behavior.
         const templateStyles = path.reduce((acc: Record<string, any>, key: string) => acc?.[key], root as Record<string, any>);
         if (templateStyles) {
           const [result] = await parseStyles(templateStyles, '');
-          return result;
+          return declaration(result);
         }
         console.warn(`Template "${_key}" with path of "${path.join('.')}" was not found in config!`);
-        return undefined;
+        return declaration();
       }
       console.warn(`Template "${_key}" received an unsupported call-site value.`);
-      return undefined;
+      return declaration();
     }
 
     // Array values — coerce by comma-joining so e.g. `boxShadow: ['a', 'b']`
@@ -102,16 +112,16 @@ export const parseStyles = async <T extends object>(
     // branches in the object-handler below; skip the coercion for them.
     const isVariantArrayKey = _key === 'compoundVariants' || _key === 'anyOfVariants';
     if (!isVariantArrayKey && Array.isArray(value)) {
-      if (value.length === 0) return undefined;
+      if (value.length === 0) return declaration();
       return processStyleEntry([key, value.join(', ')]);
     }
 
     if (typeof value === 'object') {
-      if (!value) return undefined;
-      if (value.isColor) return toString(value.toString());
-      if (value.isDefineFont) return toString(value.toString());
+      if (!value) return declaration();
+      if (value.isColor) return declaration(toString(value.toString()));
+      if (value.isDefineFont) return declaration(toString(value.toString()));
 
-      if (_key === 'defaultVariants') return undefined;
+      if (_key === 'defaultVariants') return declaration();
 
       if (_key === 'variants') {
         const variantEntries = Object.entries(value);
@@ -122,10 +132,10 @@ export const parseStyles = async <T extends object>(
             if (!styles) continue;
             const scope = `${currentScope}.${prop}-${val}`;
             const results = await parseStyles(styles, scope, config);
-            results.forEach((res) => cssStyles.add(res));
+            results.forEach((res) => nested.push(res));
           }
         }
-        return undefined;
+        return declaration();
       }
 
       if (_key === 'compoundVariants') {
@@ -135,9 +145,9 @@ export const parseStyles = async <T extends object>(
             return `${acc}.${prop}-${val}`;
           }, currentScope);
           const results = await parseStyles(css as T, scope, config);
-          results.forEach((res) => cssStyles.add(res));
+          results.forEach((res) => nested.push(res));
         }
-        return undefined;
+        return declaration();
       }
 
       if (_key === 'anyOfVariants') {
@@ -148,17 +158,17 @@ export const parseStyles = async <T extends object>(
           });
           const scope = `${currentScope}:where(${scopes.join(', ')})`;
           const results = await parseStyles(css as T, scope, config);
-          results.forEach((res) => cssStyles.add(res));
+          results.forEach((res) => nested.push(res));
         }
-        return undefined;
+        return declaration();
       }
 
       // Global escape hatch: emit child selectors unscoped (scope reset to '').
       // Mirrors how keyframes reset scope to avoid inheriting the component class.
       if (_key === 'global') {
         const results = await parseStyles(value, '', config);
-        results.forEach((res) => cssStyles.add(res));
-        return undefined;
+        results.forEach((res) => nested.push(res));
+        return declaration();
       }
 
       if (_key.startsWith('@')) {
@@ -171,13 +181,13 @@ export const parseStyles = async <T extends object>(
         const mediaQuery = config?.mediaQueries?.[_key] || _key;
         const results = await parseAndJoinStyles(value, innerScope, config);
         const query = `${mediaQuery} { ${results} }`;
-        cssStyles.add(query);
-        return undefined;
+        nested.push(query);
+        return declaration();
       }
 
       // Empty nested object — nothing to emit; avoid recursing to keep the
       // output clean and prevent an empty `selector { }` rule.
-      if (Object.keys(value).length === 0) return undefined;
+      if (Object.keys(value).length === 0) return declaration();
 
       if (pseudoTypoRegex.test(_key)) {
         reportParserIssue(strict, `Selector "${_key}" looks like a missing-colon typo (did you mean "&:${_key.slice(1)}"?).`);
@@ -185,44 +195,44 @@ export const parseStyles = async <T extends object>(
 
       const scope = combineSelectors(currentScope, _key);
       const results = await parseStyles(value, scope, config);
-      results.forEach((result) => cssStyles.add(result));
-      return undefined;
+      results.forEach((result) => nested.push(result));
+      return declaration();
     }
 
     // Property-name sanity check (these only ever produce broken CSS, so we
     // skip emission in addition to reporting under strict mode).
     if (_key.startsWith('$')) {
       reportParserIssue(strict, `Property key "${_key}" looks like a SCSS variable — Salty does not support those.`);
-      return undefined;
+      return declaration();
     }
     if (_key.includes(':')) {
       reportParserIssue(strict, `Property key "${_key}" contains a colon — did you accidentally paste a whole declaration as a key?`);
-      return undefined;
+      return declaration();
     }
 
     if (value === undefined || value === null) {
       reportParserIssue(strict, `Property "${_key}" has a ${value === undefined ? 'undefined' : 'null'} value — skipping.`);
-      return undefined;
+      return declaration();
     }
     if (typeof value === 'boolean') {
       reportParserIssue(strict, `Property "${_key}" has a boolean value (${value}) — skipping.`);
-      return undefined;
+      return declaration();
     }
-    if (value === '') return undefined;
+    if (value === '') return declaration();
 
     if (typeof value === 'number') {
       if (!Number.isFinite(value)) {
         reportParserIssue(strict, `Property "${_key}" has a non-finite numeric value (${value}) — skipping.`);
-        return undefined;
+        return declaration();
       }
       const withUnit = addUnit(propertyName, value, config);
-      return toString(withUnit);
+      return declaration(toString(withUnit));
     }
     if (typeof value !== 'string') {
       if (value && typeof value === 'object' && 'toString' in value) value = (value as { toString(): string }).toString();
       else {
         reportParserIssue(strict, `Property "${_key}" has an unsupported value type (${typeof value}) — skipping.`);
-        return undefined;
+        return declaration();
       }
     }
 
@@ -230,37 +240,45 @@ export const parseStyles = async <T extends object>(
       reportParserIssue(strict, `Property "${_key}" value "${value}" contains an unresolved \`\${...}\` — did you forget to interpolate?`);
     }
 
-    return toString(value);
+    return declaration(toString(value));
   };
-
-  const promises = entries.map(processStyleEntry);
 
   const { modifiers } = config || {};
 
   const afterFunctions: StyleValueModifierFunction[] = [parseValueTokens(), parseValueModifiers(modifiers)];
 
-  const resolved = await Promise.all(promises).then((styles) => {
-    return Promise.all(
-      styles.map((str) => {
-        return afterFunctions.reduce(async (acc, fn) => {
-          const current = await acc;
-          if (!current) return current;
+  // Run every entry concurrently; `Promise.all` preserves source order so both
+  // direct declarations and nested rules stay in the order the user declared.
+  const results = await Promise.all(entries.map(processStyleEntry));
 
-          const result = await fn(current);
-          if (!result) return current;
+  const resolved = await Promise.all(
+    results.map(({ value }) => {
+      if (value === undefined) return Promise.resolve(undefined);
+      return afterFunctions.reduce(async (acc, fn) => {
+        const current = await acc;
+        if (!current) return current;
 
-          const { transformed, additionalCss } = result;
-          let before = '';
-          if (additionalCss) {
-            for (const css of additionalCss) {
-              before += await parseAndJoinStyles(css, '');
-            }
+        const result = await fn(current);
+        if (!result) return current;
+
+        const { transformed, additionalCss } = result;
+        let before = '';
+        if (additionalCss) {
+          for (const css of additionalCss) {
+            before += await parseAndJoinStyles(css, '');
           }
-          return `${before}${transformed}`;
-        }, Promise.resolve(str));
-      }),
-    );
-  });
+        }
+        return `${before}${transformed}`;
+      }, Promise.resolve(value));
+    }),
+  );
+
+  // Assemble nested rules in declaration order, de-duplicated (a Set preserves
+  // insertion order in JS, so this keeps both order and the prior dedup).
+  const cssStyles = new Set<string>();
+  for (const { nested } of results) {
+    for (const rule of nested) cssStyles.add(rule);
+  }
 
   const mapped = resolved.filter((value) => value !== undefined).join('\n\t');
   if (!mapped.trim()) return Array.from(cssStyles);
@@ -270,6 +288,11 @@ export const parseStyles = async <T extends object>(
   if (alreadyExists) return Array.from(cssStyles);
   return [css, ...cssStyles];
 };
+
+interface EntryResult {
+  value?: string;
+  nested: string[];
+}
 
 export const parseAndJoinStyles = async <T extends object>(
   styles: T,
@@ -324,4 +347,60 @@ const combineSelectors = (currentScope: string, key: string): string => {
     }
   }
   return combos.join(', ');
+};
+
+// Matches a single width bound, e.g. the `(max-width: 960px)` inside a query.
+const widthBoundRegex = /\((max|min)-width:\s*([\d.]+)(px|r?em)\)/g;
+
+/**
+ * Heuristic: warn when overlapping single-bound media queries are declared in
+ * a cascade-breaking order. `max-width` queries should be declared widest →
+ * narrowest (so the narrower one wins at small viewports) and `min-width`
+ * queries narrowest → widest. A later query that is wider (max-width) / narrower
+ * (min-width) than an earlier same-unit one silently overrides it.
+ *
+ * Combined/range queries (more than one width bound) and cross-unit pairs are
+ * intentionally skipped — their ordering can legitimately be non-monotonic.
+ */
+const checkMediaQueryOrder = (entries: [string, unknown][], config: Partial<SaltyConfig & CachedConfig> | CachedConfig | undefined, strict: StrictMode): void => {
+  // `reportParserIssue` is a no-op unless strict reporting is enabled, so skip
+  // the scan entirely in the common (non-strict) case.
+  if (!strict) return;
+
+  // Per-unit running bounds: the narrowest max-width and widest min-width seen
+  // so far, plus the key that established each (for the warning message).
+  const minMaxWidth: Record<string, { value: number; key: string }> = {};
+  const maxMinWidth: Record<string, { value: number; key: string }> = {};
+
+  for (const [key, value] of entries) {
+    const _key = key.trim().replace(/^\?+/g, '');
+    if (!_key.startsWith('@') || typeof value !== 'object' || !value) continue;
+
+    const query = config?.mediaQueries?.[_key] || _key;
+    const bounds = [...query.matchAll(widthBoundRegex)];
+    if (bounds.length !== 1) continue; // skip combined/range or non-width queries
+
+    const [, bound, rawValue, unit] = bounds[0];
+    const numeric = parseFloat(rawValue);
+
+    if (bound === 'max') {
+      const prev = minMaxWidth[unit];
+      if (prev && numeric > prev.value) {
+        reportParserIssue(
+          'warn', // this is a heuristic, not an outright error, so we don't want to throw even in strict mode
+          `Media query "${_key}" (max-width: ${numeric}${unit}) is declared after "${prev.key}" (max-width: ${prev.value}${unit}); wider max-width queries override narrower ones at overlapping widths — order them widest → narrowest.`,
+        );
+      }
+      if (!prev || numeric < prev.value) minMaxWidth[unit] = { value: numeric, key: _key };
+    } else {
+      const prev = maxMinWidth[unit];
+      if (prev && numeric < prev.value) {
+        reportParserIssue(
+          'warn', // this is a heuristic, not an outright error, so we don't want to throw even in strict mode
+          `Media query "${_key}" (min-width: ${numeric}${unit}) is declared after "${prev.key}" (min-width: ${prev.value}${unit}); narrower min-width queries are overridden by wider ones at overlapping widths — order them narrowest → widest.`,
+        );
+      }
+      if (!prev || numeric > prev.value) maxMinWidth[unit] = { value: numeric, key: _key };
+    }
+  }
 };
