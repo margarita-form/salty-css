@@ -102,12 +102,16 @@ const main = async () => {
 
   await run('npm', ['run', 'test:all']);
   await run('npm', ['run', 'build:all']);
+  await run('npm', ['run', 'test:exports']);
   await run('npm', ['run', 'lerna', '--', ...mode.lernaArgs(branch)]);
 
   await run('node', ['./scripts/sync-peer-deps.mjs']);
   const syncDiff = spawnSync('git', ['diff', '--name-only', 'HEAD', '--', 'libs'], { encoding: 'utf8' });
   if (syncDiff.status !== 0) fail(`git diff failed: ${syncDiff.stderr.trim()}`);
-  const syncChangedFiles = syncDiff.stdout.split('\n').map((s) => s.trim()).filter(Boolean);
+  const syncChangedFiles = syncDiff.stdout
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean);
   if (syncChangedFiles.length) {
     const tagName = `v${readLernaVersion()}`;
     console.log(`sync-peer-deps changed ${syncChangedFiles.length} file(s); creating chore commit and moving ${tagName}.`);
