@@ -9,7 +9,8 @@
   "homepage": "https://salty-css.dev/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/margarita-form/salty-css.git"
+    "url": "git+https://github.com/margarita-form/salty-css.git",
+    "directory": "libs/react"
   },
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
@@ -91,5 +92,22 @@
       "import": "./dist/transform-salty-file.js",
       "require": "./dist/transform-salty-file.cjs"
     }
-  }
+  },
+  "author": {
+    "name": "Teemu Lahjalahti",
+    "url": "https://www.linkedin.com/in/teemulahjalahti/"
+  },
+  "keywords": [
+    "salty-css",
+    "css-in-js",
+    "react",
+    "styled",
+    "styled-components",
+    "css",
+    "styling"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "sideEffects": false
 }

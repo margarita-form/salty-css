@@ -83,5 +83,22 @@
   "workspaces": [
     "apps/*",
     "libs/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "npm@11.12.1",
+  "author": {
+    "name": "Teemu Lahjalahti",
+    "url": "https://www.linkedin.com/in/teemulahjalahti/"
+  },
+  "keywords": [
+    "salty-css",
+    "css-in-js",
+    "css",
+    "styling",
+    "build-time",
+    "compiler",
+    "design-tokens"
   ]
 }
