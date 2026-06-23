@@ -15,7 +15,7 @@
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "version": "0.4.0-alpha.2",
+  "version": "0.4.0-alpha.3",
   "type": "module",
   "scripts": {
     "build": "vite build",

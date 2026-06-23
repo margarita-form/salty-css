@@ -1,6 +1,6 @@
 {
   "name": "salty-css",
-  "version": "0.4.0-alpha.2",
+  "version": "0.4.0-alpha.3",
   "type": "module",
   "license": "MIT",
   "private": false,
@@ -26,7 +26,7 @@
     "name": "cli"
   },
   "dependencies": {
-    "@salty-css/core": "0.4.0-alpha.2"
+    "@salty-css/core": "0.4.0-alpha.3"
   },
   "bin": {
     "salty-css": "./index.js"
