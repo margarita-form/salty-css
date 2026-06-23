@@ -5,13 +5,11 @@ import { SaltyCompiler } from '@salty-css/core/compiler/salty-compiler';
 import { toHash } from '@salty-css/core/util';
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { detectFramework, getFrameworkTransform, Importer } from './framework-registry';
+import { detectFramework, getFrameworkTransform } from './framework-registry';
 import { renderAstroComponent } from './astro-template';
 
 export interface AstroPluginContext {
   compiler: SaltyCompiler;
-  /** Updated just-in-time by the plugin's importFile, read here for dev transforms. */
-  importer: Importer;
 }
 
 /**
@@ -36,7 +34,7 @@ export const loadSaltyFile = async (ctx: AstroPluginContext, filePath: string): 
 
       const framework = detectFramework(originalContents);
       if (framework) {
-        const transform = await getFrameworkTransform(framework, ctx.importer);
+        const transform = await getFrameworkTransform(framework);
         return await transform(saltyCompiler, filePath);
       }
 

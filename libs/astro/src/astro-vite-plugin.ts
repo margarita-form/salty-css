@@ -30,10 +30,9 @@ export const saltyPlugin = (dir: string, options: SaltyAstroPluginOptions = {}):
 
   const saltyCompiler = new SaltyCompiler(dir, { mode: options.mode });
 
-  // Shared, mutable state crossing the hook boundary. `importer` lets the
-  // `load` hook (loadSaltyFile) evaluate files through the exact same pipeline
-  // the compiler uses internally, instead of a separate ssrLoadModule path.
-  const ctx: AstroPluginContext = { compiler: saltyCompiler, importer: undefined };
+  // Shared, mutable state crossing the hook boundary into the `load` hook
+  // (loadSaltyFile).
+  const ctx: AstroPluginContext = { compiler: saltyCompiler };
 
   // Lazily create (and re-create) the vite-node pipeline. Re-creation matters
   // because Astro's build can run multiple passes and may fire closeBundle
@@ -125,10 +124,6 @@ export const saltyPlugin = (dir: string, options: SaltyAstroPluginOptions = {}):
     invalidateModule(r, path);
     return r.executeFile(path);
   };
-
-  // Route the `load` hook through the same evaluator so both entry points are
-  // consistent (previously this pointed at devServer.ssrLoadModule).
-  ctx.importer = saltyCompiler.importFile;
 
   const closeAuxServer = async () => {
     const s = auxServer;
