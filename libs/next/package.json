@@ -15,15 +15,15 @@
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "version": "0.4.0-alpha.0",
+  "version": "0.4.0-fix-variant-class-names-dashcased.0",
   "type": "module",
   "scripts": {
     "build": "vite build",
     "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.4.0-alpha.0",
-    "@salty-css/webpack": "0.4.0-alpha.0"
+    "@salty-css/core": "0.4.0-fix-variant-class-names-dashcased.0",
+    "@salty-css/webpack": "0.4.0-fix-variant-class-names-dashcased.0"
   },
   "devDependencies": {
     "jsdom": "^29.1.1"
