@@ -621,6 +621,222 @@ describe('Parser testing', () => {
   });
 });
 
+describe('Media query ordering', () => {
+  const strip = (s: string) => s.replace(/\s+/g, ' ').trim();
+
+  // Index of the first rule containing each substring, in `rules` order. Throws
+  // a helpful error if any substring is missing so failures are debuggable.
+  const mediaIndexes = (rules: string[], ...needles: string[]) =>
+    needles.map((needle) => {
+      const index = rules.findIndex((rule) => rule.includes(needle));
+      if (index === -1) throw new Error(`Expected a rule containing "${needle}" in:\n${rules.map((r) => `  ${strip(r)}`).join('\n')}`);
+      return index;
+    });
+
+  const mediaQueries = {
+    '@largeMobileDown': '@media (max-width: 960px)',
+    '@mediumMobileDown': '@media (max-width: 640px)',
+    '@smallMobileDown': '@media (max-width: 320px)',
+  };
+
+  // ──────────────────────────────────────────────────────────────────────
+  // A. Declaration order is preserved (the reported regression)
+  // ──────────────────────────────────────────────────────────────────────
+
+  /**
+   * The exact shape from the bug report: three overlapping max-width queries
+   * declared large → medium → small must keep that order, otherwise the wider
+   * query overrides the narrower one at small viewports.
+   */
+  it('preserves the declared order of config-aliased media queries', async () => {
+    const rules = await parseStyles(
+      {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        '@largeMobileDown': { gridTemplateColumns: 'repeat(3, 1fr)' },
+        '@mediumMobileDown': { gridTemplateColumns: 'repeat(2, 1fr)' },
+        '@smallMobileDown': { gridTemplateColumns: 'repeat(1, 1fr)' },
+      },
+      '.X',
+      { mediaQueries },
+    );
+    const [large, medium, small] = mediaIndexes(rules, 'max-width: 960px', 'max-width: 640px', 'max-width: 320px');
+    expect(large).toBeLessThan(medium);
+    expect(medium).toBeLessThan(small);
+  });
+
+  it('preserves the declared order of raw @media keys', async () => {
+    const rules = await parseStyles(
+      {
+        '@media (max-width: 960px)': { color: 'a' },
+        '@media (max-width: 640px)': { color: 'b' },
+        '@media (max-width: 320px)': { color: 'c' },
+      },
+      '.X',
+    );
+    const [large, medium, small] = mediaIndexes(rules, 'max-width: 960px', 'max-width: 640px', 'max-width: 320px');
+    expect(large).toBeLessThan(medium);
+    expect(medium).toBeLessThan(small);
+  });
+
+  /**
+   * The original bug was a microtask race, so order could come out right by
+   * luck on any single run. Repeat to be confident the fix is deterministic.
+   */
+  it('keeps the order stable across many runs', async () => {
+    const styles = {
+      '@largeMobileDown': { gridTemplateColumns: 'repeat(3, 1fr)' },
+      '@mediumMobileDown': { gridTemplateColumns: 'repeat(2, 1fr)' },
+      '@smallMobileDown': { gridTemplateColumns: 'repeat(1, 1fr)' },
+    };
+    for (let i = 0; i < 25; i++) {
+      const rules = await parseStyles(styles, '.X', { mediaQueries });
+      const [large, medium, small] = mediaIndexes(rules, 'max-width: 960px', 'max-width: 640px', 'max-width: 320px');
+      expect(large).toBeLessThan(medium);
+      expect(medium).toBeLessThan(small);
+    }
+  });
+
+  it('preserves order of mixed nested siblings (declaration, selector, media)', async () => {
+    const rules = await parseStyles(
+      {
+        color: 'red',
+        '& span': { color: 'blue' },
+        '@media (max-width: 960px)': { color: 'green' },
+        '@media (max-width: 320px)': { color: 'yellow' },
+      },
+      '.X',
+    );
+    // Direct declaration still lands in the main scoped block.
+    const main = rules.find((rule) => strip(rule).startsWith('.X {'));
+    expect(main && main.replace(/\s/g, '')).toContain('color:red');
+    // Nested rules keep declaration order relative to each other.
+    const [span, large, small] = mediaIndexes(rules, '.X span', 'max-width: 960px', 'max-width: 320px');
+    expect(span).toBeLessThan(large);
+    expect(large).toBeLessThan(small);
+  });
+
+  // ──────────────────────────────────────────────────────────────────────
+  // B. Cascade-order warning
+  // ──────────────────────────────────────────────────────────────────────
+
+  it('warns when a wider max-width query is declared after a narrower one', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await parseStyles(
+      {
+        '@mediumMobileDown': { color: 'a' },
+        '@largeMobileDown': { color: 'b' },
+      },
+      '.X',
+      { mediaQueries, strict: 'warn' },
+    );
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain('@largeMobileDown');
+    expect(warn.mock.calls[0][0]).toContain('@mediumMobileDown');
+    warn.mockRestore();
+  });
+
+  it('throws under strict:true for cascade-breaking max-width order', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await parseStyles(
+      {
+        '@media (max-width: 640px)': { color: 'a' },
+        '@media (max-width: 960px)': { color: 'b' },
+      },
+      '.X',
+      { strict: true }, // strict:true will be omitted to "warn" as the ordering logic should not throw, just display a warning
+    );
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+
+  it('warns when a narrower min-width query is declared after a wider one', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await parseStyles(
+      {
+        '@media (min-width: 960px)': { color: 'a' },
+        '@media (min-width: 600px)': { color: 'b' },
+      },
+      '.X',
+      { strict: 'warn' },
+    );
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+
+  it('does not warn when max-width queries are ordered widest → narrowest', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await parseStyles(
+      {
+        '@media (max-width: 960px)': { color: 'a' },
+        '@media (max-width: 640px)': { color: 'b' },
+        '@media (max-width: 320px)': { color: 'c' },
+      },
+      '.X',
+      { strict: 'warn' },
+    );
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('does not warn when min-width queries are ordered narrowest → widest', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await parseStyles(
+      {
+        '@media (min-width: 600px)': { color: 'a' },
+        '@media (min-width: 960px)': { color: 'b' },
+      },
+      '.X',
+      { strict: 'warn' },
+    );
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('stays silent for reversed order when strict reporting is off', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await parseStyles(
+      {
+        '@media (max-width: 640px)': { color: 'a' },
+        '@media (max-width: 960px)': { color: 'b' },
+      },
+      '.X',
+    );
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('does not warn for combined range queries or cross-unit pairs', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await parseStyles(
+      {
+        '@media (min-width: 600px) and (max-width: 900px)': { color: 'a' },
+        '@media (min-width: 200px) and (max-width: 500px)': { color: 'b' },
+        '@media (max-width: 40em)': { color: 'c' },
+        '@media (max-width: 960px)': { color: 'd' },
+      },
+      '.X',
+      { strict: 'warn' },
+    );
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('does not warn for duplicate (equal) breakpoints', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await parseStyles(
+      {
+        '@media (max-width: 960px)': { color: 'a' },
+        '@media (max-width: 960px) and (orientation: landscape)': { color: 'b' },
+      },
+      '.X',
+      { strict: 'warn' },
+    );
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});
+
 describe('Template variants', () => {
   const compact = (s: string) => s.replace(/\s/g, '');
 
