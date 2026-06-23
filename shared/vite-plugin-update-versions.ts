@@ -36,3 +36,31 @@ export const updateVersionsPlugin: Plugin = {
     }
   },
 };
+export const includeVersionAsDefinePlugin: Plugin = {
+  name: 'include-version-as-define',
+  apply: 'build',
+  config: async () => {
+    const path = await import('node:path');
+    const fs = await import('node:fs/promises');
+
+    const libDir = process.cwd();
+
+    const packageJsonPath = path.resolve(libDir, 'package.json');
+
+    try {
+      const packageJsonRaw = await fs.readFile(packageJsonPath, 'utf-8');
+      const packageJson = JSON.parse(packageJsonRaw);
+
+      const { version } = packageJson;
+
+      return {
+        define: {
+          __VERSION__: JSON.stringify(version),
+        },
+      };
+    } catch (error) {
+      console.error('Error reading version from package.json:', error);
+      throw error;
+    }
+  },
+};

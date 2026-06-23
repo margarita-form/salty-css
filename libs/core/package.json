@@ -15,7 +15,7 @@
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "version": "0.3.1-fix-astro-react-auto-transform-fix.0",
+  "version": "0.4.0-alpha.1",
   "type": "module",
   "scripts": {
     "build": "vite build",
