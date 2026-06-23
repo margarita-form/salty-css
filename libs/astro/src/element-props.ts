@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { dashCase } from '@salty-css/core/util';
+import { dashCase, sanitizeClassName } from '@salty-css/core/util';
 import { parseVariableTokens } from '@salty-css/core/parsers';
 import { StyledGeneratorClientProps } from '@salty-css/core/generators';
 
@@ -86,10 +86,12 @@ export const resolveAstroProps = (
     for (const key of generatorProps.variantKeys) {
       const [name, defaultValue] = key.split('=');
       if (props[name] !== undefined) {
-        classes.add(`${name}-${props[name]}`);
+        const variantClass = sanitizeClassName(`${name}-${props[name]}`);
+        classes.add(variantClass);
         vks.add(name);
       } else if (defaultValue !== undefined) {
-        classes.add(`${name}-${defaultValue}`);
+        const variantClass = sanitizeClassName(`${name}-${defaultValue}`);
+        classes.add(variantClass);
       }
     }
   }

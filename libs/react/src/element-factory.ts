@@ -1,7 +1,7 @@
 import { createElement, ForwardedRef, forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { StyledComponentProps, Tag } from '@salty-css/core/types';
-import { dashCase } from '@salty-css/core/util';
+import { dashCase, sanitizeClassName } from '@salty-css/core/util';
 import { parseVariableTokens } from '@salty-css/core/parsers';
 import { StyledGeneratorClientProps } from '@salty-css/core/generators';
 import { CommonRecord } from '@salty-css/core/types/util-types';
@@ -50,10 +50,12 @@ export const elementFactory = (tagName: Tag<any>, _className = '', _generatorPro
       _generatorProps.variantKeys.forEach((key) => {
         const [name, defaultValue] = key.split('=');
         if (props[name] !== undefined) {
-          uniqueClasses.add(`${name}-${props[name]}`);
+          const variantClass = sanitizeClassName(`${name}-${props[name]}`);
+          uniqueClasses.add(variantClass);
           if (_vks) _vks.add(name);
         } else if (defaultValue !== undefined) {
-          uniqueClasses.add(`${name}-${defaultValue}`);
+          const variantClass = sanitizeClassName(`${name}-${defaultValue}`);
+          uniqueClasses.add(variantClass);
         }
       });
     }

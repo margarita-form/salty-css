@@ -9,6 +9,7 @@ import { StyleValueModifierFunction } from './parser-types';
 import { reportParserIssue, StrictMode } from './strict';
 import { bareAtRuleRegex, keyframesAtRuleRegex, pseudoTypoRegex, templateLiteralLeftoverRegex } from './parser-regexes';
 import { parseTemplateCallSite, pathHasRichNode, resolveRichTemplate } from './resolve-template-variants';
+import { sanitizeClassName } from '../util/sanitize-class-name';
 
 /**
  * Transform styles object to css string with or without scope
@@ -130,7 +131,8 @@ export const parseStyles = async <T extends object>(
           const entries = Object.entries(conditions);
           for (const [val, styles] of entries) {
             if (!styles) continue;
-            const scope = `${currentScope}.${prop}-${val}`;
+            const variantClass = `${sanitizeClassName(prop)}-${sanitizeClassName(val)}`;
+            const scope = `${currentScope}.${variantClass}`;
             const results = await parseStyles(styles, scope, config);
             results.forEach((res) => nested.push(res));
           }
@@ -141,8 +143,9 @@ export const parseStyles = async <T extends object>(
       if (_key === 'compoundVariants') {
         for (const variant of value as MultiVariant[]) {
           const { css, ...rest } = variant;
-          const scope = Object.entries(rest).reduce((acc, [prop, val]) => {
-            return `${acc}.${prop}-${val}`;
+          const scope = Object.entries(rest).reduce((acc, [prop, val = '']) => {
+            const variantClass = `${sanitizeClassName(prop)}-${sanitizeClassName(val)}`;
+            return `${acc}.${variantClass}`;
           }, currentScope);
           const results = await parseStyles(css as T, scope, config);
           results.forEach((res) => nested.push(res));
@@ -153,8 +156,9 @@ export const parseStyles = async <T extends object>(
       if (_key === 'anyOfVariants') {
         for (const variant of value as MultiVariant[]) {
           const { css, ...rest } = variant;
-          const scopes = Object.entries(rest).map(([prop, val]) => {
-            return `.${prop}-${val}`;
+          const scopes = Object.entries(rest).map(([prop, val = '']) => {
+            const variantClass = `${sanitizeClassName(prop)}-${sanitizeClassName(val)}`;
+            return `.${variantClass}`;
           });
           const scope = `${currentScope}:where(${scopes.join(', ')})`;
           const results = await parseStyles(css as T, scope, config);
