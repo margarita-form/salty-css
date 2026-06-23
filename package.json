@@ -21,6 +21,7 @@
     "lerna": "lerna",
     "version": "npm run build:all",
     "dev:astro-demo": "nx run astro-demo:dev",
+    "dev:react-vite-demo": "nx run react-vite-demo:dev",
     "test:all": "nx run-many --target=test --projects astro core next react vite webpack",
     "test:astro": "nx run astro:test",
     "test:core": "nx run core:test",

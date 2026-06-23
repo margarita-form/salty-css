@@ -985,3 +985,100 @@ describe('Template variants', () => {
     }
   });
 });
+
+/**
+ * Variant values that contain non-identifier characters currently leak straight
+ * into the generated CSS selector. The headline case: a variant axis `maxHeight`
+ * with the key `"12.5"` produces the selector `.X.maxHeight-12.5`, where the `.`
+ * is read as a class-selector boundary — i.e. an invalid token that can never
+ * match the runtime class string.
+ *
+ * The selectors are built with raw interpolation in
+ * `libs/core/src/parsers/parse-styles.ts` (the `variants`, `compoundVariants`
+ * and `anyOfVariants` branches). The repo already ships `dashCase()`
+ * (`libs/core/src/util/dash-case.ts`) which turns dots/whitespace and camelCase
+ * into kebab-case — that is the intended transform for the common cases below.
+ *
+ * These tests assert the CORRECT (valid) output, so they are RED until the fix
+ * lands. Group A pins exact selectors for the cases `dashCase` already handles;
+ * Group B is a character matrix that asserts validity only, and is expected to
+ * surface characters (`%`, `/`, `:`, `@`, `#`, parens, …) that `dashCase` does
+ * NOT currently neutralize — informing how strong the eventual fix must be.
+ */
+describe('Variant class name sanitization', () => {
+  const strip = (s: string) => s.replace(/\s+/g, ' ').trim();
+  // Selector portion of a rule (everything before the first `{`).
+  const selectorHead = (rule: string) => strip(rule).split('{')[0].trim();
+  const selectorHeads = (rules: string[]) => rules.map(selectorHead);
+
+  // ──────────────────────────────────────────────────────────────────────
+  // Group A — exact expected selectors (cases dashCase already covers)
+  // ──────────────────────────────────────────────────────────────────────
+
+  it('replaces a dot in a variant value (the reported maxHeight "12.5" bug)', async () => {
+    const rules = await parseStyles({ variants: { maxHeight: { '12.5': { height: '12.5rem' } } } }, '.X');
+    const heads = selectorHeads(rules);
+    expect(heads).toContain('.X.max-height-12-5');
+    expect(heads.some((h) => h.includes('maxHeight-12.5'))).toBe(false);
+    expect(heads.some((h) => h.includes('max-height-12.5'))).toBe(false);
+  });
+
+  it('replaces a space in a variant value', async () => {
+    const rules = await parseStyles({ variants: { size: { 'extra large': { padding: '4px' } } } }, '.X');
+    expect(selectorHeads(rules)).toContain('.X.size-extra-large');
+  });
+
+  it('kebab-cases a camelCase variant value', async () => {
+    const rules = await parseStyles({ variants: { tone: { darkMode: { color: 'red' } } } }, '.X');
+    expect(selectorHeads(rules)).toContain('.X.tone-dark-mode');
+  });
+
+  it('replaces every dot in a multi-dot variant value', async () => {
+    const rules = await parseStyles({ variants: { scale: { '1.2.3': { color: 'red' } } } }, '.X');
+    const heads = selectorHeads(rules);
+    expect(heads).toContain('.X.scale-1-2-3');
+    expect(heads.some((h) => h.includes('1.2.3'))).toBe(false);
+  });
+
+  it('sanitizes each axis value in a compoundVariants selector', async () => {
+    const rules = await parseStyles({ compoundVariants: [{ size: '12.5', tone: '0.5', css: { color: 'red' } }] as never }, '.X');
+    expect(selectorHeads(rules)).toContain('.X.size-12-5.tone-0-5');
+  });
+
+  it('sanitizes each axis value in an anyOfVariants selector', async () => {
+    const rules = await parseStyles({ anyOfVariants: [{ size: '12.5', tone: '0.5', css: { color: 'red' } }] as never }, '.X');
+    expect(selectorHeads(rules)).toContain('.X:where(.size-12-5, .tone-0-5)');
+  });
+
+  // Decision-pending: whether the fix should also dash-case the *axis name*
+  // (camelCase axis names are themselves valid CSS tokens, so they are not the
+  // reported bug). Left skipped until that call is made — see the
+  // `fix/variant-class-names-dashcased` branch name.
+  it.skip('kebab-cases the variant axis name (axis-name dashcasing — decision pending)', async () => {
+    const rules = await parseStyles({ variants: { maxHeight: { large: { height: '10rem' } } } }, '.X');
+    expect(selectorHeads(rules)).toContain('.X.max-height-large');
+  });
+
+  // ──────────────────────────────────────────────────────────────────────
+  // Group B — character matrix (validity only; exposes the wider problem)
+  // ──────────────────────────────────────────────────────────────────────
+
+  // A valid CSS class token: starts with a letter/underscore (or a single
+  // leading dash), then letters/digits/dashes/underscores only.
+  const validClassToken = /^-?[_a-zA-Z][-_a-zA-Z0-9]*$/;
+
+  // Values whose raw form would break the selector if interpolated as-is.
+  // Some (pure alphanumerics) are already valid and act as the green baseline;
+  // the rest are expected to stay RED until sanitization is strengthened.
+  const values = ['12.5', '1.2.3', 'extra large', 'darkMode', '50%', '1/2', 'a:b', 'foo@bar', 'a#b', 'a(b)', 'a,b', 'a+b', 'a>b', '100px', '-5', '2em', '#fff'];
+
+  describe.each(values)('variant value %j', (value) => {
+    it('emits a valid CSS class token', async () => {
+      const rules = await parseStyles({ variants: { axis: { [value]: { color: 'red' } } } }, '.X');
+      const head = selectorHeads(rules).find((h) => h.startsWith('.X.axis-'));
+      expect(head).toBeDefined();
+      const token = (head as string).replace(/^\.X\./, '');
+      expect(token).toMatch(validClassToken);
+    });
+  });
+});
