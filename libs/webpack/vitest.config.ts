@@ -7,6 +7,9 @@ export default defineConfig({
     globals: true,
     environment: 'node',
   },
+  define: {
+    __VERSION__: JSON.stringify('1.2.3'),
+  },
   resolve: {
     alias: {
       '@salty-css/core': resolve(import.meta.dirname, '../core/src'),
