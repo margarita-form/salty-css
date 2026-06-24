@@ -1,3 +1,5 @@
+import { sanitizeClassName } from '@salty-css/core/util';
+
 interface ClassNameMethods {
   isClassName: boolean;
   variant: (name: string, value: string) => string & ClassNameFunction;
@@ -13,7 +15,7 @@ export const className = (classNameStr: string) => {
       return true;
     },
     variant: (name: string, value: string) => {
-      const variantClass = `${name}-${value}`;
+      const variantClass = sanitizeClassName(`${name}-${value}`);
       const combinedClass = `${classNameStr} ${variantClass}`;
       return className(combinedClass);
     },
