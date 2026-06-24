@@ -1,5 +1,6 @@
 import { StyledParams } from '@salty-css/core/types';
 import { ClassNameGenerator } from '@salty-css/core/generators';
+import { sanitizeClassName } from '@salty-css/core/util';
 
 interface ClassNameMethods<STYLE_PARAMS extends StyledParams> {
   generator: ClassNameGenerator<STYLE_PARAMS>;
@@ -19,13 +20,13 @@ export const className = <const STYLE_PARAMS extends StyledParams>(params: STYLE
         return true;
       },
       variant: (name: string, value: string) => {
-        const variantClass = `${name}-${value}`;
+        const variantClass = sanitizeClassName(`${name}-${value}`);
         const combinedClass = `${str} ${variantClass}`;
         return createClass(combinedClass);
       },
       variants: (variants: Record<string, string>) => {
         const variantClasses = Object.entries(variants).reduce((acc, [name, value]) => {
-          acc += ` ${name}-${value}`;
+          acc += ` ${sanitizeClassName(`${name}-${value}`)}`;
           return acc;
         }, '');
         const combinedClass = `${str}${variantClasses}`.trim();
