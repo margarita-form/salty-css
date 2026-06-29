@@ -588,7 +588,7 @@ export class SaltyCompiler {
     const templateStylesPath = join(destDir, 'css/_templates.css');
     const templates = mergeObjects<CssTemplates>(config.templates, generationResults.templates);
 
-    const templateStylesString = await parseTemplates(templates);
+    const templateStylesString = await parseTemplates(templates, [], config);
     const templateTokens = getTemplateTypes(templates);
     const templateVariantMaps = getTemplateVariantMaps(templates as Record<string, any>);
 
