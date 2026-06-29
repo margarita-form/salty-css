@@ -44,6 +44,13 @@ export const loadSaltyFile = async (ctx: AstroPluginContext, filePath: string): 
 
       const compiled = await saltyCompiler.compileSaltyFile(filePath, destDir);
 
+      // The resolved config (templates, variables, modifiers, …) is required by
+      // the generator: `getTemplateClasses()` reads `config.templates` to compose
+      // template utility classes (e.g. `textStyle`) onto the component, and bails
+      // out returning `[]` when it is missing. Passing `{}` here silently dropped
+      // those classes from every Astro component. Mirrors SaltyCompiler.generateFile.
+      const config = await saltyCompiler.getConfig();
+
       const components = Object.entries(compiled.contents);
       for (const [name, value] of components) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,7 +61,7 @@ export const loadSaltyFile = async (ctx: AstroPluginContext, filePath: string): 
           const generator = resolved.generator._withBuildContext({
             callerName: name,
             isProduction: saltyCompiler.isProduction,
-            config: {},
+            config,
           });
 
           consts.push(`const ${name} = classNameInstance(${JSON.stringify(generator.params)});`);
@@ -73,7 +80,7 @@ export const loadSaltyFile = async (ctx: AstroPluginContext, filePath: string): 
         const generator = resolved.generator._withBuildContext({
           callerName: name,
           isProduction: saltyCompiler.isProduction,
-          config: {},
+          config,
         });
 
         const fileConfig = {
