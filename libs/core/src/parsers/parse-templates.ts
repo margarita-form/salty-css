@@ -6,21 +6,45 @@ import { isRichTemplateNode } from './resolve-template-variants';
 
 const RICH_META_KEYS = new Set(['base', 'variants', 'defaultVariants', 'compoundVariants', 'anyOfVariants']);
 
+/**
+ * A CSS construct key — an at-rule (`@media`, `@container`, …), a nested selector
+ * (`&:hover`, `& .child`) or a pseudo (`:hover`). These describe styles for the
+ * *current* node and must be handed to the style parser, never dash-cased into a
+ * class name or recursed into as if they were a nested template path. Without this
+ * guard `{ large: { '@largeMobileDown': { … } } }` compiled to a flat class
+ * `.…-large-@large-mobile-down` with no `@media` wrapper (and was never applied).
+ */
+const isStyleKey = (key: string): boolean => /^[@&:]/.test(key.trim());
+
 const isChildEntry = (key: string, value: unknown): boolean => {
   if (RICH_META_KEYS.has(key)) return false;
+  if (isStyleKey(key)) return false;
   return !!value && typeof value === 'object' && !Array.isArray(value);
 };
 
-export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey[] = []): Promise<string> => {
+// The config is forwarded to the style parser so template styles resolve named
+// media queries, modifiers and tokens exactly like component styles do. Template
+// definitions are literal styles, so template-token expansion is disabled
+// (`omitTemplates`) to avoid a template recursively expanding another template.
+type TemplateParseConfig = Parameters<typeof parseAndJoinStyles>[2];
+
+export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey[] = [], config?: TemplateParseConfig): Promise<string> => {
   if (!obj) return '';
   const classes: string[] = [];
 
   if (isRichTemplateNode(obj)) {
     const rich = obj as RichTemplateNode;
     const baseClassName = path.map((p) => dashCase(String(p))).join('-');
-    if (rich.base) {
+
+    // `base` plus any node-level CSS constructs (e.g. a `@media` declared
+    // directly on the node) render together under this node's class.
+    const ownStyles: Record<string, any> = { ...(rich.base as Record<string, any> | undefined) };
+    for (const [key, value] of Object.entries(rich)) {
+      if (isStyleKey(key)) ownStyles[key] = value;
+    }
+    if (Object.keys(ownStyles).length) {
       const hashClass = 't_' + toHash(baseClassName, 4);
-      const result = await parseAndJoinStyles(rich.base as Record<string, any>, `.${baseClassName}, .${hashClass}`);
+      const result = await parseAndJoinStyles(ownStyles, `.${baseClassName}, .${hashClass}`, config, true);
       classes.push(result);
     }
     if (rich.variants) {
@@ -30,14 +54,14 @@ export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey
           if (!styles || typeof styles !== 'object') continue;
           const variantClassName = `${baseClassName}-${dashCase(axis)}-${dashCase(value)}`;
           const variantHashClass = 'tv_' + toHash(variantClassName, 4);
-          const result = await parseAndJoinStyles(styles as Record<string, any>, `.${variantClassName}, .${variantHashClass}`);
+          const result = await parseAndJoinStyles(styles as Record<string, any>, `.${variantClassName}, .${variantHashClass}`, config, true);
           classes.push(result);
         }
       }
     }
     for (const [key, value] of Object.entries(rich)) {
       if (!isChildEntry(key, value)) continue;
-      const result = await parseTemplates(value as object, [...path, key.trim()]);
+      const result = await parseTemplates(value as object, [...path, key.trim()], config);
       classes.push(result);
     }
     return classes.join('\n');
@@ -48,11 +72,14 @@ export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'function') {
       // Skip functions
-    } else if (value && typeof value === 'object') {
+    } else if (value && typeof value === 'object' && !isStyleKey(key)) {
+      // A nested template sub-path (e.g. `large`, `medium`).
       const _key = key.trim();
-      const result = await parseTemplates(value, [...path, _key]);
+      const result = await parseTemplates(value, [...path, _key], config);
       classes.push(result);
     } else {
+      // A scalar declaration, or a CSS construct (`@media`, `&…`, `:…`) whose
+      // object body is real CSS for this level — both go to the style parser.
       levelStyles[key] = value;
     }
   }
@@ -60,7 +87,7 @@ export const parseTemplates = async <T extends object>(obj: T, path: PropertyKey
   if (Object.keys(levelStyles).length) {
     const className = path.map((p) => dashCase(String(p))).join('-');
     const hashClass = 't_' + toHash(className, 4);
-    const result = await parseAndJoinStyles(levelStyles, `.${className}, .${hashClass}`);
+    const result = await parseAndJoinStyles(levelStyles, `.${className}, .${hashClass}`, config, true);
     classes.push(result);
   }
 
@@ -103,7 +130,7 @@ export const getTemplateTokens = <T extends object>(templates: T, parent = '', t
 
   Object.entries(templates).forEach(([key, value]) => {
     const keyValue = parent ? `${parent}.${key}` : key;
-    if (value && typeof value === 'object') return getTemplateTokens(value, keyValue, templateTokens);
+    if (value && typeof value === 'object' && !isStyleKey(key)) return getTemplateTokens(value, keyValue, templateTokens);
     return templateTokens.add(parent);
   });
 
@@ -165,7 +192,7 @@ const walk = (node: any, path: string[], out: Record<string, Record<string, stri
     return;
   }
   for (const [key, value] of Object.entries(node as Record<string, any>)) {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+    if (!value || typeof value !== 'object' || Array.isArray(value) || isStyleKey(key)) continue;
     walk(value, [...path, key.trim()], out, axes);
   }
 };
