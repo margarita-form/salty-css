@@ -49,10 +49,6 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./astro-vite-plugin": {
-      "import": "./dist/astro-vite-plugin.js",
-      "require": "./dist/astro-vite-plugin.cjs"
-    },
     "./integration": {
       "import": "./dist/integration.js",
       "require": "./dist/integration.cjs"
@@ -65,9 +61,9 @@
       "import": "./dist/class-name.js",
       "require": "./dist/class-name.cjs"
     },
-    "./element-props": {
-      "import": "./dist/element-props.js",
-      "require": "./dist/element-props.cjs"
+    "./integration/element-props": {
+      "import": "./dist/integration/element-props.js",
+      "require": "./dist/integration/element-props.cjs"
     },
     "./runtime": {
       "import": "./dist/runtime.js",

@@ -15,7 +15,7 @@ export interface ResolvedAstroProps {
 
 /**
  * SSR equivalent of the React `elementFactory`. Takes the raw `Astro.props` of a
- * generated `.astro` Salty component plus the build-time generator props and
+ * generated `.astro` Salty component plus the build-time client props and
  * returns cleaned values ready to apply on the underlying `<Element>` tag:
  *
  * - `class` — array for `class:list`
@@ -23,38 +23,42 @@ export interface ResolvedAstroProps {
  * - `rest` — object to `{...spread}` onto the element (variants and `css-*` props removed unless `passProps` allows)
  * - `element` — runtime element override
  * - `_vks` — variant keys consumed at this level, forwarded so wrapping styled components can keep stripping them
+ *
+ * When `extendsStyled` is set (the component extends another Salty styled
+ * component), consumed variant keys are kept in `rest` so the inner component
+ * receives them, matching React's `deleteVKS = !extendsComponent || !extendsStyled`.
  */
 export const resolveAstroProps = (
   astroProps: Record<string, any> = {},
-  generatorProps: StyledGeneratorClientProps = {},
+  clientProps: StyledGeneratorClientProps = {},
   baseClassName = '',
   additionalProps?: Record<string, any>,
+  extendsStyled = false,
 ): ResolvedAstroProps => {
   const {
     class: incomingClass = '',
     className: incomingClassName,
     element: consumerElement,
     as: consumerAs,
-    passProps = generatorProps.passProps,
+    passProps = clientProps.passProps,
     _vks: incomingVks,
     style: incomingStyle,
     ...rawProps
   } = astroProps;
 
   const passedProps: Record<string, any> = { passProps };
-  if (generatorProps.attr) {
-    for (const [key, value] of Object.entries(generatorProps.attr)) {
+  if (clientProps.attr) {
+    for (const [key, value] of Object.entries(clientProps.attr)) {
       if (value !== undefined) passedProps[key] = value;
     }
   }
   if (additionalProps) Object.assign(passedProps, additionalProps);
 
   const props: Record<string, any> = { ...rawProps };
-  if (generatorProps.defaultProps) {
-    for (const [key, value] of Object.entries(generatorProps.defaultProps)) {
-      if (props[key] === undefined) props[key] = value;
-    }
-  }
+  // React parity (element-factory.ts): `Object.assign(props, defaultProps)` lets
+  // defaultProps override consumer-supplied props. Replicated here so SSR matches
+  // CSR; if that precedence is ever deemed a React bug it must be fixed in both.
+  if (clientProps.defaultProps) Object.assign(props, clientProps.defaultProps);
   Object.assign(passedProps, props);
 
   const classes = new Set<string>();
@@ -72,8 +76,8 @@ export const resolveAstroProps = (
 
   const vks = new Set<string>(Array.isArray(incomingVks) ? incomingVks : []);
 
-  if (generatorProps.propValueKeys) {
-    for (const key of generatorProps.propValueKeys) {
+  if (clientProps.propValueKeys) {
+    for (const key of clientProps.propValueKeys) {
       const propName = `css-${key}`;
       const value = props[propName];
       if (value === undefined) continue;
@@ -82,8 +86,8 @@ export const resolveAstroProps = (
     }
   }
 
-  if (generatorProps.variantKeys) {
-    for (const key of generatorProps.variantKeys) {
+  if (clientProps.variantKeys) {
+    for (const key of clientProps.variantKeys) {
       const [name, defaultValue] = key.split('=');
       if (props[name] !== undefined) {
         const variantClass = sanitizeClassName(`${name}-${props[name]}`);
@@ -96,11 +100,15 @@ export const resolveAstroProps = (
     }
   }
 
-  for (const vk of vks) {
-    if (passProps === true) continue;
-    if (Array.isArray(passProps) && passProps.includes(vk)) continue;
-    if (typeof passProps === 'string' && passProps === vk) continue;
-    delete passedProps[vk];
+  // Extending another styled component: forward the variant keys (and the `_vks`
+  // set) untouched so the inner component resolves and strips them.
+  if (!extendsStyled) {
+    for (const vk of vks) {
+      if (passProps === true) continue;
+      if (Array.isArray(passProps) && passProps.includes(vk)) continue;
+      if (typeof passProps === 'string' && passProps === vk) continue;
+      delete passedProps[vk];
+    }
   }
   for (const key of _styledKeys) delete passedProps[key];
 
@@ -108,7 +116,7 @@ export const resolveAstroProps = (
     class: [...classes],
     style,
     rest: passedProps,
-    element: consumerAs ?? consumerElement ?? generatorProps.element,
+    element: consumerAs ?? consumerElement ?? clientProps.element,
     _vks: [...vks],
   };
 };

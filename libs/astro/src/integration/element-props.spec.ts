@@ -51,9 +51,9 @@ describe('resolveAstroProps', () => {
     expect(r.rest['data-x']).toBe('y');
   });
 
-  it('consumer props override defaultProps', () => {
+  it('defaultProps override consumer props (React element-factory parity)', () => {
     const r = resolveAstroProps({ 'data-x': 'z' }, { defaultProps: { 'data-x': 'y' } }, 'hash');
-    expect(r.rest['data-x']).toBe('z');
+    expect(r.rest['data-x']).toBe('y');
   });
 
   it('applies attr unconditionally and lets consumer override', () => {
@@ -119,5 +119,23 @@ describe('resolveAstroProps', () => {
   it('as prop is stripped from rest (not forwarded to DOM)', () => {
     const r = resolveAstroProps({ as: 'section' }, {}, 'hash');
     expect(r.rest).not.toHaveProperty('as');
+  });
+
+  it('keeps consumed variant props in rest when extending a styled component', () => {
+    const r = resolveAstroProps({ size: 'lg' }, { variantKeys: ['size'] }, 'hash', undefined, true);
+    expect(r.class).toContain('size-lg');
+    expect(r.rest).toHaveProperty('size', 'lg');
+    expect(r._vks).toContain('size');
+  });
+
+  it('still strips consumed variant props when not extending a styled component', () => {
+    const r = resolveAstroProps({ size: 'lg' }, { variantKeys: ['size'] }, 'hash', undefined, false);
+    expect(r.rest).not.toHaveProperty('size');
+    expect(r._vks).toContain('size');
+  });
+
+  it('forwards incoming and newly-consumed variant keys together in _vks', () => {
+    const r = resolveAstroProps({ _vks: ['tone'], size: 'lg' }, { variantKeys: ['size'] }, 'hash', undefined, true);
+    expect(r._vks).toEqual(expect.arrayContaining(['tone', 'size']));
   });
 });

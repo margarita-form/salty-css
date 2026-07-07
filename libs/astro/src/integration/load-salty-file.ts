@@ -43,6 +43,11 @@ export const loadSaltyFile = async (ctx: AstroPluginContext, filePath: string): 
       const exports: string[] = [];
 
       const compiled = await saltyCompiler.compileSaltyFile(filePath, destDir);
+      // The real merged config carries `templates` (and variables/mediaQueries),
+      // which the generator needs to emit template (`t_…`) classes for text
+      // styles. Passing `{}` here silently drops them. Mirrors the React
+      // transform (transform-salty-file.ts).
+      const config = await saltyCompiler.getConfig();
 
       const components = Object.entries(compiled.contents);
       for (const [name, value] of components) {
@@ -54,7 +59,7 @@ export const loadSaltyFile = async (ctx: AstroPluginContext, filePath: string): 
           const generator = resolved.generator._withBuildContext({
             callerName: name,
             isProduction: saltyCompiler.isProduction,
-            config: {},
+            config,
           });
 
           consts.push(`const ${name} = classNameInstance(${JSON.stringify(generator.params)});`);
@@ -73,13 +78,18 @@ export const loadSaltyFile = async (ctx: AstroPluginContext, filePath: string): 
         const generator = resolved.generator._withBuildContext({
           callerName: name,
           isProduction: saltyCompiler.isProduction,
-          config: {},
+          config,
         });
 
         const fileConfig = {
           componentName: name,
           tagName: tagName.replace(/['"`]/g, ''),
           tagIsComponent: false,
+          // Whether the extended tag is itself a Salty styled component. Mirrors
+          // React's runtime `extendsStyled` check (`'isStyled' in extend`) so the
+          // SSR template keeps forwarding variant keys / `_vks` to the inner
+          // component instead of stripping them at this level.
+          extendsStyled: false,
           classNames: generator.classNames,
           imports: [] as (string | undefined)[],
           clientProps: generator.clientProps,
@@ -91,11 +101,18 @@ export const loadSaltyFile = async (ctx: AstroPluginContext, filePath: string): 
           const isInSameFile = components.some(([name]) => name === tagName);
           const matchingImport = originalContents.match(new RegExp(`import[^;]*${tagName}[^;]*;`));
           if (isInSameFile) {
+            // A component defined in this same salty file is always a styled
+            // component we generate an .astro wrapper for.
+            fileConfig.extendsStyled = true;
             const hashedName = toHash(tagName);
             const importPath = `import ${tagName} from '${filePath}.astro?configFile=${hashedName}.config';`;
             fileConfig.imports = [importPath];
           } else if (matchingImport) {
             const importPath = matchingImport.at(0);
+            // Best-effort: treat an import from another salty file as a styled
+            // component. Plain component imports won't match this and fall back
+            // to the (default) intrinsic-style stripping behavior.
+            fileConfig.extendsStyled = /['"][^'"]*\.(salty|css|styles|styled)\.\w+['"]/.test(importPath ?? '');
             fileConfig.imports = [importPath];
           }
         }
