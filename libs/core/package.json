@@ -15,7 +15,7 @@
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "version": "0.4.2",
+  "version": "0.4.3-fix-astro-templates-usage-070726.0",
   "type": "module",
   "scripts": {
     "build": "vite build",
