@@ -530,6 +530,22 @@ Options: `srcDir` (defaults to `'src'`), `rootDir` (defaults to the Astro config
 
 ---
 
+## Troubleshooting
+
+### TypeScript 7: `Cannot read properties of undefined (reading 'Latest')`
+
+TypeScript 7 (the Go-native compiler) does not ship the programmatic compiler API that Salty CSS uses to parse style files — it returns in TS 7.1. Salty CSS feature-detects a working API at runtime:
+
+| Your TypeScript | What to install | What happens |
+| --- | --- | --- |
+| 4.x / 5.x / 6.x | Nothing | Works as-is, using your own `typescript` |
+| 7.0.x | `npm install -D @typescript/typescript6` | Salty parses with the 6.x API; `tsc` stays the fast native compiler |
+| 7.1+ (once the stable API ships) | Nothing | Detection picks up the main package again automatically |
+
+`@typescript/typescript6` is Microsoft's official side-by-side compatibility package, designed to coexist with TS 7 during the transition.
+
+---
+
 ## Support
 
 Help, questions, or feedback → [Join the Salty CSS Discord](https://discord.gg/R6kr4KxMhP). Bug reports → [GitHub issues](https://github.com/margarita-form/salty-css/issues).
