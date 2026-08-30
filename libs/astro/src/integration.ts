@@ -1,5 +1,5 @@
 import { AstroIntegration } from 'astro';
-import saltyPlugin from './astro-vite-plugin';
+import saltyPlugin from './integration/astro-vite-plugin';
 import { join } from 'path';
 
 interface SaltyIntegrationOptions {

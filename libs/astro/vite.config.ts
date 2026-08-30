@@ -35,11 +35,10 @@ export default defineConfig({
       formats: ['es', 'cjs'],
       entry: {
         index: 'index.ts',
-        'astro-vite-plugin': 'astro-vite-plugin.ts',
         integration: 'integration.ts',
+        'integration/element-props': 'integration/element-props.ts',
         styled: 'styled.ts',
         'class-name': 'class-name.ts',
-        'element-props': 'element-props.ts',
         runtime: 'runtime.ts',
         keyframes: 'keyframes.ts',
         media: 'media.ts',
