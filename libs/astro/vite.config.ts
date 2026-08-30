@@ -1,5 +1,5 @@
 import { resolve } from 'node:path';
-import { defineConfig } from 'vite-build';
+import { defineConfig } from 'vite';
 import dts from 'unplugin-dts/vite';
 import { rolldown } from '../../shared/vite-rolldown-config';
 import { vitePlugins } from '../../shared/vite-plugin-config';
