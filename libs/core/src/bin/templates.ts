@@ -2,7 +2,8 @@ import ejs from 'ejs';
 
 const templateLoaders = {
   'salty.config.ts': () => import('./templates/salty.config.ts__template'),
-  'saltygen/index.css': () => import('./templates/index.css__template'),
+  'styles/index.css': () => import('./templates/styles_index.css__template'),
+  'saltygen/index.css': () => import('./templates/saltygen_index.css__template'),
   'react/styled-file.ts': () => import('./templates/react/styled-file.ts__template'),
   'react/vanilla-file.ts': () => import('./templates/react/vanilla-file.ts__template'),
   'astro/styled-file.ts': () => import('./templates/astro/styled-file.ts__template'),
