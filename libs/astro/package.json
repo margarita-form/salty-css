@@ -15,15 +15,15 @@
   "bugs": {
     "url": "https://github.com/margarita-form/salty-css/issues"
   },
-  "version": "0.4.5-fix-cli-astro-salty-config-dir.3",
+  "version": "0.4.5-alpha.0",
   "type": "module",
   "scripts": {
     "build": "vite build",
     "test": "vitest run"
   },
   "dependencies": {
-    "@salty-css/core": "0.4.5-fix-cli-astro-salty-config-dir.3",
-    "@salty-css/react": "0.4.5-fix-cli-astro-salty-config-dir.3",
+    "@salty-css/core": "0.4.5-alpha.0",
+    "@salty-css/react": "0.4.5-alpha.0",
     "vite-node": "^6.0.0"
   },
   "devDependencies": {
