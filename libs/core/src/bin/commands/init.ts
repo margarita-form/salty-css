@@ -4,7 +4,7 @@ import { mkdir, readFile, writeFile } from 'fs/promises';
 import { join, relative as relativePath } from 'path';
 import { SaltyCompiler } from '../../compiler/salty-compiler';
 import { npmInstall } from '../bin-util';
-import { confirmInstall } from '../confirm-install';
+import { confirmInstall, confirmYesNo } from '../confirm-install';
 import { buildContext } from '../context';
 import { findGlobalCssFile } from '../detection/css-file';
 import { detectFramework } from '../frameworks';
@@ -48,7 +48,15 @@ const ensureGitignoreSaltygen = async (rootDir: string) => {
 const importSaltygenIntoCss = async (projectDir: string, explicitCssFile: string | undefined) => {
   const target = explicitCssFile ?? (await findGlobalCssFile(projectDir));
   if (!target) {
-    logger.warn('Could not find a CSS file to import the generated CSS. Please add it manually.');
+    const confirmAddCssFile = await confirmYesNo(
+      'Could not find a CSS file to import the generated CSS. Do you want to create a new `styles/index.css` file and import it there? (y/N) ',
+    );
+    if (!confirmAddCssFile) {
+      logger.warn('Could not find a CSS file to import the generated CSS. Please add it manually.');
+      return;
+    }
+    const { fileName, content } = await readTemplate('styles/index.css');
+    await writeProjectFile(projectDir, fileName, content);
     return;
   }
   const cssFilePath = join(projectDir, target);
@@ -102,8 +110,10 @@ export const registerInitCommand = (program: Command): void => {
         }
 
         const projectFiles = await Promise.all([readTemplate('salty.config.ts'), readTemplate('saltygen/index.css')]);
-        await mkdir(ctx.projectDir, { recursive: true });
-        await Promise.all(projectFiles.map(({ fileName, content }) => writeProjectFile(ctx.projectDir, fileName, content)));
+        const projectDir = join(ctx.projectDir, framework.srcDirectory);
+        await mkdir(projectDir, { recursive: true });
+
+        await Promise.all(projectFiles.map(({ fileName, content }) => writeProjectFile(projectDir, fileName, content)));
 
         const pathDefaults = computePathDefaults({
           framework: framework.name,
@@ -113,14 +123,14 @@ export const registerInitCommand = (program: Command): void => {
 
         await writeProjectToRc(ctx.cwd, ctx.relativeProjectPath, framework, pathDefaults);
         await ensureGitignoreSaltygen(ctx.cwd);
-        await importSaltygenIntoCss(ctx.projectDir, opts.cssFile);
+        await importSaltygenIntoCss(projectDir, opts.cssFile);
 
         await applyIntegrationPlans(plannedIntegrations);
 
         await wirePrepareScript();
 
         logger.info('Running the build to generate initial CSS...');
-        const compiler = new SaltyCompiler(ctx.projectDir);
+        const compiler = new SaltyCompiler(projectDir);
         await compiler.generateCss();
 
         logger.info('🎉 Salty CSS project initialized successfully!');
