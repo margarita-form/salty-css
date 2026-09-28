@@ -9,6 +9,6 @@ export const Wrapper = styled('div', {
 export const Heading = styled('h1', {
   base: {
     textStyle: 'body.large',
-    color: '#222',
+    color: 'red',
   },
 });

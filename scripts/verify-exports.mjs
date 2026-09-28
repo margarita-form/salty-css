@@ -78,6 +78,7 @@ const EXPECTED = {
   '@salty-css/webpack/loader': ['default'],
 
   '@salty-css/astro/integration': ['saltyIntegration', 'default'],
+  '@salty-css/astro/middleware': ['onRequest', 'CSS_COLLECTOR_PLACEHOLDER'],
   '@salty-css/astro/integration/element-props': ['resolveAstroProps'],
   '@salty-css/astro/styled': ['styled'],
   '@salty-css/astro/class-name': ['className'],

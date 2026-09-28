@@ -12,10 +12,14 @@ export const renderAstroComponent = async (destDir: string, configFile: string):
     const configFileContent = await readFile(configPath, 'utf-8');
     if (!configFileContent) return undefined;
     const config = JSON.parse(configFileContent);
-    const { clientProps = {}, classNames = '', tagIsComponent, extendsStyled = false, tagName = 'div' } = config;
+    const { clientProps = {}, classNames = '', tagIsComponent, extendsStyled = false, tagName = 'div', cssFile } = config;
 
     const userImports: string[] = config.imports || [];
     const imports = ["import { resolveAstroProps } from '@salty-css/astro/integration/element-props';", ...userImports];
+    if (cssFile) imports.push(`import __saltyCss from ${JSON.stringify(`${cssFile}?url`)};`);
+
+    // Register the component CSS url for <CssCollector /> (Set is created here when no middleware is used)
+    const collectCss = cssFile ? '(Astro.locals.cssUrls ??= new Set()).add(__saltyCss);' : '';
 
     const elementExpr = tagIsComponent ? tagName : `__r.element || ${JSON.stringify(clientProps.element || tagName)}`;
 
@@ -29,6 +33,7 @@ export const renderAstroComponent = async (destDir: string, configFile: string):
             const __cp = ${JSON.stringify(clientProps)};
             const __r = resolveAstroProps(Astro.props, __cp, ${JSON.stringify(classNames)}, undefined, ${JSON.stringify(!!extendsStyled)});
             const Element = ${elementExpr};
+            ${collectCss}
             ---
             <Element class:list={__r.class} style={__r.style} {...__r.rest}${forwardedAttrs}><slot/></Element>`;
   } catch (error) {

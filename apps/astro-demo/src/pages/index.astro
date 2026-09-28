@@ -1,6 +1,7 @@
 ---
 import Card from '../components/card/Card';
 import { Heading, Wrapper } from '../components/wrapper.css';
+import CssCollector from '@salty-css/astro/CssCollector.astro';
 import '../styles/_index.css';
 ---
 
@@ -18,5 +19,6 @@ import '../styles/_index.css';
       <Heading>Astro</Heading>
       <Card client:load />
     </Wrapper>
+    <CssCollector />
   </body>
 </html>

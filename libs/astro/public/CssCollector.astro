@@ -1,0 +1,9 @@
+---
+// Renders the CSS files of Salty components collected into Astro.locals.cssUrls.
+// With the Salty middleware this can live in <head>; without it, place it after all components.
+import { CSS_COLLECTOR_PLACEHOLDER } from '@salty-css/astro/middleware';
+
+const { cssUrls, saltyCssCollector } = Astro.locals as { cssUrls?: Set<string>; saltyCssCollector?: boolean };
+---
+
+{saltyCssCollector ? <Fragment set:html={CSS_COLLECTOR_PLACEHOLDER} /> : [...(cssUrls ?? [])].map((href) => <link rel="stylesheet" href={href} />)}

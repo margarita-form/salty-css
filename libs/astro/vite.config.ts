@@ -45,6 +45,7 @@ export default defineConfig({
         factories: 'factories.ts',
         config: 'config.ts',
         helpers: 'helpers.ts',
+        middleware: 'middleware.ts',
       },
     },
     rolldownOptions: rolldown,

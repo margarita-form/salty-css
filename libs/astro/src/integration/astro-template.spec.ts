@@ -86,4 +86,23 @@ describe('renderAstroComponent', () => {
     // Not extending styled → false is threaded through.
     expect(result).toContain(', false)');
   });
+
+  it('registers the component css url into Astro.locals.cssUrls when cssFile is set', async () => {
+    const result = await writeConfig('css-file.config', {
+      tagName: 'div',
+      classNames: 'abc123',
+      clientProps: { hash: 'abc123' },
+      cssFile: '/project/saltygen/css/cl_wrapper-abc123.css',
+    });
+
+    expect(result).toContain('import __saltyCss from "/project/saltygen/css/cl_wrapper-abc123.css?url";');
+    expect(result).toContain('(Astro.locals.cssUrls ??= new Set()).add(__saltyCss);');
+  });
+
+  it('does not register css when cssFile is missing', async () => {
+    const result = await writeConfig('no-css-file.config', { tagName: 'div', classNames: 'abc123', clientProps: { hash: 'abc123' } });
+
+    expect(result).not.toContain('__saltyCss');
+    expect(result).not.toContain('Astro.locals.cssUrls');
+  });
 });

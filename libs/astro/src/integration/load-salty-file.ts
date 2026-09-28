@@ -93,7 +93,13 @@ export const loadSaltyFile = async (ctx: AstroPluginContext, filePath: string): 
           classNames: generator.classNames,
           imports: [] as (string | undefined)[],
           clientProps: generator.clientProps,
+          cssFile: undefined as string | undefined,
         };
+
+        // Component import strategy: the rendered .astro wrapper registers its CSS url into Astro.locals.cssUrls
+        if (config.importStrategy === 'component' && (await generator.css)) {
+          fileConfig.cssFile = join(destDir, 'css', generator.cssFileName);
+        }
 
         const extendsComponent = /^\w+$/.test(tagName);
         fileConfig.tagIsComponent = extendsComponent;

@@ -89,7 +89,12 @@
     "./helpers": {
       "import": "./dist/helpers.js",
       "require": "./dist/helpers.cjs"
-    }
+    },
+    "./middleware": {
+      "import": "./dist/middleware.js",
+      "require": "./dist/middleware.cjs"
+    },
+    "./CssCollector.astro": "./dist/CssCollector.astro"
   },
   "author": {
     "name": "Teemu Lahjalahti",
