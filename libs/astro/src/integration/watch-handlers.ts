@@ -6,17 +6,19 @@ import { HmrContext, ModuleNode } from 'vite';
 /** Vite `handleHotUpdate` hook body: invalidate config + generated-CSS modules. */
 export const handleHotUpdate = async (saltyCompiler: SaltyCompiler, { file, server, modules }: HmrContext): Promise<ModuleNode[] | void> => {
   try {
+    // Keyframes, define*() and the config change shared output, so regenerate everything and
+    // invalidate every component config, not only the changed file's.
     const shouldRestart = await checkShouldRestart(file);
-    if (shouldRestart) return await saltyCompiler.generateCss(false);
-    const saltyFile = isSaltyFile(file);
-    if (!saltyFile) return;
+    if (shouldRestart) await saltyCompiler.generateCss(false);
+    else if (!isSaltyFile(file)) return;
 
     const destDir = await saltyCompiler.getDestDir(); // absolute path
     const cssGraphHits = [];
 
     // Invalidate modules that imported the changed file's config
     for (const [id, mod] of server.moduleGraph.idToModuleMap) {
-      if (id.startsWith(file + '.astro?configFile=')) {
+      const isConfigModule = shouldRestart ? id.includes('.astro?configFile=') : id.startsWith(file + '.astro?configFile=');
+      if (isConfigModule) {
         server.moduleGraph.invalidateModule(mod);
         cssGraphHits.push(mod);
       }
@@ -45,7 +47,9 @@ export const watchChange = async (saltyCompiler: SaltyCompiler, filePath: string
     const saltyFile = isSaltyFile(filePath);
     if (saltyFile && change.event !== 'delete') {
       const shouldRestart = await checkShouldRestart(filePath);
+      // handleHotUpdate does the full regeneration on edits, but it doesn't run for new files.
       if (!shouldRestart) await saltyCompiler.generateFile(filePath);
+      else if (change.event === 'create') await saltyCompiler.generateCss(false);
     }
   } catch (error) {
     console.error('Error during watch change handling:', error);
